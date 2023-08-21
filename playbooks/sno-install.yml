@@ -45,6 +45,9 @@
         url: "{{ iso_url_raw.stdout }}"
         dest: "{{ tempfolder }}/rhcos-live.iso"
         mode: "0664"
+        validate_certs: false
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
 
     - name: Template install-config.yaml
       ansible.builtin.template:

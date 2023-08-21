@@ -24,3 +24,13 @@ bootstrapInPlace:
 pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
 sshKey: |
   {{ sshkey | regex_replace('"', '') }}
+{% if additional_trust_bundle is defined %}
+additionalTrustBundle: |
+{{ additional_trust_bundle | indent(2, True) }}
+{% endif %}
+{% if http_proxy is defined %}
+proxy:
+  httpProxy: {{ http_proxy }}
+  httpsProxy: {{ https_proxy }}
+  noProxy: {{ no_proxy }}
+{% endif %}
