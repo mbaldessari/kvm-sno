@@ -1,0 +1,45 @@
+---
+ocp_version: "latest-4.13"
+arch: "x86_64"
+tempfolder: "/tmp/sno-temp-folder"
+openshift_mirror: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
+domain: "ocplab.ocp"
+sshkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
+pullsecret: "{{ lookup('file', '~/.pullsecret.json') }}"
+kubeadmin_pass: "{{ lookup('file', '~/.kubeadminpass') }}"
+bridge_interface: "br0"
+mac_prefix: "52:54:00:00:01"
+clusters:
+  sno1:
+    cpus: 12
+    ram: 64768
+    mac_nr: 66
+    disk: 128
+    cache: unsafe
+    wwn: "0x5000c50015ea71aa"
+    disk2: 30
+    cache2: unsafe
+    wwn2: "0x5000c50015ea71bb"
+    network: 172.16.0.0/24
+  sno2:
+    cpus: 12
+    ram: 64768
+    mac_nr: 67
+    disk: 128
+    cache: unsafe
+    wwn: "0x5000c50015ea71cc"
+    disk2: 30
+    cache2: unsafe
+    wwn2: "0x5000c50015ea71dd"
+    network: 172.16.0.0/24
+  sno3:
+    cpus: 8
+    ram: 32768
+    mac_nr: 68
+    disk: 128
+    cache: unsafe
+    wwn: "0x5000c50015ea71ee"
+    disk2: 30
+    cache2: unsafe
+    wwn2: "0x5000c50015ea71ff"
+    network: 172.16.0.0/24

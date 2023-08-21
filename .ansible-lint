@@ -1,0 +1,6 @@
+# Vim filetype=yaml
+---
+offline: false
+skip_list:
+  - no-changed-when
+  - no-relative-paths

@@ -1,0 +1,196 @@
+---
+- name: Install SNO clusters
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Create temporary folders
+      ansible.builtin.file:
+        path: "{{ tempfolder }}/{{ item }}"
+        state: directory
+        recurse: true
+      with_items: "{{ snos }}"
+
+    - name: Download oc
+      ansible.builtin.get_url:
+        url: "{{ openshift_mirror }}/{{ ocp_version }}/openshift-client-linux.tar.gz"
+        dest: "{{ tempfolder }}/openshift-client-linux.tar.gz"
+        mode: "0640"
+
+    - name: Download openshift-install
+      ansible.builtin.get_url:
+        url: "{{ openshift_mirror }}/{{ ocp_version }}/openshift-install-linux.tar.gz"
+        dest: "{{ tempfolder }}/openshift-install-linux.tar.gz"
+        mode: "0640"
+
+    - name: Uncompress oc and openshift install
+      ansible.builtin.unarchive:
+        src: "{{ tempfolder }}/{{ item }}"
+        dest: "{{ tempfolder }}"
+        remote_src: true
+      with_items:
+        - openshift-client-linux.tar.gz
+        - openshift-install-linux.tar.gz
+
+    - name: Register iso URL
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ./openshift-install coreos print-stream-json | grep location | grep "{{ arch }}" | grep iso | cut -d\" -f4
+      args:
+        chdir: "{{ tempfolder }}"
+      register: iso_url_raw
+
+    - name: Download RHCOS iso
+      ansible.builtin.get_url:
+        url: "{{ iso_url_raw.stdout }}"
+        dest: "{{ tempfolder }}/rhcos-live.iso"
+        mode: "0664"
+
+    - name: Template install-config.yaml
+      ansible.builtin.template:
+        src: ../templates/install-config.yaml.j2
+        dest: "{{ tempfolder }}/{{ item }}/install-config.yaml"
+        mode: "0640"
+      with_items: "{{ snos }}"
+
+    - name: Create ocp folder and run openshift-install
+      ansible.builtin.shell: |
+        set -e
+        ./openshift-install --dir={{ item }} create single-node-ignition-config
+      args:
+        chdir: "{{ tempfolder }}"
+      with_items: "{{ snos }}"
+
+    - name: Run coreos ignition embedding
+      ansible.builtin.shell: |
+        set -e
+        cp rhcos-live.iso "{{ item }}/rhcos-live.iso"
+        podman run --privileged --pull always --rm \
+            -v /dev:/dev -v /run/udev:/run/udev -v "{{ tempfolder }}:/data" \
+            -w /data quay.io/coreos/coreos-installer:release \
+            iso ignition embed -fi {{ item }}/bootstrap-in-place-for-live-iso.ign "{{ item }}/rhcos-live.iso"
+      args:
+        chdir: "{{ tempfolder }}"
+      with_items: "{{ snos }}"
+
+    - name: Create SNO VM
+      ansible.builtin.command: >-
+        virt-install
+        --name {{ item }}
+        --hvm
+        --virt-type kvm
+        --cdrom {{ tempfolder }}/{{ item }}/rhcos-live.iso
+        --arch {{ arch }}
+        --os-variant rhel8.0
+        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ clusters[item].mac_nr }}"
+        --vcpus {{ clusters[item].cpus }}
+        --ram {{ clusters[item].ram }}
+        --disk pool=default,size={{ clusters[item].disk }},format=qcow2,bus=scsi,cache={{ clusters[item].cache }},wwn={{ clusters[item].wwn }}
+        --disk pool=default,size={{ clusters[item].disk2 }},format=qcow2,bus=scsi,cache={{ clusters[item].cache2 }},wwn={{ clusters[item].wwn2 }}
+        --check disk_size=off
+        --graphics spice,listen=127.0.0.1
+        --noautoconsole
+        --boot menu=on,useserial=on
+      with_items: "{{ snos }}"
+
+    - name: Wait for vm to be stopped
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        virsh list --all | grep -w "{{ item }}" | grep -v running
+      register: running
+      retries: 100
+      delay: 10
+      until: running is not failed
+      with_items: "{{ snos }}"
+
+    - name: Start "{{ item }}"
+      ansible.builtin.command: |
+        virsh start "{{ item }}"
+      with_items: "{{ snos }}"
+
+    - name: Wait for node to be Ready
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        "{{ tempfolder }}"/oc get nodes | grep "{{ item }}" | grep -v NotReady
+      with_items: "{{ snos }}"
+      register: cluster_info
+      until: cluster_info is not failed
+      retries: 100
+      delay: 10
+
+    - name: Wait for console to be up
+      ansible.builtin.uri:
+        url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+        validate_certs: false
+        follow_redirects: all
+      with_items: "{{ snos }}"
+      register: uri
+      until: uri is not failed
+      retries: 100
+      delay: 20
+
+    - name: Fetch kubeconfig file
+      ansible.posix.synchronize:
+        mode: pull
+        src: "{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        dest: "~/{{ item }}-kubeconfig"
+      with_items: "{{ snos }}"
+
+    - name: Template out lvm namespace
+      ansible.builtin.template:
+        src: ../templates/lvm-namespace.yaml
+        dest: "{{ tempfolder }}/{{ item }}/lvm-namespace.yaml"
+        mode: "0644"
+      with_items: "{{ snos }}"
+
+    - name: Template out lvm operatorgroup
+      ansible.builtin.template:
+        src: ../templates/lvm-operatorgroup.yaml
+        dest: "{{ tempfolder }}/{{ item }}/lvm-operatorgroup.yaml"
+        mode: "0644"
+      with_items: "{{ snos }}"
+
+    - name: Template out lvm subscription
+      ansible.builtin.template:
+        src: ../templates/lvm-subscription.yaml
+        dest: "{{ tempfolder }}/{{ item }}/lvm-subscription.yaml"
+        mode: "0644"
+      with_items: "{{ snos }}"
+
+    - name: Template out lvm cluster
+      ansible.builtin.template:
+        src: ../templates/lvm-cluster.yaml
+        dest: "{{ tempfolder }}/{{ item }}"
+        mode: "0644"
+      with_items: "{{ snos }}"
+
+    - name: Install LVM operator
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-namespace.yaml"
+        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-operatorgroup.yaml"
+        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-subscription.yaml"
+      with_items: "{{ snos }}"
+
+    - name: Install LVM Cluster
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-cluster.yaml"
+      register: lvmcluster
+      retries: 50
+      delay: 10
+      until: lvmcluster is not failed
+      with_items: "{{ snos }}"
+
+    - name: Set kubeadmin password
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        "{{ tempfolder }}"/oc patch secret -n kube-system kubeadmin --type json \
+          -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
+      with_items: "{{ snos }}"
+      when: kubeadmin_pass is defined
