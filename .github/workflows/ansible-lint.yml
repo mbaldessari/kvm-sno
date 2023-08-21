@@ -8,8 +8,5 @@ jobs:
     steps:
       - uses: actions/checkout@v3
 
-      # - name: Install collections
-      #   run: ansible-galaxy collection install -r requirements.yml
-
       - name: Lint Ansible Playbook
         uses: ansible/ansible-lint-action@v6
