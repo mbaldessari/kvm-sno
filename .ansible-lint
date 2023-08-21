@@ -3,5 +3,6 @@
 skip_list:
   - no-changed-when
   - no-relative-paths
+
 exclude_paths:
-  - ./.github/
+  - .github/
