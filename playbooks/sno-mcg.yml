@@ -73,6 +73,10 @@
     - name: Import sno2
       ansible.builtin.import_role:
         name: acm_import
+      retries: 10
+      delay: 30
+      register: acm1
+      until: acm1 is not failed
 
     - name: Join sno3 to HUB(sno1) env vars
       ansible.builtin.set_fact:
@@ -82,6 +86,10 @@
     - name: Import sno3
       ansible.builtin.import_role:
         name: acm_import
+      retries: 10
+      delay: 30
+      register: acm2
+      until: acm2 is not failed
 
     - name: Wait for all argo apps to be green on regional clusters
       ansible.builtin.shell: |
@@ -104,8 +112,8 @@
         fi
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      retries: 1
-      delay: 5
+      retries: 100
+      delay: 20
       register: argoregional
       until: argoregional is not failed
       with_items:
