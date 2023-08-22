@@ -9,9 +9,9 @@ pullsecret: "{{ lookup('file', '~/.pullsecret.json') }}"
 kubeadmin_pass: "{{ lookup('file', '~/.kubeadminpass') }}"
 bridge_interface: "br0"
 mac_prefix: "52:54:00:00:01"
-http_proxy: http://fw.int.rhx:3128/
-https_proxy: http://fw.int.rhx:3129/
-no_proxy: 172.16.0.0/16
+http_proxy: http://kuemper.int.rhx:3128/
+https_proxy: http://kuemper.int.rhx:3129/
+no_proxy: {{ domain }},172.16.0.0/16,10.0.0.0/8
 additional_trust_bundle: |
   -----BEGIN CERTIFICATE-----
   MIID1TCCAr2gAwIBAgIUdsZU+98GGSpvWjukDLaMQEO+BoowDQYJKoZIhvcNAQEL

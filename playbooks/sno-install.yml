@@ -11,17 +11,17 @@
         recurse: true
       with_items: "{{ snos }}"
 
-    - name: Download oc
+    - name: Download tools
       ansible.builtin.get_url:
-        url: "{{ openshift_mirror }}/{{ ocp_version }}/openshift-client-linux.tar.gz"
-        dest: "{{ tempfolder }}/openshift-client-linux.tar.gz"
+        url: "{{ openshift_mirror }}/{{ ocp_version }}/{{ item }}"
+        dest: "{{ tempfolder }}/{{ item }}"
         mode: "0640"
-
-    - name: Download openshift-install
-      ansible.builtin.get_url:
-        url: "{{ openshift_mirror }}/{{ ocp_version }}/openshift-install-linux.tar.gz"
-        dest: "{{ tempfolder }}/openshift-install-linux.tar.gz"
-        mode: "0640"
+        validate_certs: false
+      with_items:
+        - openshift-install-linux.tar.gz
+        - openshift-client-linux.tar.gz
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
 
     - name: Uncompress oc and openshift install
       ansible.builtin.unarchive:
