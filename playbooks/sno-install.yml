@@ -20,8 +20,6 @@
       with_items:
         - openshift-install-linux.tar.gz
         - openshift-client-linux.tar.gz
-      environment:
-        https_proxy: "{{ https_proxy | default('') }}"
 
     - name: Uncompress oc and openshift install
       ansible.builtin.unarchive:
@@ -46,8 +44,6 @@
         dest: "{{ tempfolder }}/rhcos-live.iso"
         mode: "0664"
         validate_certs: false
-      environment:
-        https_proxy: "{{ https_proxy | default('') }}"
 
     - name: Template install-config.yaml
       ansible.builtin.template:
