@@ -1,0 +1,35 @@
+---
+- name: Install MCG on the three clusters
+  hosts: localhost
+  gather_facts: false
+  vars:
+    mcgtempfolder: "/tmp/sno-mcg"
+    gitrepo: https://github.com/validatedpatterns/multicloud-gitops
+  tasks:
+    - name: Check that all kubeconfig files exist
+      ansible.builtin.stat:
+        path: "~/{{ item }}-kubeconfig"
+      with_items: "{{ snos }}"
+
+    - name: Delete temporary folder
+      ansible.builtin.file:
+        path: "{{ mcgtempfolder }}"
+        state: absent
+
+    - name: Create temporary folder
+      ansible.builtin.file:
+        path: "{{ mcgtempfolder }}/multicloud-gitops"
+        state: directory
+        recurse: true
+
+    - name: Clone git repo
+      ansible.builtin.git:
+        repo: "{{ gitrepo }}"
+        dest: "{{ mcgtempfolder }}/multicloud-gitops"
+        clone: true
+
+    - name: Install pattern on HUB/sno1
+      ansible.builtin.shell: |
+        export KUBECONFIG="~/sno1-kubeconfig"
+        ./pattern.sh make install
+      chdir: "{{ mcgtempfolder }}/multicloud-gitops"
