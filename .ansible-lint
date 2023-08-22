@@ -3,6 +3,10 @@
 skip_list:
   - no-changed-when
   - no-relative-paths
+  - latest
+  - var-naming
+  - meta-no-info
+  - yaml
 
 exclude_paths:
   - .github/

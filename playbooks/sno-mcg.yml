@@ -40,8 +40,6 @@
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
 
     - name: Wait for all argo apps to be green
-      tags:
-        - zozzo
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/sno1-kubeconfig
@@ -51,7 +49,7 @@
           NS=$(echo "${i}" | cut -f1 -d,)
           APP=$(echo "${i}" | cut -f2 -d,)
           STATUS=$(oc get -n "${NS}" application/"${APP}" -o jsonpath='{.status.sync.status}')
-          if [ $STATUS != "Syncedd" ]; then
+          if [ $STATUS != "Synced" ]; then
             NOTSYNCED=$((NOTSYNCED + 1))
           fi
           echo "${NS} ${APP} -> ${STATUS}"
@@ -66,3 +64,50 @@
       delay: 20
       register: argo
       until: argo is not failed
+
+    - name: Join sno2 to HUB(sno1) env vars
+      ansible.builtin.set_fact:
+        HUBCONFIG: "{{ '~/sno1-kubeconfig' | expanduser }}"
+        REGIONCONFIG: "{{ '~/sno2-kubeconfig' | expanduser }}"
+
+    - name: Import sno2
+      ansible.builtin.import_role:
+        name: acm_import
+
+    - name: Join sno3 to HUB(sno1) env vars
+      ansible.builtin.set_fact:
+        HUBCONFIG: "{{ '~/sno1-kubeconfig' | expanduser }}"
+        REGIONCONFIG: "{{ '~/sno3-kubeconfig' | expanduser }}"
+
+    - name: Import sno3
+      ansible.builtin.import_role:
+        name: acm_import
+
+    - name: Wait for all argo apps to be green on regional clusters
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        APPS=$(oc get applications -A -o jsonpath='{range .items[*]}{@.metadata.namespace}{","}{@.metadata.name}{"\n"}{end}')
+        NOTSYNCED=0
+        for i in $APPS; do
+          NS=$(echo "${i}" | cut -f1 -d,)
+          APP=$(echo "${i}" | cut -f2 -d,)
+          STATUS=$(oc get -n "${NS}" application/"${APP}" -o jsonpath='{.status.sync.status}')
+          if [ $STATUS != "Synced" ]; then
+            NOTSYNCED=$((NOTSYNCED + 1))
+          fi
+          echo "${NS} ${APP} -> ${STATUS}"
+        done
+        if [ $NOTSYNCED -gt 0 ]; then
+           echo "Applications not synced: ${NOTSYNCED}"
+           exit 1
+        fi
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 1
+      delay: 5
+      register: argoregional
+      until: argoregional is not failed
+      with_items:
+        - sno2
+        - sno3
