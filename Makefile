@@ -16,7 +16,7 @@ sno-destroy: ## Destroy installed SNOs and temp folders
 ##@ Patterns Tasks
 .PHONY: mcg
 mcg: ## Install multicloud gitops on all three snos
-	ansible-playbook -vvv -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-mcg.yml
+	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-mcg.yml
 
 ##@ CI / Linter tasks
 .PHONY: lint
