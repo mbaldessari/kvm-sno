@@ -180,7 +180,7 @@
         "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-cluster.yaml"
       register: lvmcluster
       retries: 50
-      delay: 10
+      delay: 20
       until: lvmcluster is not failed
       with_items: "{{ snos }}"
 
