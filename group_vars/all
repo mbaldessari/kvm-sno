@@ -60,8 +60,8 @@ clusters:
     wwn2: "0x5000c50015ea71dd"
     network: 172.16.0.0/24
   sno3:
-    cpus: 8
-    ram: 32768
+    cpus: 12
+    ram: 64768
     mac_nr: 68
     disk: 128
     cache: unsafe
