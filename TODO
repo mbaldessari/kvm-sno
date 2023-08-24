@@ -1,0 +1,2 @@
+- Stop using self-signed certs
+- Find a way to use a proxy/containers pull through to cache containers

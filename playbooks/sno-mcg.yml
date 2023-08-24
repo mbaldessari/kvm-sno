@@ -65,6 +65,15 @@
       register: argo
       until: argo is not failed
 
+    - name: Wait for ManagedCluster API to show up
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        oc api-resources | grep cluster.open-cluster-management.io/v1 | grep ManagedCluster
+      retries: 50
+      delay: 20
+      register: managedcluster_api
+      until: managedcluster_api is not failed
+
     - name: Join sno2 to HUB(sno1) env vars
       ansible.builtin.set_fact:
         HUBCONFIG: "{{ '~/sno1-kubeconfig' | expanduser }}"
