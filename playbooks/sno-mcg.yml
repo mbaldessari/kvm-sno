@@ -77,6 +77,7 @@
     - name: Wait for ManagedCluster API to show up
       ansible.builtin.shell: |
         set -e -o pipefail
+        export KUBECONFIG=~/sno1-kubeconfig
         oc api-resources | grep cluster.open-cluster-management.io/v1 | grep ManagedCluster
       retries: 50
       delay: 20
