@@ -72,3 +72,5 @@
       # FIXME: change the route to passthrough. Argocd is self signed by itself
       # and the ingress controller refuses access since it does not trust the
       # internal endpoint
+      # FIXME: fetch the secret from argocd/argocd-initial-admin-secret and print it out
+      # here
