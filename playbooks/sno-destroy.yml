@@ -20,3 +20,13 @@
       ansible.builtin.file:
         path: "{{ tempfolder }}"
         state: absent
+
+    - name: Delete sno kubeconfig file locally if they exist
+      delegate_to: localhost
+      become: true
+      become_user: michele
+      ansible.builtin.file:
+        path: "~/{{ item }}-kubeconfig"
+        state: absent
+      with_items: "{{ snos }}"
+
