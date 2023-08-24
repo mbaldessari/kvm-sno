@@ -102,6 +102,26 @@
       register: managedcluster_api
       until: managedcluster_api is not failed
 
+    - name: Create secrets template to access gh repo on the regional clusters
+      vars:
+        argo_ns: multicloud-gitops-group-one
+        secret_name: mcg-secret
+        github_pat: "{{ lookup('file', '~/.githubmcg_pat') }}"
+      ansible.builtin.template:
+        src: ../templates/test-secret.yaml
+        dest: "{{ mcgtempfolder }}/test-secret-regional.yaml"
+        mode: "0640"
+
+    - name: Install secret on sno2 and sno3
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/sno2-kubeconfig
+        oc apply -f test-secret-regional.yaml
+        export KUBECONFIG=~/sno3-kubeconfig
+        oc apply -f test-secret-regional.yaml
+      args:
+        chdir: "{{ mcgtempfolder }}/"
+
     - name: Join sno2 to HUB(sno1) env vars
       ansible.builtin.set_fact:
         HUBCONFIG: "{{ '~/sno1-kubeconfig' | expanduser }}"
