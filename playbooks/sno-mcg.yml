@@ -13,6 +13,12 @@
       ansible.builtin.stat:
         path: "~/{{ item }}-kubeconfig"
       with_items: "{{ snos }}"
+      register: kubeconfig_files
+
+    - name: Verifying if files exists
+      debug: msg="File {{ item.item }} exist"
+      with_items: "{{ kubeconfig_files.results }}"
+      failed_when: not item.stat.exists
 
     - name: Delete temporary folder
       ansible.builtin.file:

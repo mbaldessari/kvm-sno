@@ -1,0 +1,23 @@
+---
+- name: Install ArgoCD from git on sno1
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  become_user: michele
+  vars:
+    mcgtempfolder: "~/sno-mcg"
+    argorepo: https://github.com/argoproj/argo-cd/
+  tasks:
+    - name: Check that all kubeconfig files exist
+      ansible.builtin.stat:
+        path: "~/{{ item }}-kubeconfig"
+      with_items: "{{ snos }}"
+      register: kubeconfig_files
+
+    - name: Verifying if files exists
+      debug: msg="File {{ item.item }} exist"
+      with_items: "{{ kubeconfig_files.results }}"
+      failed_when: not item.stat.exists
+
+

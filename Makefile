@@ -13,10 +13,14 @@ sno: ## Install an SNO vm on kuemper host
 sno-destroy: ## Destroy installed SNOs and temp folders
 	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-destroy.yml
 
-##@ Patterns Tasks
+##@ Day-2 Tasks
 .PHONY: mcg
 mcg: ## Install multicloud gitops on all three snos
 	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-mcg.yml
+
+.PHONY: argo
+argo: ## Install argocd from git on sno1
+	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-argocd-git.yml
 
 ##@ CI / Linter tasks
 .PHONY: lint
