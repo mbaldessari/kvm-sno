@@ -23,6 +23,10 @@ mcg: ## Install multicloud gitops on all three snos
 argo: ## Install argocd from git on sno1
 	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' -e argonode=$(ARGONODE) playbooks/sno-argocd-git.yml
 
+.PHONY: private
+private: ## Test mcg with private repo
+	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' -e argonode=$(ARGONODE) playbooks/sno-private.yml
+
 ##@ CI / Linter tasks
 .PHONY: lint
 lint: ## Run ansible-lint on the codebase
