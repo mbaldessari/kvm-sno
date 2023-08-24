@@ -34,13 +34,13 @@
         clone: true
         force: true
 
-    # FIXME: upload it somewhere
     - name: Patch argo for podman
       ansible.builtin.shell: |
         set -e -o pipefail
         git reset --hard
         git clean -dxf
-        git apply /home/michele/argo.patch
+        curl -o /tmp/argo.patch -L https://gist.githubusercontent.com/mbaldessari/e1eff9aba4e053b908bd103c749e705b/raw/6c200f33d2e06ed074b65abda2caa63ce919523e/argo.patch
+        git apply /tmp/argo.patch
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
 
@@ -74,8 +74,31 @@
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
 
-      # FIXME: change the route to passthrough. Argocd is self signed by itself
-      # and the ingress controller refuses access since it does not trust the
-      # internal endpoint
-      # FIXME: fetch the secret from argocd/argocd-initial-admin-secret and print it out
-      # here
+    - name: Template out argo route
+      ansible.builtin.template:
+        src: ../templates/argo-route.yaml
+        dest: "{{ argotempfolder }}/argo-cd/argo-route.yaml"
+        mode: "0644"
+
+    - name: Install argo route
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/{{ argonode }}-kubeconfig
+        oc apply -f argo-route.yaml
+      args:
+        chdir: "{{ argotempfolder }}/argo-cd"
+      retries: 5
+      delay: 10
+      register: route
+      until: route is not failed
+
+    - name: Get argo secret
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/{{ argonode }}-kubeconfig
+        oc extract -n argocd secrets/argocd-initial-admin-secret --to=- 2>/dev/null
+      args:
+        chdir: "{{ argotempfolder }}/argo-cd"
+      register: argosecret
+
+    - name: Print secret
+      ansible.builtin.debug:
+        msg: "ARGO ADMIN PASSWORD: {{ argosecret.stdout }}"
