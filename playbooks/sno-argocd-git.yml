@@ -8,12 +8,14 @@
   vars:
     argotempfolder: "/tmp/argocd-git/"
     argorepo: https://github.com/argoproj/argo-cd/
-    argonode: sno1
+    node: sno1
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
         path: "~/{{ item }}-kubeconfig"
-      with_items: "{{ snos }}"
+      loop: "{{ kubeconfig_files.results }}"
+      loop_control:
+        label: "{{ item.stat.path }}"
       register: kubeconfig_files
 
     - name: Verifying if files exists
@@ -65,12 +67,12 @@
 
     - name: Create argocd project
       ansible.builtin.shell: |
-        export KUBECONFIG=~/{{ argonode }}-kubeconfig
+        export KUBECONFIG=~/{{ node }}-kubeconfig
         oc new-project argocd
 
     - name: Install argo manifest
       ansible.builtin.shell: |
-        export KUBECONFIG=~/{{ argonode }}-kubeconfig
+        export KUBECONFIG=~/{{ node }}-kubeconfig
         oc apply -f manifests/install.yaml
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
@@ -83,7 +85,7 @@
 
     - name: Install argo route
       ansible.builtin.shell: |
-        export KUBECONFIG=~/{{ argonode }}-kubeconfig
+        export KUBECONFIG=~/{{ node }}-kubeconfig
         oc apply -f argo-route.yaml
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
@@ -94,7 +96,7 @@
 
     - name: Get argo secret
       ansible.builtin.shell: |
-        export KUBECONFIG=~/{{ argonode }}-kubeconfig
+        export KUBECONFIG=~/{{ node }}-kubeconfig
         oc extract -n argocd secrets/argocd-initial-admin-secret --to=- 2>/dev/null
       args:
         chdir: "{{ argotempfolder }}/argo-cd"

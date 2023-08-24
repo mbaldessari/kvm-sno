@@ -18,7 +18,9 @@
     - name: Verifying if files exists
       ansible.builtin.debug:
         msg: "File {{ item.item.stat.path }} exist"
-      with_items: "{{ kubeconfig_files.results }}"
+      loop: "{{ kubeconfig_files.results }}"
+      loop_control:
+        label: "{{ item.stat.path }}"
       failed_when: not item.stat.exists
 
     - name: Delete temporary folder

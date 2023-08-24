@@ -7,6 +7,7 @@
   become_user: michele
   vars:
     mcgtempfolder: "~/sno-mcg"
+    ghrepo: mbaldessari/mcg-private
     gitrepo: https://github.com/mbaldessari/mcg-private
   tasks:
     - name: Check that all kubeconfig files exist
@@ -17,8 +18,10 @@
 
     - name: Verifying if files exists
       ansible.builtin.debug:
-        msg: "File {{ item.item.stat.path }} exist"
-      with_items: "{{ kubeconfig_files.results }}"
+        msg: "File {{ item.stat.path }} exist"
+      loop: "{{ kubeconfig_files.results }}"
+      loop_control:
+        label: "{{ item.stat.path }}"
       failed_when: not item.stat.exists
 
     - name: Delete temporary folder
@@ -28,21 +31,19 @@
 
     - name: Create temporary folder
       ansible.builtin.file:
-        path: "{{ mcgtempfolder }}/multicloud-gitops"
+        path: "{{ mcgtempfolder }}"
         state: directory
         recurse: true
 
     - name: Clone git repo
-      ansible.builtin.git:
-        repo: "{{ gitrepo }}"
-        dest: "{{ mcgtempfolder }}/multicloud-gitops"
-        clone: true
+      ansible.builtin.shell: |
+        gh repo clone {{ ghrepo }} {{ mcgtempfolder }}/multicloud-gitops
 
     - name: Create secrets template to access gh repo
       vars:
-        argo_ns: mcg-private-hub
+        argo_ns: multicloud-gitops-hub
         secret_name: mcg-secret
-        github_path: "{{ lookup('file', '~/.githubmcg_pat') }}"
+        github_pat: "{{ lookup('file', '~/.githubmcg_pat') }}"
       ansible.builtin.template:
         src: ../templates/test-secret.yaml
         dest: "{{ mcgtempfolder }}/test-secret.yaml"
