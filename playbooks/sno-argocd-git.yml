@@ -8,6 +8,7 @@
   vars:
     argotempfolder: "/tmp/argocd-git/"
     argorepo: https://github.com/argoproj/argo-cd/
+    argonode: sno1
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
@@ -31,10 +32,14 @@
         repo: "{{ argorepo }}"
         dest: "{{ argotempfolder }}/argo-cd"
         clone: true
+        force: true
 
     # FIXME: upload it somewhere
     - name: Patch argo for podman
       ansible.builtin.shell: |
+        set -e -o pipefail
+        git reset --hard
+        git clean -dxf
         git apply /home/michele/argo.patch
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
@@ -42,8 +47,8 @@
     - name: Build and push the newly built container
       ansible.builtin.shell: |
         set -e -o pipefail
-        make DOCKER_PUSH=true IMAGE_NAMESPACE=quay.io/rhn_support_mbaldess/ \
-          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" all
+        make DOCKER_PUSH=true IMAGE_NAMESPACE=quay.io/rhn_support_mbaldess \
+          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" all &> build.log
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
 
@@ -51,7 +56,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         make DOCKER_PUSH=true IMAGE_NAMESPACE=quay.io/rhn_support_mbaldess \
-          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" manifests
+          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" manifests &> manifest.log
         # Silly redis default breaks on OCP
         sed -i -e "/runAsUser: 999/d" manifests/install.yaml
       args:
@@ -59,12 +64,12 @@
 
     - name: Create argocd project
       ansible.builtin.shell: |
-        export KUBECONFIG=~/sno1-kubeconfig
+        export KUBECONFIG=~/{{ argonode }}-kubeconfig
         oc new-project argocd
 
     - name: Install argo manifest
       ansible.builtin.shell: |
-        export KUBECONFIG=~/sno1-kubeconfig
+        export KUBECONFIG=~/{{ argonode }}-kubeconfig
         oc apply -f manifests/install.yaml
       args:
         chdir: "{{ argotempfolder }}/argo-cd"

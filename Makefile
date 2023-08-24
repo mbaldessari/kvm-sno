@@ -1,4 +1,5 @@
-SNOS := sno1,sno2,sno3
+SNOS ?= sno1,sno2,sno3
+ARGONODE ?= sno1
 
 ##@ Common Tasks
 .PHONY: help
@@ -20,7 +21,7 @@ mcg: ## Install multicloud gitops on all three snos
 
 .PHONY: argo
 argo: ## Install argocd from git on sno1
-	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-argocd-git.yml
+	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' -e argonode=$(ARGONODE) playbooks/sno-argocd-git.yml
 
 ##@ CI / Linter tasks
 .PHONY: lint
