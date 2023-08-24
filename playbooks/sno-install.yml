@@ -116,7 +116,7 @@
       register: cluster_info
       until: cluster_info is not failed
       retries: 100
-      delay: 10
+      delay: 20
 
     - name: Wait for console to be up
       ansible.builtin.uri:
