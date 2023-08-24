@@ -6,7 +6,7 @@
   become: true
   become_user: michele
   vars:
-    mcgtempfolder: "~/sno-mcg"
+    argotempfolder: "/tmp/argocd-git/"
     argorepo: https://github.com/argoproj/argo-cd/
   tasks:
     - name: Check that all kubeconfig files exist
@@ -20,4 +20,55 @@
       with_items: "{{ kubeconfig_files.results }}"
       failed_when: not item.stat.exists
 
+    - name: Create temporary folder
+      ansible.builtin.file:
+        path: "{{ argotempfolder }}/argo-cd"
+        state: directory
+        recurse: true
 
+    - name: Clone git repo
+      ansible.builtin.git:
+        repo: "{{ argorepo }}"
+        dest: "{{ argotempfolder }}/argo-cd"
+        clone: true
+
+    # FIXME: upload it somewhere
+    - name: Patch argo for podman
+      ansible.builtin.shell: |
+        git apply /home/michele/argo.patch
+      args:
+        chdir: "{{ argotempfolder }}/argo-cd"
+
+    - name: Build and push the newly built container
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        make DOCKER_PUSH=true IMAGE_NAMESPACE=quay.io/rhn_support_mbaldess/ \
+          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" all
+      args:
+        chdir: "{{ argotempfolder }}/argo-cd"
+
+    - name: Tweak manifests for installation
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        make DOCKER_PUSH=true IMAGE_NAMESPACE=quay.io/rhn_support_mbaldess \
+          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" manifests
+        # Silly redis default breaks on OCP
+        sed -i -e "/runAsUser: 999/d" manifests/install.yaml
+      args:
+        chdir: "{{ argotempfolder }}/argo-cd"
+
+    - name: Create argocd project
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/sno1-kubeconfig
+        oc new-project argocd
+
+    - name: Install argo manifest
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/sno1-kubeconfig
+        oc apply -f manifests/install.yaml
+      args:
+        chdir: "{{ argotempfolder }}/argo-cd"
+
+      # FIXME: change the route to passthrough. Argocd is self signed by itself
+      # and the ingress controller refuses access since it does not trust the
+      # internal endpoint
