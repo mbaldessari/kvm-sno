@@ -47,7 +47,7 @@ clusters:
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea71bb"
-    network: 172.16.0.0/24
+    network: 192.168.66.0/24
   sno2:
     cpus: 12
     ram: 64768
@@ -58,7 +58,7 @@ clusters:
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea71dd"
-    network: 172.16.0.0/24
+    network: 192.168.66.0/24
   sno3:
     cpus: 12
     ram: 64768
@@ -69,4 +69,4 @@ clusters:
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea71ff"
-    network: 172.16.0.0/24
+    network: 192.168.66.0/24
