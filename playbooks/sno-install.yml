@@ -177,9 +177,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-namespace.yaml"
-        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-operatorgroup.yaml"
-        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-subscription.yaml"
+        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
       with_items: "{{ snos }}"
 
     - name: Install LVM Cluster
