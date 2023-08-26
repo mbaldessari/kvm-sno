@@ -16,6 +16,8 @@
         url: "{{ openshift_mirror }}/{{ ocp_version }}/{{ item }}"
         dest: "{{ tempfolder }}/{{ item }}"
         mode: "0640"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
       with_items:
         - openshift-install-linux.tar.gz
         - openshift-client-linux.tar.gz
@@ -43,6 +45,8 @@
         dest: "{{ tempfolder }}/rhcos-live.iso"
         mode: "0664"
         validate_certs: false
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
 
     - name: Template install-config.yaml
       ansible.builtin.template:
@@ -137,8 +141,9 @@
 
     - name: Fix permissions
       ansible.builtin.shell: |
-        chmod 0640 "~/{{ item }}-kubeconfig"
+        chmod 0640 "/home/michele/{{ item }}-kubeconfig"
       with_items: "{{ snos }}"
+      delegate_to: localhost
 
     - name: Template out lvm namespace
       ansible.builtin.template:

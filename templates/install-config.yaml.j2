@@ -28,7 +28,7 @@ sshKey: |
 additionalTrustBundle: |
 {{ additional_trust_bundle | indent(2, True) }}
 {% endif %}
-{% if http_proxy is defined %}
+{% if notjustyethttp_proxy is defined %}
 proxy:
   httpProxy: {{ http_proxy }}
   httpsProxy: {{ https_proxy }}
