@@ -8,7 +8,7 @@ help: ## This help message
 
 .PHONY: sno
 sno: ## Install an SNO vm on kuemper host
-	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-install.yml
+	ansible-playbook -i hosts --tags zozzo --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-install.yml
 
 .PHONY: sno-destroy
 sno-destroy: ## Destroy installed SNOs and temp folders
