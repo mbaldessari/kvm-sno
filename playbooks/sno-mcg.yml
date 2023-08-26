@@ -17,7 +17,7 @@
 
     - name: Verifying if files exists
       ansible.builtin.debug:
-        msg: "File {{ item.item.stat.path }} exist"
+        msg: "File {{ item.stat.path }} exist"
       loop: "{{ kubeconfig_files.results }}"
       loop_control:
         label: "{{ item.stat.path }}"
