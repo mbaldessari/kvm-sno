@@ -1,3 +1,2 @@
 - Do not serialize tasks around container VMs and statuses or at all?
-- Stop using self-signed certs
 - Find a way to use a proxy/containers pull through to cache containers
