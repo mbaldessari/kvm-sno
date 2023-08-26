@@ -247,3 +247,14 @@
       args:
         chdir: "/home/michele/ssl-ca"
       loop: "{{ snos }}"
+
+    - name: Wait for console to be up
+      ansible.builtin.uri:
+        url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+        validate_certs: true
+        follow_redirects: all
+      with_items: "{{ snos }}"
+      register: uri
+      until: uri is not failed
+      retries: 100
+      delay: 20
