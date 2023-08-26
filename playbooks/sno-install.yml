@@ -202,3 +202,29 @@
           -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
       with_items: "{{ snos }}"
       when: kubeadmin_pass is defined
+
+- name: Replace certificates with ours
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  become_user: michele
+  tasks:
+    - name: Install certificates
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        oc create configmap custom-ca --from-file=./rhx-ca.crt -n openshift-config
+
+        oc patch proxy/cluster --type=merge \
+            --patch='{"spec":{"trustedCA":{"name":"custom-ca"}}}'
+
+        oc create secret tls sno --cert=./certs/{{ item }}.ocplab.ocp.crt \
+            --key=./certs/{{ item }}.ocplab.ocp.key -n openshift-ingress
+
+        oc patch ingresscontroller.operator default \
+            --type=merge -p '{"spec":{"defaultCertificate": {"name": "sno"}}}' 
+            -n openshift-ingress-operator
+      args:
+        chdir: "/home/michele/ssl-ca"
+      loop: "{{ snos }}"
