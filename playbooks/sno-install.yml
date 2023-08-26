@@ -16,7 +16,6 @@
         url: "{{ openshift_mirror }}/{{ ocp_version }}/{{ item }}"
         dest: "{{ tempfolder }}/{{ item }}"
         mode: "0640"
-        validate_certs: false
       with_items:
         - openshift-install-linux.tar.gz
         - openshift-client-linux.tar.gz
@@ -134,6 +133,11 @@
         mode: pull
         src: "{{ tempfolder }}/{{ item }}/auth/kubeconfig"
         dest: "~/{{ item }}-kubeconfig"
+      with_items: "{{ snos }}"
+
+    - name: Fix permissions
+      ansible.builtin.shell: |
+        chmod 0640 "~/{{ item }}-kubeconfig"
       with_items: "{{ snos }}"
 
     - name: Template out lvm namespace
