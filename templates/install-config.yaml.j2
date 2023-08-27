@@ -22,15 +22,19 @@ platform:
 bootstrapInPlace:
   installationDisk: /dev/disk/by-id/wwn-{{ clusters[item].wwn }}
 pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
+imageContentSources:
+- mirrors:
+  - fw.int.rhx:5001
+  source: quay.io
 sshKey: |
   {{ sshkey | regex_replace('"', '') }}
 {% if additional_trust_bundle is defined %}
 additionalTrustBundle: |
 {{ additional_trust_bundle | indent(2, True) }}
 {% endif %}
-{% if notjustyethttp_proxy is defined %}
+#{% if notjustyethttp_proxy is defined %}
 proxy:
   httpProxy: {{ http_proxy }}
   httpsProxy: {{ https_proxy }}
   noProxy: {{ no_proxy }}
-{% endif %}
+#{% endif %}
