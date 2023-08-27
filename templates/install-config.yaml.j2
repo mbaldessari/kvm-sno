@@ -26,6 +26,9 @@ imageContentSources:
 - mirrors:
   - fw.int.rhx:5001
   source: quay.io
+- mirrors:
+  - fw.int.rhx:5003
+  source: registry.redhat.io
 sshKey: |
   {{ sshkey | regex_replace('"', '') }}
 {% if additional_trust_bundle is defined %}
