@@ -145,24 +145,10 @@
       with_items: "{{ snos }}"
       delegate_to: localhost
 
-    - name: Template out lvm namespace
+    - name: Template out lvm bits
       ansible.builtin.template:
-        src: ../templates/lvm-namespace.yaml
-        dest: "{{ tempfolder }}/{{ item }}/lvm-namespace.yaml"
-        mode: "0644"
-      with_items: "{{ snos }}"
-
-    - name: Template out lvm operatorgroup
-      ansible.builtin.template:
-        src: ../templates/lvm-operatorgroup.yaml
-        dest: "{{ tempfolder }}/{{ item }}/lvm-operatorgroup.yaml"
-        mode: "0644"
-      with_items: "{{ snos }}"
-
-    - name: Template out lvm subscription
-      ansible.builtin.template:
-        src: ../templates/lvm-subscription.yaml
-        dest: "{{ tempfolder }}/{{ item }}/lvm-subscription.yaml"
+        src: ../templates/lvm-base.yaml
+        dest: "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
         mode: "0644"
       with_items: "{{ snos }}"
 
