@@ -25,13 +25,13 @@ pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
 imageContentSources:
 - mirrors:
   - fw.int.rhx:5001
-  source: docker.io
-- mirrors:
-  - fw.int.rhx:5001
   source: quay.io
 - mirrors:
   - fw.int.rhx:5003
   source: registry.redhat.io
+- mirrors:
+  - fw.int.rhx:5004
+  source: docker.io
 sshKey: |
   {{ sshkey | regex_replace('"', '') }}
 {% if additional_trust_bundle is defined %}
