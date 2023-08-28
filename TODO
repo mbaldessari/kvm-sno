@@ -1,2 +1,3 @@
 - Do not serialize tasks around container VMs and statuses or at all?
-- Find a way to use a proxy/containers pull through to cache containers
+  * We can parallelize a few tasks here and there
+
