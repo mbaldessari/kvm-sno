@@ -1,0 +1,58 @@
+- name: Replace certificates with ours
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  become_user: michele
+  tasks:
+    - name: Install ca
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        oc delete configmap custom-ca -n openshift-config || /bin/true
+        oc create configmap custom-ca --from-file=ca-bundle.crt -n openshift-config
+      args:
+        chdir: "/home/michele/ssl-ca"
+      loop: "{{ snos }}"
+
+    - name: Patch proxy cluster
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        oc patch proxy/cluster --type=merge \
+            --patch='{"spec":{"trustedCA":{"name":"custom-ca"}}}'
+      args:
+        chdir: "/home/michele/ssl-ca"
+      loop: "{{ snos }}"
+
+    - name: Create cert secret
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        oc delete secret sno -n openshift-ingress || /bin/true
+        oc create secret tls sno --cert=./certs/{{ item }}.ocplab.ocp.crt \
+            --key=./certs/{{ item }}.ocplab.ocp.key -n openshift-ingress
+      args:
+        chdir: "/home/michele/ssl-ca"
+      loop: "{{ snos }}"
+
+    - name: Patch ingress
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        oc patch ingresscontroller.operator default --type=merge -p '{"spec":{"defaultCertificate": {"name": "sno"}}}' -n openshift-ingress-operator
+      args:
+        chdir: "/home/michele/ssl-ca"
+      loop: "{{ snos }}"
+
+    - name: Wait for console to be up
+      ansible.builtin.uri:
+        url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+        validate_certs: true
+        follow_redirects: all
+      with_items: "{{ snos }}"
+      register: uri
+      until: uri is not failed
+      retries: 100
+      delay: 20
+

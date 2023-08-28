@@ -10,6 +10,10 @@ help: ## This help message
 sno: ## Install an SNO vm on kuemper host
 	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-install.yml
 
+.PHONY: ssl
+ssl: ## Install my SSL certs on the SNO nodes
+	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-ssl.yml
+
 .PHONY: sno-destroy
 sno-destroy: ## Destroy installed SNOs and temp folders
 	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-destroy.yml
