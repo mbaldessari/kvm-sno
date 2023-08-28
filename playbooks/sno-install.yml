@@ -146,6 +146,8 @@
       delegate_to: localhost
 
     - name: Template out lvm bits
+      tags:
+        - lvm
       ansible.builtin.template:
         src: ../templates/lvm-base.yaml
         dest: "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
@@ -153,6 +155,8 @@
       with_items: "{{ snos }}"
 
     - name: Template out lvm cluster
+      tags:
+        - lvm
       ansible.builtin.template:
         src: ../templates/lvm-cluster.yaml
         dest: "{{ tempfolder }}/{{ item }}"
@@ -160,13 +164,21 @@
       with_items: "{{ snos }}"
 
     - name: Install LVM operator
+      tags:
+        - lvm
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
         "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
       with_items: "{{ snos }}"
+      register: lvm
+      until: lvm is not failed
+      retries: 10
+      delay: 2
 
     - name: Install LVM Cluster
+      tags:
+        - lvm
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
@@ -178,6 +190,8 @@
       with_items: "{{ snos }}"
 
     - name: Set kubeadmin password
+      tags:
+        - lvm
       ansible.builtin.shell: |
         set -e -o pipefail
         PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
@@ -186,4 +200,3 @@
           -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
       with_items: "{{ snos }}"
       when: kubeadmin_pass is defined
-

@@ -1,6 +1,7 @@
 SNOS ?= sno1,sno2,sno3
 NODE ?= sno1
 
+
 ##@ Common Tasks
 .PHONY: help
 help: ## This help message
