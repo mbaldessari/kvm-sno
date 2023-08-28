@@ -1,6 +1,7 @@
 SNOS ?= sno1,sno2,sno3
 NODE ?= sno1
 
+TAGS ?=
 
 ##@ Common Tasks
 .PHONY: help
@@ -9,7 +10,11 @@ help: ## This help message
 
 .PHONY: sno
 sno: ## Install an SNO vm on kuemper host
+ifndef TAGS
 	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-install.yml
+else
+	ansible-playbook -i hosts --tags "$(TAGS)" --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-install.yml
+endif
 
 .PHONY: ssl
 ssl: ## Install my SSL certs on the SNO nodes
