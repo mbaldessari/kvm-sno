@@ -13,7 +13,6 @@ help: ## This help message
 
 .PHONY: sno
 sno: ## Install an SNO vm on kuemper host
-ifndef TAGS
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-install.yml
 
 .PHONY: ssl
