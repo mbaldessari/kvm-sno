@@ -9,20 +9,27 @@
     argotempfolder: "/tmp/argocd-git/"
     argorepo: https://github.com/argoproj/argo-cd/
     node: sno1
+    quay_user: rhn_support_mbaldess
+    quay_pass_field: quay.io
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
         path: "~/{{ item }}-kubeconfig"
-      loop: "{{ kubeconfig_files.results }}"
-      loop_control:
-        label: "{{ item.stat.path }}"
+      with_items: "{{ snos | intersect(node) }}"
       register: kubeconfig_files
 
     - name: Verifying if files exists
       ansible.builtin.debug:
-        msg: "File {{ item.item.stat.path }} exist"
-      with_items: "{{ kubeconfig_files.results }}"
+        msg: "File {{ item.stat.path }} exist"
+      loop: "{{ kubeconfig_files.results }}"
+      loop_control:
+        label: "{{ item.stat.path }}"
       failed_when: not item.stat.exists
+
+    - name: Try and log in to podman
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        echo $(pass show {{ quay_pass_field }} | head -n1) | podman login -u{{ quay_user }} quay.io --password-stdin
 
     - name: Create temporary folder
       ansible.builtin.file:
