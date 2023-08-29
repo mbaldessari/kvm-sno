@@ -17,24 +17,24 @@ sno: ## Install an SNO vm on kuemper host
 
 .PHONY: ssl
 ssl: ## Install my SSL certs on the SNO nodes
-	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-ssl.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-ssl.yml
 
 .PHONY: sno-destroy
 sno-destroy: ## Destroy installed SNOs and temp folders
-	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-destroy.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-destroy.yml
 
 ##@ Day-2 Tasks
 .PHONY: mcg
 mcg: ## Install multicloud gitops on all three snos
-	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-mcg.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-mcg.yml
 
 .PHONY: argo
 argo: ## Install argocd from git on sno1
-	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-argocd-git.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-argocd-git.yml
 
 .PHONY: private
 private: ## Test mcg with private repo
-	ansible-playbook -i hosts --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-private.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-private.yml
 
 ##@ CI / Linter tasks
 .PHONY: lint

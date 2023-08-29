@@ -10,7 +10,7 @@ metadata:
   name: argo
   namespace: argocd
 spec:
-  host: argo-argocd.apps.{{ argonode }}.{{ domain }}
+  host: argo-argocd.apps.{{ node }}.{{ domain }}
   port:
     targetPort: https
   tls:
