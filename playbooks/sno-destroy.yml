@@ -16,10 +16,11 @@
       when: 'item in all_vms.list_vms'
       with_items: "{{ snos }}"
 
-    - name: Remove tempfolder
+    - name: Remove sno tempfolders
       ansible.builtin.file:
-        path: "{{ tempfolder }}"
+        path: "{{ tempfolder }}/{{ item }}"
         state: absent
+      with_items: "{{ snos }}"
 
     - name: Delete sno kubeconfig file locally if they exist
       delegate_to: localhost
