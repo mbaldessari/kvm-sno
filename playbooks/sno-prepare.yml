@@ -11,25 +11,47 @@
         recurse: true
       with_items: "{{ snos }}"
 
-    - name: Download tools
+    - name: Check if oc already exists
+      ansible.builtin.stat:
+        path: "{{ tempfolder }}/oc"
+      register: oc_binary
+
+    - name: Check if openshift-install already exists
+      ansible.builtin.stat:
+        path: "{{ tempfolder }}/openshift-install"
+      register: openshift_install_binary
+
+    - name: Download oc
       ansible.builtin.get_url:
-        url: "{{ openshift_mirror }}/{{ ocp_version }}/{{ item }}"
-        dest: "{{ tempfolder }}/{{ item }}"
+        url: "{{ openshift_mirror }}/{{ ocp_version }}/openshift-client-linux.tar.gz"
+        dest: "{{ tempfolder }}/openshift-client-linux.tar.gz"
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
-      with_items:
-        - openshift-install-linux.tar.gz
-        - openshift-client-linux.tar.gz
+      when: not oc_binary.stat.exists
 
-    - name: Uncompress oc and openshift install
+    - name: Download openshift-install
+      ansible.builtin.get_url:
+        url: "{{ openshift_mirror }}/{{ ocp_version }}/openshift-install.tar.gz"
+        dest: "{{ tempfolder }}/openshift-install.tar.gz"
+        mode: "0640"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+      when: not openshift_install_binary.stat.exists
+
+    - name: Uncompress oc
       ansible.builtin.unarchive:
-        src: "{{ tempfolder }}/{{ item }}"
+        src: "{{ tempfolder }}/openshift-client-lin"
         dest: "{{ tempfolder }}"
         remote_src: true
-      with_items:
-        - openshift-client-linux.tar.gz
-        - openshift-install-linux.tar.gz
+      when: not oc_binary.stat.exists
+
+    - name: Uncompress openshift install
+      ansible.builtin.unarchive:
+        src: "{{ tempfolder }}/openshift-install-linux.tar.gz"
+        dest: "{{ tempfolder }}"
+        remote_src: true
+      when: not openshift_install_binary.stat.exists
 
     - name: Register iso URL
       ansible.builtin.shell: |

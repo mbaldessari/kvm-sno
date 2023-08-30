@@ -50,6 +50,10 @@
         --noautoconsole
         --boot menu=on,useserial=on
       with_items: "{{ snos }}"
+      retries: 10
+      delay: 10
+      register: vm_creation
+      until: vm_creation is not failed
 
     - name: Wait for vm to be stopped
       ansible.builtin.shell: |
