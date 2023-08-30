@@ -1,0 +1,50 @@
+---
+- name: Prepare SNO clusters
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Create temporary folders
+      ansible.builtin.file:
+        path: "{{ tempfolder }}/{{ item }}"
+        state: directory
+        recurse: true
+      with_items: "{{ snos }}"
+
+    - name: Download tools
+      ansible.builtin.get_url:
+        url: "{{ openshift_mirror }}/{{ ocp_version }}/{{ item }}"
+        dest: "{{ tempfolder }}/{{ item }}"
+        mode: "0640"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+      with_items:
+        - openshift-install-linux.tar.gz
+        - openshift-client-linux.tar.gz
+
+    - name: Uncompress oc and openshift install
+      ansible.builtin.unarchive:
+        src: "{{ tempfolder }}/{{ item }}"
+        dest: "{{ tempfolder }}"
+        remote_src: true
+      with_items:
+        - openshift-client-linux.tar.gz
+        - openshift-install-linux.tar.gz
+
+    - name: Register iso URL
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ./openshift-install coreos print-stream-json | grep location | grep "{{ arch }}" | grep iso | cut -d\" -f4
+      args:
+        chdir: "{{ tempfolder }}"
+      register: iso_url_raw
+
+    - name: Download RHCOS iso
+      ansible.builtin.get_url:
+        url: "{{ iso_url_raw.stdout }}"
+        dest: "{{ tempfolder }}/rhcos-live.iso"
+        mode: "0664"
+        validate_certs: false
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+

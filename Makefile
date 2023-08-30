@@ -11,9 +11,20 @@ endif
 help: ## This help message
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^(\s|[a-zA-Z_0-9-])+:.*?##/ { printf "  \033[36m%-35s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
+.PHONY: sno-prepare
+sno-prepare: ## Prepares kvm host with utils to install SNOs
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-prepare.yml
+
 .PHONY: sno
-sno: ## Install an SNO vm on kuemper host
+sno: sno-prepare ## Install an SNO vm on kuemper host
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-install.yml
+
+.PHONY: sno-parallel
+sno-parallel: sno-prepare ## Install snos in parallel (experimental)
+	@set -x; echo -n '' > /tmp/parallel; for i in `echo $(SNOS) | tr ',' ' '`; do\
+		echo "--extra-vars='{\"snos\":[$$i]}'" >> /tmp/parallel;\
+	done;\
+	parallel -a /tmp/parallel eval ansible-playbook -i hosts playbooks/sno-install.yml
 
 .PHONY: ssl
 ssl: ## Install my SSL certs on the SNO nodes

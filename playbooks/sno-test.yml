@@ -1,0 +1,12 @@
+---
+- name: Test
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Create temporary folders
+      ansible.builtin.file:
+        path: "/tmp/foo{{ item }}"
+        state: directory
+        mode: "0644"
+      with_items: "{{ snos }}"
