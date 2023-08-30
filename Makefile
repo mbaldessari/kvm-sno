@@ -24,7 +24,7 @@ sno-parallel: sno-prepare ## Install snos in parallel (experimental)
 	@set -x; echo -n '' > /tmp/parallel; for i in `echo $(SNOS) | tr ',' ' '`; do\
 		echo "--extra-vars='{\"snos\":[$$i]}'" >> /tmp/parallel;\
 	done;\
-	parallel -a /tmp/parallel eval ansible-playbook -i hosts playbooks/sno-install.yml
+	parallel --ungroup -a /tmp/parallel eval ansible-playbook -i hosts playbooks/sno-install.yml
 
 .PHONY: ssl
 ssl: ## Install my SSL certs on the SNO nodes
