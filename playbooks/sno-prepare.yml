@@ -32,8 +32,8 @@
 
     - name: Download openshift-install
       ansible.builtin.get_url:
-        url: "{{ openshift_mirror }}/{{ ocp_version }}/openshift-install.tar.gz"
-        dest: "{{ tempfolder }}/openshift-install.tar.gz"
+        url: "{{ openshift_mirror }}/{{ ocp_version }}/openshift-install-linux.tar.gz"
+        dest: "{{ tempfolder }}/openshift-install-linux.tar.gz"
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
@@ -41,7 +41,7 @@
 
     - name: Uncompress oc
       ansible.builtin.unarchive:
-        src: "{{ tempfolder }}/openshift-client-lin"
+        src: "{{ tempfolder }}/openshift-client-linux.tar.gz"
         dest: "{{ tempfolder }}"
         remote_src: true
       when: not oc_binary.stat.exists

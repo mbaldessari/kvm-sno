@@ -4,11 +4,34 @@
   gather_facts: false
   become: true
   tasks:
+    - name: Template install-config.yaml to the base tmp folder for debugging
+      ansible.builtin.template:
+        src: ../templates/install-config.yaml.j2
+        dest: "{{ tempfolder }}/install-config.yaml"
+        mode: "0640"
+      with_items:
+        - sno1
+
     - name: Template install-config.yaml
       ansible.builtin.template:
         src: ../templates/install-config.yaml.j2
         dest: "{{ tempfolder }}/{{ item }}/install-config.yaml"
         mode: "0640"
+      with_items: "{{ snos }}"
+
+    - name: Create ocp manifests
+      ansible.builtin.shell: |
+        set -e
+        ./openshift-install --dir={{ item }} create manifests
+      args:
+        chdir: "{{ tempfolder }}"
+      with_items: "{{ snos }}"
+
+    - name: Template machineconfig for kernel args
+      ansible.builtin.template:
+        src: ../templates/machineconfig-kargs.yaml
+        dest: "{{ tempfolder }}/{{ item }}/openshift/99-openshift-machineconfig-kargs.yaml"
+        mode: "0644"
       with_items: "{{ snos }}"
 
     - name: Create ocp folder and run openshift-install
@@ -18,6 +41,15 @@
       args:
         chdir: "{{ tempfolder }}"
       with_items: "{{ snos }}"
+
+    # - name: Inject kernel args
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     jq '. += {"kernelArguments": { "shouldExist": ["mitigations=off", "selinux=0"] }}' \
+    #         "{{ tempfolder }}/{{ item }}/bootstrap-in-place-for-live-iso.ign" | \
+    #         jq '.ignition.version="3.3.0"' > "{{ tempfolder }}/tmp-{{ item }}.ign" 
+    #     cp -f "{{ tempfolder }}/tmp-{{ item }}.ign" "{{ tempfolder }}/{{ item }}/bootstrap-in-place-for-live-iso.ign"
+    #   with_items: "{{ snos }}"
 
     - name: Run coreos ignition embedding
       ansible.builtin.shell: |
@@ -43,8 +75,8 @@
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ clusters[item].mac_nr }}"
         --vcpus {{ clusters[item].cpus }}
         --ram {{ clusters[item].ram }}
-        --disk pool=default,size={{ clusters[item].disk }},format=qcow2,bus=scsi,cache={{ clusters[item].cache }},wwn={{ clusters[item].wwn }}
-        --disk pool=default,size={{ clusters[item].disk2 }},format=qcow2,bus=scsi,cache={{ clusters[item].cache2 }},wwn={{ clusters[item].wwn2 }}
+        --disk pool={{ vm_pool }},size={{ clusters[item].disk }},format=qcow2,bus=scsi,cache={{ clusters[item].cache }},wwn={{ clusters[item].wwn }}
+        --disk pool={{ vm_pool }},size={{ clusters[item].disk2 }},format=qcow2,bus=scsi,cache={{ clusters[item].cache2 }},wwn={{ clusters[item].wwn2 }}
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole

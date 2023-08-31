@@ -2,7 +2,7 @@
 #ocp_version: "latest-4.13"
 ocp_version: "4.13.10"
 arch: "x86_64"
-tempfolder: "/tmp/sno-temp-folder"
+tempfolder: "/ramfs/sno-temp-folder"
 openshift_mirror: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
 domain: "ocplab.ocp"
 sshkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
@@ -34,6 +34,8 @@ additional_trust_bundle: |
   DEhdr/LCdIZtoPbQvxk0D7OmANONCbAriM5WNp6u9pGLc7w7IKOZVOkFltlXdINb
   U8LwiGLfCl7vTrz+27FHTCx0IBxU
   -----END CERTIFICATE-----
+
+vm_pool: "fast"
 clusters:
   sno1:
     cpus: 12
