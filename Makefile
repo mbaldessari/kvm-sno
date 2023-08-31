@@ -1,4 +1,4 @@
-SNOS ?= sno1,sno2,sno3
+SNOS ?= sno1,sno2,sno3,sno4
 NODE ?= sno1
 
 TAGS ?=

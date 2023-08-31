@@ -27,6 +27,7 @@
         chdir: "{{ tempfolder }}"
       with_items: "{{ snos }}"
 
+    # Not working yet?!
     - name: Template machineconfig for kernel args
       ansible.builtin.template:
         src: ../templates/machineconfig-kargs.yaml
@@ -80,7 +81,7 @@
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
-        --boot menu=on,useserial=on
+        --boot menu=on,useserial=on,uefi
       with_items: "{{ snos }}"
       retries: 10
       delay: 10
