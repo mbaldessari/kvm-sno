@@ -114,6 +114,37 @@
       retries: 100
       delay: 20
 
+    - name: Template out lvm bits
+      tags:
+        - lvm
+      ansible.builtin.template:
+        src: ../templates/lvm-base.yaml
+        dest: "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
+        mode: "0644"
+      with_items: "{{ snos }}"
+
+    - name: Template out lvm cluster
+      tags:
+        - lvm
+      ansible.builtin.template:
+        src: ../templates/lvm-cluster.yaml
+        dest: "{{ tempfolder }}/{{ item }}"
+        mode: "0644"
+      with_items: "{{ snos }}"
+
+    - name: Fetch kubeconfig file
+      ansible.posix.synchronize:
+        mode: pull
+        src: "{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        dest: "~/{{ item }}-kubeconfig"
+      with_items: "{{ snos }}"
+
+    - name: Fix permissions
+      ansible.builtin.shell: |
+        chmod 0640 "/home/michele/{{ item }}-kubeconfig"
+      with_items: "{{ snos }}"
+      delegate_to: localhost
+
     - name: Wait for console to be up
       ansible.builtin.uri:
         url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
@@ -138,37 +169,6 @@
       until: kubepass is not failed
       retries: 10
       delay: 2
-
-    - name: Fetch kubeconfig file
-      ansible.posix.synchronize:
-        mode: pull
-        src: "{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-        dest: "~/{{ item }}-kubeconfig"
-      with_items: "{{ snos }}"
-
-    - name: Fix permissions
-      ansible.builtin.shell: |
-        chmod 0640 "/home/michele/{{ item }}-kubeconfig"
-      with_items: "{{ snos }}"
-      delegate_to: localhost
-
-    - name: Template out lvm bits
-      tags:
-        - lvm
-      ansible.builtin.template:
-        src: ../templates/lvm-base.yaml
-        dest: "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
-        mode: "0644"
-      with_items: "{{ snos }}"
-
-    - name: Template out lvm cluster
-      tags:
-        - lvm
-      ansible.builtin.template:
-        src: ../templates/lvm-cluster.yaml
-        dest: "{{ tempfolder }}/{{ item }}"
-        mode: "0644"
-      with_items: "{{ snos }}"
 
     - name: Install LVM operator
       tags:
