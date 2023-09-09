@@ -141,7 +141,7 @@
 
     - name: Fix permissions
       ansible.builtin.shell: |
-        chmod 0640 "/home/michele/{{ item }}-kubeconfig"
+        chmod 0600 "/home/michele/{{ item }}-kubeconfig"
       with_items: "{{ snos }}"
       delegate_to: localhost
 
