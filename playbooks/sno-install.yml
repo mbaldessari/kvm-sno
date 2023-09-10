@@ -145,6 +145,31 @@
       with_items: "{{ snos }}"
       delegate_to: localhost
 
+    - name: Wait for console to be up
+      ansible.builtin.uri:
+        url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+        validate_certs: false
+        follow_redirects: all
+      with_items: "{{ snos }}"
+      register: uri
+      until: uri is not failed
+      retries: 100
+      delay: 20
+
+    - name: Set kubeadmin password
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        "{{ tempfolder }}"/oc patch secret -n kube-system kubeadmin --type json \
+          -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
+      with_items: "{{ snos }}"
+      when: kubeadmin_pass is defined
+      register: kubepass
+      until: kubepass is not failed
+      retries: 10
+      delay: 2
+
     - name: Install LVM operator
       tags:
         - lvm
@@ -170,28 +195,3 @@
       delay: 20
       until: lvmcluster is not failed
       with_items: "{{ snos }}"
-
-    - name: Wait for console to be up
-      ansible.builtin.uri:
-        url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
-        validate_certs: false
-        follow_redirects: all
-      with_items: "{{ snos }}"
-      register: uri
-      until: uri is not failed
-      retries: 100
-      delay: 20
-
-    - name: Set kubeadmin password
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
-        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-        "{{ tempfolder }}"/oc patch secret -n kube-system kubeadmin --type json \
-          -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
-      with_items: "{{ snos }}"
-      when: kubeadmin_pass is defined
-      register: kubepass
-      until: kubepass is not failed
-      retries: 10
-      delay: 2
