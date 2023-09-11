@@ -167,8 +167,8 @@
       when: kubeadmin_pass is defined
       register: kubepass
       until: kubepass is not failed
-      retries: 10
-      delay: 2
+      retries: 30
+      delay: 5
 
     - name: Install LVM operator
       tags:
