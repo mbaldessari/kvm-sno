@@ -81,3 +81,14 @@ clusters:
     cache2: unsafe
     wwn2: "0x5000c50015ea72bb"
     network: 192.168.66.0/24
+  sno5:
+    cpus: 12
+    ram: 64768
+    mac_nr: 70
+    disk: 128
+    cache: unsafe
+    wwn: "0x5000c50015ea72cc"
+    disk2: 30
+    cache2: unsafe
+    wwn2: "0x5000c50015ea72dd"
+    network: 192.168.66.0/24
