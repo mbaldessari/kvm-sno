@@ -47,6 +47,10 @@ argo: ## Install argocd from git on sno1
 private: ## Test mcg with private repo
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-private.yml
 
+.PHONY: poweroff
+poweroff: ## powers off kuemper
+	ansible -i hosts -m shell -a "poweroff" kvm
+
 ##@ CI / Linter tasks
 .PHONY: lint
 lint: ## Run ansible-lint on the codebase
