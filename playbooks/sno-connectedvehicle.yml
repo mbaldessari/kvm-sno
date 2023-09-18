@@ -1,0 +1,42 @@
+---
+- name: Install Connected Vehicle on sno1
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  become_user: michele
+  vars:
+    vehicletempfolder: "~/sno-connected-vehicle"
+    gitrepo: https://github.com/validatedpatterns/connected-vehicle-architecture
+  tasks:
+    - name: Check that all kubeconfig files exist
+      ansible.builtin.stat:
+        path: "~/{{ item }}-kubeconfig"
+      with_items: "{{ snos }}"
+      register: kubeconfig_files
+
+    - name: Verifying if files exists
+      ansible.builtin.debug:
+        msg: "File {{ item.stat.path }} exist"
+      loop: "{{ kubeconfig_files.results }}"
+      loop_control:
+        label: "{{ item.stat.path }}"
+      failed_when: not item.stat.exists
+
+    - name: Delete temporary folder
+      ansible.builtin.file:
+        path: "{{ vehicletempfolder }}"
+        state: absent
+
+    - name: Create temporary folder
+      ansible.builtin.file:
+        path: "{{ vehicletempfolder }}/connected-vehicle-architecture"
+        state: directory
+        recurse: true
+
+    - name: Clone git repo
+      ansible.builtin.git:
+        repo: "{{ gitrepo }}"
+        dest: "{{ vehicletempfolder }}/connected-vehicle-architecture"
+        clone: true
+

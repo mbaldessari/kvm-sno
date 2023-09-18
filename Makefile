@@ -39,6 +39,10 @@ sno-destroy: ## Destroy installed SNOs and temp folders
 mcg: ## Install multicloud gitops on all three snos
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-mcg.yml
 
+.PHONY: vehicle
+vehicle: ## Install Connected Vehicle Architecture on SNO1
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-connectedvehicle.yml
+
 .PHONY: argo
 argo: ## Install argocd from git on sno1
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-argocd-git.yml
