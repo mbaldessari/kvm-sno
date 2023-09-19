@@ -22,7 +22,7 @@ sno: sno-prepare ## Install an SNO vm on kuemper host
 
 .PHONY: sno-nomirror
 sno-nomirror: sno-prepare ## Install SNO without using docker pull through caches (needed for IIB)
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' --extra-vars='{"enable_local_docker_mirror": "False"}' playbooks/sno-install.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' --extra-vars='{enable_local_docker_mirror: False}' playbooks/sno-install.yml
 
 .PHONY: sno-parallel
 sno-parallel: sno-prepare ## Install snos in parallel (experimental)
