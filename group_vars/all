@@ -14,6 +14,7 @@ http_proxy: http://192.168.66.254:3128/
 https_proxy: http://192.168.66.254:3129/
 no_proxy: "{{ domain }},172.16.0.0/16,10.0.0.0/8,192.168.66.0/24"
 enable_local_docker_mirror: true
+iib_index_image_base: registry-proxy.engineering.redhat.com/rh-osbs
 additional_trust_bundle: |
   -----BEGIN CERTIFICATE-----
   MIIDQTCCAimgAwIBAgIUI9mzIwMoIuL+N+hAfsbg9NJcTjQwDQYJKoZIhvcNAQEL

@@ -22,7 +22,7 @@ sno: sno-prepare ## Install an SNO vm on kuemper host
 
 .PHONY: sno-nomirror
 sno-nomirror: sno-prepare ## Install SNO without using docker pull through caches (needed for IIB)
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e enable_local_docker_mirror=false playbooks/sno-install.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' --extra-vars='{"enable_local_docker_mirror": "False"}' playbooks/sno-install.yml
 
 .PHONY: sno-parallel
 sno-parallel: sno-prepare ## Install snos in parallel (experimental)
@@ -52,9 +52,9 @@ vehicle: ## Install Connected Vehicle Architecture on SNO1
 argo: ## Install argocd from git on sno1
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-argocd-git.yml
 
-.PHONY: load-iib
-load-iib: ## Install argocd from git on sno1
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) -e iib=$(IIB) playbooks/sno-load-iib.yml
+.PHONY: gitops-iib
+gitops-iib: ## Install argocd from git on sno1
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) -e iib=$(IIB) playbooks/sno-gitops-iib.yml
 
 .PHONY: private
 private: ## Test mcg with private repo
