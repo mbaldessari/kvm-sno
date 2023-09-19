@@ -1,5 +1,6 @@
 SNOS ?= sno1,sno2,sno3,sno4,sno5
 NODE ?= sno1
+IIB ?=
 
 TAGS ?=
 ifdef TAGS
@@ -46,6 +47,10 @@ vehicle: ## Install Connected Vehicle Architecture on SNO1
 .PHONY: argo
 argo: ## Install argocd from git on sno1
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-argocd-git.yml
+
+.PHONY: load-iib
+load-iib: ## Install argocd from git on sno1
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) -e iib=$(IIB) playbooks/sno-load-iib.yml
 
 .PHONY: private
 private: ## Test mcg with private repo

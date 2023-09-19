@@ -1,0 +1,34 @@
+---
+- name: Load a specified IIB on to the cluster
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  become_user: michele
+  tasks:
+    - name: Fail if node or iib are not defined
+      ansible.builtin.fail:
+        msg: "IIB or NODE not defined"
+      when: iib is not defined or node is not defined or iib == "" or node == ""
+
+    - name: Check that all kubeconfig files exist
+      ansible.builtin.stat:
+        path: "~/{{ item }}-kubeconfig"
+      with_items: "{{ snos | intersect(node) }}"
+      register: kubeconfig_files
+
+    - name: Verifying if files exists
+      ansible.builtin.debug:
+        msg: "File {{ item.stat.path }} exist"
+      loop: "{{ kubeconfig_files.results }}"
+      loop_control:
+        label: "{{ item.stat.path }}"
+      failed_when: not item.stat.exists
+
+    - name: Enable SNO internal registry
+      ansible.builtin.shell: |
+        set -e
+        oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}
+        oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+      environment:
+        KUBECONFIG: "~/{{ node }}-kubeconfig" 
