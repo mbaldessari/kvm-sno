@@ -22,6 +22,7 @@ platform:
 bootstrapInPlace:
   installationDisk: /dev/disk/by-id/wwn-{{ clusters[item].wwn }}
 pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
+{% if enable_local_docker_mirror %}
 imageContentSources:
 - mirrors:
   - fw.int.rhx:5001
@@ -32,6 +33,7 @@ imageContentSources:
 - mirrors:
   - fw.int.rhx:5004
   source: docker.io
+{% endif %}
 sshKey: |
   {{ sshkey | regex_replace('"', '') }}
 {% if additional_trust_bundle is defined %}
