@@ -1,5 +1,5 @@
 ---
-- name: Install MCG using an IIB
+- name: Install MCG using an IIB for gitops
   hosts: localhost
   connection: local
   gather_facts: false

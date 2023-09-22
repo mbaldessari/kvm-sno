@@ -1,4 +1,4 @@
-SNOS ?= sno1,sno2,sno3,sno4,sno5
+SNOS ?= sno1,sno2,sno3,sno4
 NODE ?= sno1
 IIB ?=
 
@@ -53,8 +53,12 @@ argo: ## Install argocd from git on sno1
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-argocd-git.yml
 
 .PHONY: gitops-iib
-gitops-iib: ## Install argocd from git on sno1
+gitops-iib: ## Install mcg with gitops from iib
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) -e iib=$(IIB) playbooks/sno-gitops-iib.yml
+
+.PHONY: acm-iib
+acm-iib: ## Install mcg with acm from iib
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) -e iib=$(IIB) playbooks/sno-acm-iib.yml
 
 .PHONY: private
 private: ## Test mcg with private repo
