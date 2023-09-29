@@ -34,3 +34,18 @@
       delay: 10
       register: vm_creation
       until: vm_creation is not failed
+
+    - name: Wait for vm to be stopped
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        virsh list --all | grep -w "{{ item }}" | grep -v running
+      register: running
+      retries: 100
+      delay: 10
+      until: running is not failed
+      with_items: "{{ rhels }}"
+
+    - name: Start "{{ item }}"
+      ansible.builtin.command: |
+        virsh start "{{ item }}"
+      with_items: "{{ rhels }}"

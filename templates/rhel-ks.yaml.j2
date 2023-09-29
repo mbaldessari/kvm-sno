@@ -1,0 +1,72 @@
+%include /tmp/uefi
+%include /tmp/legacy
+
+%pre --logfile /tmp/kickstart.install.pre.log
+
+
+if [ -d /sys/firmware/efi ] ; then
+    touch /tmp/legacy
+    cat > /tmp/uefi <<END
+clearpart --all --initlabel --drives=sda
+part /boot --fstype="ext4" --size=512 --ondisk=sda
+part /boot/efi --fstype="vfat" --size=1024 --ondisk=sda
+part swap  --size=100  --fstype=swap --ondisk=sda
+part pv.13 --size=1 --grow --ondisk=sda
+volgroup VolGroup00 pv.13
+logvol / --fstype xfs --name=rootsys --vgname=VolGroup00 --size=3000
+END
+else
+    touch /tmp/uefi
+    cat > /tmp/legacy <<END
+clearpart --all --initlabel --drives=sda,sdb
+part /boot  --fstype=ext4 --size=300
+part pv.6 --size=1000 --grow --ondisk=sda
+part swap  --size=100  --fstype=swap
+part pv.13 --size=1 --grow
+volgroup VolGroup00 pv.13
+logvol / --fstype xfs --name=rootsys --vgname=VolGroup00 --size=3000
+END
+fi
+
+chvt 1
+
+%end
+
+# Use network installation
+cdrom
+firewall --disabled
+network --onboot=yes --bootproto=dhcp
+keyboard us
+# Configure Language During Installation
+lang en_US
+skipx
+
+# Services to enable/disable
+services --disabled=mlocate-updatedb,mlocate-updatedb.timer,geoclue,avahi-daemon
+
+timezone Europe/Rome
+user --name=michele --shell=/bin/zsh --groups=wheel --iscrypted --password="{{ passwd }}"
+sshkey --username=michele "{{ ssh_pubkey }}"
+text
+#syspurpose --role="Red Hat Enterprise Linux Server" --sla=Self-Support --usage="Development/Test"
+#rhsm --organization="{{ rhn_org }}" --activation-key="{{ activation_key }}"
+
+%packages
+@core
+openssh-server
+zsh
+strace
+-amd-gpu-firmware
+-intel-gpu-firmware
+-nvidia-gpu-firmware
+-pcsc-lite
+-firewalld
+%end
+
+# Post-installation Script
+%post
+echo "michele ALL=(ALL)    NOPASSWD: ALL" >> /etc/sudoers.d/michele
+systemctl disable raid-check.timer
+%end
+
+reboot --eject
