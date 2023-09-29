@@ -94,3 +94,29 @@ clusters:
     cache2: unsafe
     wwn2: "0x5000c50015ea72dd"
     network: 192.168.66.0/24
+
+rhel_isos:
+  9.2: /var/lib/libvirt/images/rhel-9.2-x86_64-dvd.iso
+rhel_pool: "default"
+passwd: "{{ lookup('file', '~/.fwpass') }}"
+ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3YhhpKweKeyW+iCK michele@oshie"
+    
+rhels:
+  rhel1:
+    version: 9.2
+    cpus: 4
+    ram: 32768
+    mac_nr: 80
+    disk: 64
+    cache: unsafe
+    wwn: "0x5000c50015ea81aa"
+    network: 192.168.66.0/24
+  rhel2:
+    version: 9.2
+    cpus: 4
+    ram: 32768
+    mac_nr: 81
+    disk: 64
+    cache: unsafe
+    wwn: "0x5000c50015ea81aa"
+    network: 192.168.66.0/24

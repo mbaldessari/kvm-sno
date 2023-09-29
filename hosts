@@ -1,2 +1,5 @@
 [kvm]
 kuemper.int.rhx ansible_user=root
+
+[fw]
+fw.int.rhx ansible_user=michele

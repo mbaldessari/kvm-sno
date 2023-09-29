@@ -39,6 +39,14 @@ ssl: ## Install my SSL certs on the SNO nodes
 sno-destroy: ## Destroy installed SNOs and temp folders
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-destroy.yml
 
+.PHONY: rhels
+rhels: ## Create RHEL vms
+	ansible-playbook -i hosts $(TAGS_STRING) playbooks/rhels.yml
+
+.PHONY: rhels-destroy
+rhels-destroy: ## Destroy installed RHELs VMS
+	ansible-playbook -i hosts $(TAGS_STRING) playbooks/rhels-destroy.yml
+
 ##@ Day-2 Tasks
 .PHONY: mcg
 mcg: ## Install multicloud gitops on all three snos

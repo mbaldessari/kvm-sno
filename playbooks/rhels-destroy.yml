@@ -1,0 +1,17 @@
+---
+- name: Destroy RHELs
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Check if vms already exists
+      community.libvirt.virt:
+        command: list_vms
+      register: all_vms
+
+    - name: Destroy {{ item }}
+      ansible.builtin.shell: |
+        virsh destroy {{ item }}
+        virsh undefine --nvram --remove-all-storage {{ item }}
+      when: 'item in all_vms.list_vms'
+      with_items: "{{ rhels }}"

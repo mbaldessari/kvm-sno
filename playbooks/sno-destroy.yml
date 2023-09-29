@@ -1,5 +1,5 @@
 ---
-- name: Destroy SNO cluser
+- name: Destroy SNO cluster
   hosts: kvm
   gather_facts: false
   become: true
