@@ -48,8 +48,6 @@ timezone Europe/Rome
 user --name=michele --shell=/bin/zsh --groups=wheel --iscrypted --password="{{ passwd }}"
 sshkey --username=michele "{{ ssh_pubkey }}"
 text
-#syspurpose --role="Red Hat Enterprise Linux Server" --sla=Self-Support --usage="Development/Test"
-#rhsm --organization="{{ rhn_org }}" --activation-key="{{ activation_key }}"
 
 %packages
 @core
@@ -64,9 +62,13 @@ strace
 %end
 
 # Post-installation Script
-%post
+%post --logfile /root/post-kickstart.log
 echo "michele ALL=(ALL)    NOPASSWD: ALL" >> /etc/sudoers.d/michele
 systemctl disable raid-check.timer
+subscription-manager syspurpose role --set "Red Hat Enterprise Linux Server"
+subscription-manager syspurpose service-level --set Self-Support 
+subscription-manager suspurpose usage --set "Development/Test"
+subscription-manager register --organization="{{ rhn_org }}" --activation-key="{{ activation_key }}" --force
 %end
 
 reboot --eject

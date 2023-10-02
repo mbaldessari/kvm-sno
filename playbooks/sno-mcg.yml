@@ -8,6 +8,7 @@
   vars:
     mcgtempfolder: "~/sno-mcg"
     gitrepo: https://github.com/validatedpatterns/multicloud-gitops
+    gitbranch: main
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
@@ -37,6 +38,7 @@
     - name: Clone git repo
       ansible.builtin.git:
         repo: "{{ gitrepo }}"
+        version: "{{ gitbranch }}"
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
