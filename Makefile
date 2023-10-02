@@ -7,6 +7,8 @@ ifdef TAGS
 	TAGS_STRING = --tags $(TAGS)
 endif
 
+EXTRA_VARS ?=
+
 ##@ Common Tasks
 .PHONY: help
 help: ## This help message
@@ -33,40 +35,40 @@ sno-parallel: sno-prepare ## Install snos in parallel (experimental)
 
 .PHONY: ssl
 ssl: ## Install my SSL certs on the SNO nodes
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-ssl.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-ssl.yml
 
 .PHONY: sno-destroy
 sno-destroy: ## Destroy installed SNOs and temp folders
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-destroy.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-destroy.yml
 
 .PHONY: rhels
 rhels: ## Create RHEL vms
-	ansible-playbook -i hosts $(TAGS_STRING) playbooks/rhels.yml
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/rhels.yml
 
 .PHONY: rhels-destroy
 rhels-destroy: ## Destroy installed RHELs VMS
-	ansible-playbook -i hosts $(TAGS_STRING) playbooks/rhels-destroy.yml
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/rhels-destroy.yml
 
 ##@ Day-2 Tasks
 .PHONY: mcg
 mcg: ## Install multicloud gitops on all three snos
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-mcg.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml
 
 .PHONY: vehicle
 vehicle: ## Install Connected Vehicle Architecture on SNO1
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-connectedvehicle.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-connectedvehicle.yml
 
 .PHONY: argo
 argo: ## Install argocd from git on sno1
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) playbooks/sno-argocd-git.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) $(EXTRA_VARS) playbooks/sno-argocd-git.yml
 
 .PHONY: gitops-iib
 gitops-iib: ## Install mcg with gitops from iib
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) -e iib=$(IIB) playbooks/sno-gitops-iib.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) -e iib=$(IIB) $(EXTRA_VARS) playbooks/sno-gitops-iib.yml
 
 .PHONY: acm-iib
 acm-iib: ## Install mcg with acm from iib
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) -e iib=$(IIB) playbooks/sno-acm-iib.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' -e node=$(NODE) -e iib=$(IIB) $(EXTRA_VARS) playbooks/sno-acm-iib.yml
 
 .PHONY: private
 private: ## Test mcg with private repo
