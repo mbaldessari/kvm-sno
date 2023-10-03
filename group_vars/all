@@ -1,5 +1,5 @@
 ---
-#ocp_version: "4.14.0-rc.3"
+#ocp_version: "4.14.0-rc.4"
 ocp_version: "4.13.14"
 arch: "x86_64"
 tempfolder: "/ramfs/sno-temp-folder"
