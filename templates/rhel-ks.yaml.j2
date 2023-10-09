@@ -67,8 +67,9 @@ echo "michele ALL=(ALL)    NOPASSWD: ALL" >> /etc/sudoers.d/michele
 systemctl disable raid-check.timer
 subscription-manager syspurpose role --set "Red Hat Enterprise Linux Server"
 subscription-manager syspurpose service-level --set Self-Support 
-subscription-manager suspurpose usage --set "Development/Test"
-subscription-manager register --organization="{{ rhn_org }}" --activation-key="{{ activation_key }}" --force
+subscription-manager syspurpose usage --set "Development/Test"
+subscription-manager register --org "{{ rhn_org }}" --activationkey "{{ activation_key }}" --force
+dnf update -y
 %end
 
 reboot --eject

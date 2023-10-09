@@ -54,6 +54,10 @@ rhels-destroy: ## Destroy installed RHELs VMS
 mcg: ## Install multicloud gitops on all three snos
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml
 
+.PHONY: agof
+agof: ## Install AGOF on the two RHEL boxes
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/agof.yml
+
 .PHONY: vehicle
 vehicle: ## Install Connected Vehicle Architecture on SNO1
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-connectedvehicle.yml

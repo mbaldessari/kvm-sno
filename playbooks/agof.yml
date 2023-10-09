@@ -1,0 +1,37 @@
+---
+- name: Install AGOF on two rhel boxes
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  become_user: michele
+  vars:
+    agoftempfolder: "~/agof"
+    gitrepo: https://github.com/validatedpatterns/agof
+    gitbranch: main
+    inventory: /home/michele/Engineering/Labs/kvm-sno/hosts
+  tasks:
+    - name: Delete temporary folder
+      ansible.builtin.file:
+        path: "{{ agoftempfolder }}"
+        state: absent
+
+    - name: Create temporary folder
+      ansible.builtin.file:
+        path: "{{ agoftempfolder }}/agof"
+        state: directory
+        recurse: true
+
+    - name: Clone git repo
+      ansible.builtin.git:
+        repo: "{{ gitrepo }}"
+        version: "{{ gitbranch }}"
+        dest: "{{ agoftempfolder }}/agof"
+        clone: true
+
+    - name: Install AGOF
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ./pattern.sh make from_os_install INVENTORY="{{ inventory }}"
+      args:
+        chdir: "{{ agoftempfolder }}/agof"
