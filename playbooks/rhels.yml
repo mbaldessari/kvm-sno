@@ -49,3 +49,11 @@
       ansible.builtin.command: |
         virsh start "{{ item }}"
       with_items: "{{ rhels }}"
+
+- name: Wait for RHEL boxes
+  hosts: rhels
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Wait for boxes
+      ansible.builtin.wait_for_connection:
