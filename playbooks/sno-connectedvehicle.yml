@@ -40,3 +40,10 @@
         dest: "{{ vehicletempfolder }}/connected-vehicle-architecture"
         clone: true
 
+    - name: Install pattern on HUB/sno1
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/sno1-kubeconfig
+        ./pattern.sh make install &> /tmp/connected1.log
+      args:
+        chdir: "{{ vehicletempfolder }}/connected-vehicle-architecture"
