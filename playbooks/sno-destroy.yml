@@ -13,7 +13,9 @@
       ansible.builtin.shell: |
         virsh destroy {{ item }}
         virsh undefine --nvram --remove-all-storage {{ item }}
-      when: 'item in all_vms.list_vms'
+      when: 
+        - item is match("sno.*")
+        - 'item in all_vms.list_vms'
       with_items: "{{ snos }}"
 
     - name: Remove sno tempfolders
