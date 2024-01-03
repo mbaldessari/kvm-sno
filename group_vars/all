@@ -105,8 +105,8 @@ rhel_isos:
 rhel_variants:
   "9.3": "rhel9.2"
   "9.2": "rhel9.2"
-  "8.9": "rhel9.2"
-  "7.9": "rhel9.2"
+  "8.9": "rhel8.9"
+  "7.9": "rhel7.9"
 
 rhel_pool: "default"
 passwd: "{{ lookup('file', '~/.fwpass') }}"
