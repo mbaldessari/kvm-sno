@@ -13,7 +13,7 @@ part /boot/efi --fstype="vfat" --size=1024 --ondisk=sda
 part swap  --size=100  --fstype=swap --ondisk=sda
 part pv.13 --size=1 --grow --ondisk=sda
 volgroup VolGroup00 pv.13
-logvol / --fstype xfs --name=rootsys --grow --vgname=VolGroup00
+logvol / --fstype xfs --name=rootsys --percent=100 --vgname=VolGroup00
 END
 else
     touch /tmp/uefi
@@ -24,7 +24,7 @@ part pv.6 --size=1000 --grow --ondisk=sda
 part swap  --size=100  --fstype=swap
 part pv.13 --size=1 --grow
 volgroup VolGroup00 pv.13
-logvol / --fstype xfs --name=rootsys --grow --vgname=VolGroup00
+logvol / --fstype xfs --name=rootsys --percent=100 --vgname=VolGroup00
 END
 fi
 
@@ -59,6 +59,23 @@ strace
 -nvidia-gpu-firmware
 -pcsc-lite
 -firewalld
+-iwl6000g2a-firmware
+-iwl3160-firmware
+-iwl105-firmware
+-linux-firmware
+-iwl6050-firmware
+-iwl6000-firmware
+-iwl5000-firmware
+-iwl2030-firmware
+-iwl135-firmware
+-iwl1000-firmware
+-iwl7260-firmware
+-iwl5150-firmware
+-iwl2000-firmware
+-iwl100-firmware
+rsync
+git
+vim
 %end
 
 # Post-installation Script

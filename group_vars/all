@@ -97,10 +97,16 @@ clusters:
     network: 192.168.66.0/24
 
 rhel_isos:
-  9.3: /var/lib/libvirt/images/rhel-9.3-x86_64-dvd.iso
-  9.2: /var/lib/libvirt/images/rhel-9.2-x86_64-dvd.iso
-  8.9: /var/lib/libvirt/images/rhel-8.9-x86_64-dvd.iso
-  7.9: /var/lib/libvirt/images/rhel-7.9-x86_64-dvd.iso
+  "9.3": "/var/lib/libvirt/images/rhel-9.3-x86_64-dvd.iso"
+  "9.2": "/var/lib/libvirt/images/rhel-9.2-x86_64-dvd.iso"
+  "8.9": "/var/lib/libvirt/images/rhel-8.9-x86_64-dvd.iso"
+  "7.9": "/var/lib/libvirt/images/rhel-7.9-x86_64-dvd.iso"
+
+rhel_variants:
+  "9.3": "rhel9.2"
+  "9.2": "rhel9.2"
+  "8.9": "rhel9.2"
+  "7.9": "rhel9.2"
 
 rhel_pool: "default"
 passwd: "{{ lookup('file', '~/.fwpass') }}"

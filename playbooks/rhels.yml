@@ -11,15 +11,19 @@
         mode: "0644"
       delegate_to: fw
 
+    - name: debug
+      ansible.builtin.debug:
+        msg: "{{ rhel_isos }} - {{ rhels }}"
+
     - name: Create RHEL VMs
       ansible.builtin.command: >-
         virt-install
         --name {{ item }}
         --hvm
         --virt-type kvm
-        --location {{ rhel_isos[rhels[item].version] }}
         --arch {{ arch }}
-        --os-variant rhel9.2
+        --location {{ rhel_isos[rhels[item].version] }}
+        --os-variant {{ rhel_variants[rhels[item].version] }}
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ rhels[item].mac_nr }}"
         --vcpus {{ rhels[item].cpus }}
         --ram {{ rhels[item].ram }}
