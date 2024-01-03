@@ -13,7 +13,7 @@ part /boot/efi --fstype="vfat" --size=1024 --ondisk=sda
 part swap  --size=100  --fstype=swap --ondisk=sda
 part pv.13 --size=1 --grow --ondisk=sda
 volgroup VolGroup00 pv.13
-logvol / --fstype xfs --name=rootsys --vgname=VolGroup00 --size=3000
+logvol / --fstype xfs --name=rootsys --grow --vgname=VolGroup00
 END
 else
     touch /tmp/uefi
@@ -24,7 +24,7 @@ part pv.6 --size=1000 --grow --ondisk=sda
 part swap  --size=100  --fstype=swap
 part pv.13 --size=1 --grow
 volgroup VolGroup00 pv.13
-logvol / --fstype xfs --name=rootsys --vgname=VolGroup00 --size=3000
+logvol / --fstype xfs --name=rootsys --grow --vgname=VolGroup00
 END
 fi
 

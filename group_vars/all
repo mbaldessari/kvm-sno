@@ -97,7 +97,11 @@ clusters:
     network: 192.168.66.0/24
 
 rhel_isos:
+  9.3: /var/lib/libvirt/images/rhel-9.3-x86_64-dvd.iso
   9.2: /var/lib/libvirt/images/rhel-9.2-x86_64-dvd.iso
+  8.9: /var/lib/libvirt/images/rhel-8.9-x86_64-dvd.iso
+  7.9: /var/lib/libvirt/images/rhel-7.9-x86_64-dvd.iso
+
 rhel_pool: "default"
 passwd: "{{ lookup('file', '~/.fwpass') }}"
 ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3YhhpKweKeyW+iCK michele@oshie"
