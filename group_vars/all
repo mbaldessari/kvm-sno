@@ -108,9 +108,10 @@ ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3Yh
 rhn_org: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key: "{{ lookup('file', '~/.rhn_activation_key') }}"
     
+rhel_version: 9.2
 rhels:
   rhel1:
-    version: 9.2
+    version: "{{ rhel_version }}"
     cpus: 4
     ram: 32768
     mac_nr: 80
@@ -119,7 +120,7 @@ rhels:
     wwn: "0x5000c50015ea81aa"
     network: 192.168.66.0/24
   rhel2:
-    version: 9.2
+    version: "{{ rhel_version }}"
     cpus: 4
     ram: 32768
     mac_nr: 81
