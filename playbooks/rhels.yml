@@ -11,10 +11,6 @@
         mode: "0644"
       delegate_to: fw
 
-    - name: debug
-      ansible.builtin.debug:
-        msg: "{{ rhel_isos }} - {{ rhels }}"
-
     - name: Copy non-secure boot vars on rhel7
       ansible.builtin.command: |
         cp -f /usr/share/edk2/ovmf/OVMF_VARS.fd "/var/lib/libvirt/qemu/nvram/{{ item }}.fd"
