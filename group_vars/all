@@ -114,7 +114,7 @@ ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3Yh
 rhn_org: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key: "{{ lookup('file', '~/.rhn_activation_key') }}"
     
-rhel_version: 9.2
+rhel_version: "9.2"
 rhels:
   rhel1:
     version: "{{ rhel_version }}"
