@@ -54,7 +54,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         make DOCKER_PUSH=true IMAGE_NAMESPACE="{{ registry_url }}" \
-          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" image &> "{{ argotempfolder }}/build.log"
+          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" all &> "{{ argotempfolder }}/build.log"
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
 
