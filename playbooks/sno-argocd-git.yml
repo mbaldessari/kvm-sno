@@ -1,5 +1,5 @@
 ---
-- name: Install ArgoCD from git on sno1
+- name: Install ArgoCD from git on sno
   hosts: localhost
   connection: local
   gather_facts: false
@@ -8,9 +8,9 @@
   vars:
     argotempfolder: "/tmp/argocd-git/"
     argorepo: https://github.com/argoproj/argo-cd/
+    argobranch: master
     node: sno1
-    quay_user: rhn_support_mbaldess
-    quay_pass_field: quay.io
+    registry_url: fw.int.rhx/bandini
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
@@ -26,11 +26,6 @@
         label: "{{ item.stat.path }}"
       failed_when: not item.stat.exists
 
-    - name: Try and log in to podman
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        echo $(pass show {{ quay_pass_field }} | head -n1) | podman login -u{{ quay_user }} quay.io --password-stdin
-
     - name: Create temporary folder
       ansible.builtin.file:
         path: "{{ argotempfolder }}/argo-cd"
@@ -40,6 +35,7 @@
     - name: Clone git repo
       ansible.builtin.git:
         repo: "{{ argorepo }}"
+        version: "{{ argobranch }}"
         dest: "{{ argotempfolder }}/argo-cd"
         clone: true
         force: true
@@ -49,24 +45,24 @@
         set -e -o pipefail
         git reset --hard
         git clean -dxf
-        curl -o /tmp/argo.patch -L https://gist.githubusercontent.com/mbaldessari/e1eff9aba4e053b908bd103c749e705b/raw/6c200f33d2e06ed074b65abda2caa63ce919523e/argo.patch
-        git apply /tmp/argo.patch
+        curl https://acksyn.org/files/argocd/0001-Add-DOCKER_RUN_OPTIONAL_ARGS-variable-when-calling-d.patch | git am
+        curl https://acksyn.org/files/argocd/0002-WIP-openshift-build-fixes.patch | git am
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
 
     - name: Build and push the newly built container
       ansible.builtin.shell: |
         set -e -o pipefail
-        make DOCKER_PUSH=true IMAGE_NAMESPACE=quay.io/rhn_support_mbaldess \
-          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" all &> build.log
+        make DOCKER_PUSH=true IMAGE_NAMESPACE="{{ registry_url }}" \
+          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" image &> "{{ argotempfolder }}/build.log"
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
 
     - name: Tweak manifests for installation
       ansible.builtin.shell: |
         set -e -o pipefail
-        make DOCKER_PUSH=true IMAGE_NAMESPACE=quay.io/rhn_support_mbaldess \
-          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" manifests &> manifest.log
+        make DOCKER_PUSH=true IMAGE_NAMESPACE="{{ registry_url }}" \
+          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" manifests &> "{{ argotempfolder }}/manifest.log"
         # Silly redis default breaks on OCP
         sed -i -e "/runAsUser: 999/d" manifests/install.yaml
       args:
@@ -108,7 +104,12 @@
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
       register: argosecret
+      retries: 5
+      delay: 10
+      until: argosecret is not failed
 
     - name: Print secret
       ansible.builtin.debug:
-        msg: "ARGO ADMIN PASSWORD: {{ argosecret.stdout }}"
+        msg:
+          - "ARGO URL: argo-argocd.apps.{{ node }}.{{ domain }}"
+          - "ARGO ADMIN PASSWORD: {{ argosecret.stdout }}"
