@@ -70,3 +70,14 @@
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
 
+- name: Prepare Docker cache registry
+  hosts: fw
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Restart docker caches
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ./docker-cache.sh
+      args:
+        chdir: /root/docker
