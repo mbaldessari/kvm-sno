@@ -15,6 +15,7 @@
       ansible.builtin.get_url:
         url: "{{ ocp_url }}"
         dest: "{{ ocp_tmp_file }}"
+        mode: 0644
 
     - name: Read file into var
       ansible.builtin.shell: |
