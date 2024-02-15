@@ -31,6 +31,10 @@
           reason: 'HubClusterAdminAccepted'
           status: 'True'
         wait_timeout: 60
+      register: create_regional
+      until: create_regional is not failed
+      retries: 10
+      delay: 10
 
     - name: "Create regional KlusterAddonConfig"
       kubernetes.core.k8s:
