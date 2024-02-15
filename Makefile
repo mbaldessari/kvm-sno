@@ -20,11 +20,11 @@ ocp-versions: ## Prints latest minor versions for ocp
 
 .PHONY: sno-prepare
 sno-prepare: ## Prepares kvm host with utils to install SNOs
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-prepare.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-prepare.yml
 
 .PHONY: sno
 sno: sno-prepare ## Install an SNO vm on kuemper host
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/sno-install.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-install.yml
 
 .PHONY: sno-nomirror
 sno-nomirror: sno-prepare ## Install SNO without using docker pull through caches (needed for IIB)
