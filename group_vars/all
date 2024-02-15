@@ -2,7 +2,7 @@
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
 ocp_version: "4.14.12"
-#ocp_version: "4.15.0-rc.5"
+#ocp_version: "4.15.0-rc.7"
 arch: "x86_64"
 tempfolder: "/ramfs/sno-temp-folder"
 openshift_mirror: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
