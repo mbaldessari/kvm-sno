@@ -39,6 +39,8 @@ sshKey: |
 {% if additional_trust_bundle is defined %}
 additionalTrustBundle: |
 {{ additional_trust_bundle | indent(2, True) }}
+# see https://docs.openshift.com/container-platform/4.14/networking/configuring-a-custom-pki.html
+additionalTrustBundlePolicy: Always
 {% endif %}
 #{% if notjustyethttp_proxy is defined %}
 proxy:
