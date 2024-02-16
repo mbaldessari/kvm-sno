@@ -16,7 +16,11 @@ help: ## This help message
 
 .PHONY: ocp-versions
 ocp-versions: ## Prints latest minor versions for ocp
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' playbooks/print-ocp-versions.yml
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/print-ocp-versions.yml
+
+.PHONY: ocp-mirror
+ocp-mirror: ## Reads ocp_versions list and makes sure everything is downloaded and uncompressed
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/ocp-mirror.yml
 
 .PHONY: sno-prepare
 sno-prepare: ## Prepares kvm host with utils to install SNOs

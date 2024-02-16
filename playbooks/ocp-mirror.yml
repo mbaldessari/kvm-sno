@@ -1,0 +1,67 @@
+---
+- name: Mirror ocp_versions
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Create mirror folders
+      ansible.builtin.file:
+        path: "{{ mirrorfolder }}/{{ item }}"
+        state: directory
+        recurse: true
+      with_items: "{{ ocp_versions }}"
+
+    - name: Download oc
+      ansible.builtin.get_url:
+        url: "{{ openshift_mirror }}/{{ item }}/openshift-client-linux.tar.gz"
+        dest: "{{ mirrorfolder }}/{{ item }}/openshift-client-linux.tar.gz"
+        mode: "0640"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+      with_items: "{{ ocp_versions }}"
+
+    - name: Download openshift-install
+      ansible.builtin.get_url:
+        url: "{{ openshift_mirror }}/{{ item }}/openshift-install-linux.tar.gz"
+        dest: "{{ mirrorfolder }}/{{ item }}/openshift-install-linux.tar.gz"
+        mode: "0640"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+      with_items: "{{ ocp_versions }}"
+
+    - name: Uncompress oc
+      ansible.builtin.unarchive:
+        src: "{{ mirrorfolder }}/{{ item }}/openshift-client-linux.tar.gz"
+        dest: "{{ mirrorfolder }}/{{ item }}"
+        remote_src: true
+      with_items: "{{ ocp_versions }}"
+
+    - name: Uncompress openshift install
+      ansible.builtin.unarchive:
+        src: "{{ mirrorfolder }}/{{ item }}/openshift-install-linux.tar.gz"
+        dest: "{{ mirrorfolder }}/{{ item }}"
+        remote_src: true
+      with_items: "{{ ocp_versions }}"
+    
+    - name: Register iso URL
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ./openshift-install coreos print-stream-json | grep location | grep "{{ arch }}" | grep iso | cut -d\" -f4
+      args:
+        chdir: "{{ tempfolder }}"
+      register: iso_url_raw
+      with_items: "{{ ocp_versions }}"
+
+    - name: debug
+      ansible.builtin.debug:
+        msg: "{{ iso_url_raw }}"
+
+    - name: Download RHCOS iso
+      ansible.builtin.get_url:
+        url: "{{ item.stdout }}"
+        dest: "{{ mirrorfolder }}/{{ item.item }}/rhcos-live.iso"
+        mode: "0664"
+        validate_certs: false
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+      with_items: "{{ iso_url_raw.results }}"
