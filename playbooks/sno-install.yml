@@ -4,6 +4,12 @@
   gather_facts: false
   become: true
   tasks:
+    - name: Remove folders
+      ansible.builtin.file:
+        path: "{{ tempfolder }}/{{ item }}"
+        state: absent
+      with_items: "{{ snos }}"
+
     - name: Create folders
       ansible.builtin.file:
         path: "{{ tempfolder }}/{{ item }}"
@@ -34,6 +40,17 @@
         mode: "0644"
       with_items: "{{ snos }}"
 
+    # This is because single-node-ignition-config removes the manifests
+    - name: Copy manifests in another folder for debuggability
+      ansible.builtin.shell: |
+        set -e
+        mkdir -p .backupfiles
+        cp -avf * .backupfiles/
+      args:
+        chdir: "{{ tempfolder }}/{{ item }}"
+      with_items: "{{ snos }}"
+
+
     - name: Create ocp folder and run openshift-install
       ansible.builtin.shell: |
         set -e
@@ -54,11 +71,11 @@
     - name: Run coreos ignition embedding
       ansible.builtin.shell: |
         set -e
-        cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ item }}/rhcos-live.iso"
+        cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
         podman run --privileged --pull always --rm \
-            -v /dev:/dev -v /run/udev:/run/udev -v "{{ tempfolder }}:/data" \
+            -v /dev:/dev -v /run/udev:/run/udev -v "{{ tempfolder }}/{{ item }}:/data" \
             -w /data quay.io/coreos/coreos-installer:release \
-            iso ignition embed -fi {{ item }}/bootstrap-in-place-for-live-iso.ign "{{ item }}/rhcos-live.iso"
+            iso ignition embed -fi bootstrap-in-place-for-live-iso.ign "rhcos-live.iso"
       args:
         chdir: "{{ tempfolder }}"
       with_items: "{{ snos }}"
@@ -67,12 +84,13 @@
       ansible.builtin.command: >-
         virt-install
         --name {{ item }}
+        --cpu host-passthrough
         --hvm
         --virt-type kvm
         --cdrom {{ tempfolder }}/{{ item }}/rhcos-live.iso
         --arch {{ arch }}
         --os-variant rhel8.0
-        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ clusters[item].mac_nr }}"
+        --network bridge="{{ bridge_interface }}",model=virtio,mac="{{ mac_prefix }}:{{ clusters[item].mac_nr }}"
         --vcpus {{ clusters[item].cpus }}
         --ram {{ clusters[item].ram }}
         --disk pool={{ vm_pool }},size={{ clusters[item].disk }},format=qcow2,bus=scsi,cache={{ clusters[item].cache }},wwn={{ clusters[item].wwn }}
@@ -106,7 +124,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-        "{{ tempfolder }}"/oc get nodes | grep "{{ item }}" | grep -v NotReady
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc get nodes | grep "{{ item }}" | grep -v NotReady
       with_items: "{{ snos }}"
       register: cluster_info
       until: cluster_info is not failed
@@ -160,7 +178,7 @@
         set -e -o pipefail
         PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
         export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-        "{{ tempfolder }}"/oc patch secret -n kube-system kubeadmin --type json \
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch secret -n kube-system kubeadmin --type json \
           -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
       with_items: "{{ snos }}"
       when: kubeadmin_pass is defined
@@ -175,7 +193,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
       with_items: "{{ snos }}"
       register: lvm
       until: lvm is not failed
@@ -188,7 +206,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-        "{{ tempfolder }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-cluster.yaml"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-cluster.yaml"
       register: lvmcluster
       retries: 50
       delay: 20
