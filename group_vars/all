@@ -1,8 +1,8 @@
 ---
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
-ocp_version: "4.14.12"
-#ocp_version: "4.15.0-rc.7"
+#ocp_version: "4.14.13"
+ocp_version: "4.15.0-rc.7"
 arch: "x86_64"
 tempfolder: "/ramfs/sno-temp-folder"
 openshift_mirror: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
@@ -107,50 +107,50 @@ clusters:
     cache2: unsafe
     wwn2: "0x5000c50015ea72ff"
     network: 192.168.66.0/24
-  # sno7:
-  #   cpus: 12
-  #   ram: 64768
-  #   mac_nr: 72
-  #   disk: 128
-  #   cache: unsafe
-  #   wwn: "0x5000c50015ea7311"
-  #   disk2: 30
-  #   cache2: unsafe
-  #   wwn2: "0x5000c50015ea7322"
-  #   network: 192.168.66.0/24
-  # sno8:
-  #   cpus: 12
-  #   ram: 64768
-  #   mac_nr: 73
-  #   disk: 128
-  #   cache: unsafe
-  #   wwn: "0x5000c50015ea7333"
-  #   disk2: 30
-  #   cache2: unsafe
-  #   wwn2: "0x5000c50015ea7344"
-  #   network: 192.168.66.0/24
-  # sno9:
-  #   cpus: 12
-  #   ram: 64768
-  #   mac_nr: 74
-  #   disk: 128
-  #   cache: unsafe
-  #   wwn: "0x5000c50015ea7355"
-  #   disk2: 30
-  #   cache2: unsafe
-  #   wwn2: "0x5000c50015ea7366"
-  #   network: 192.168.66.0/24
-  # sno10:
-  #   cpus: 12
-  #   ram: 64768
-  #   mac_nr: 75
-  #   disk: 128
-  #   cache: unsafe
-  #   wwn: "0x5000c50015ea7377"
-  #   disk2: 30
-  #   cache2: unsafe
-  #   wwn2: "0x5000c50015ea7388"
-  #   network: 192.168.66.0/24
+  sno7:
+    cpus: 12
+    ram: 64768
+    mac_nr: 72
+    disk: 128
+    cache: unsafe
+    wwn: "0x5000c50015ea7311"
+    disk2: 30
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7322"
+    network: 192.168.66.0/24
+  sno8:
+    cpus: 12
+    ram: 64768
+    mac_nr: 73
+    disk: 128
+    cache: unsafe
+    wwn: "0x5000c50015ea7333"
+    disk2: 30
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7344"
+    network: 192.168.66.0/24
+  sno9:
+    cpus: 12
+    ram: 64768
+    mac_nr: 74
+    disk: 128
+    cache: unsafe
+    wwn: "0x5000c50015ea7355"
+    disk2: 30
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7366"
+    network: 192.168.66.0/24
+  sno10:
+    cpus: 12
+    ram: 64768
+    mac_nr: 75
+    disk: 128
+    cache: unsafe
+    wwn: "0x5000c50015ea7377"
+    disk2: 30
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7388"
+    network: 192.168.66.0/24
 
 rhel_isos:
   "9.3": "/var/lib/libvirt/images/rhel-9.3-x86_64-dvd.iso"
