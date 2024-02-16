@@ -212,3 +212,7 @@
       delay: 20
       until: lvmcluster is not failed
       with_items: "{{ snos }}"
+
+    - name: Print output of lvm cluster install
+      ansible.builtin.debug:
+        msg: "LVMCLUSTER: {{ lvmcluster }}"

@@ -3,12 +3,11 @@ kind: LVMCluster
 metadata:
  name: my-lvmcluster
  namespace: openshift-storage
- annotations:
-   storageclass.kubernetes.io/is-default-class": "true"
 spec:
  storage:
    deviceClasses:
    - name: vg1
+     default: true
      deviceSelector:
        paths:
        - /dev/disk/by-id/wwn-{{ clusters[item].wwn2 }}
