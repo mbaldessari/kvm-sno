@@ -4,13 +4,12 @@
   gather_facts: false
   become: true
   tasks:
-    - name: Template install-config.yaml to the base tmp folder for debugging
-      ansible.builtin.template:
-        src: ../templates/install-config.yaml.j2
-        dest: "{{ tempfolder }}/install-config.yaml"
-        mode: "0640"
-      with_items:
-        - sno1
+    - name: Create folders
+      ansible.builtin.file:
+        path: "{{ tempfolder }}/{{ item }}"
+        state: directory
+        recurse: true
+      with_items: "{{ snos }}"
 
     - name: Template install-config.yaml
       ansible.builtin.template:
@@ -22,7 +21,7 @@
     - name: Create ocp manifests
       ansible.builtin.shell: |
         set -e
-        ./openshift-install --dir={{ item }} create manifests
+        {{ mirrorfolder }}/{{ ocp_version}}/openshift-install --dir={{ item }} create manifests
       args:
         chdir: "{{ tempfolder }}"
       with_items: "{{ snos }}"
@@ -38,7 +37,7 @@
     - name: Create ocp folder and run openshift-install
       ansible.builtin.shell: |
         set -e
-        ./openshift-install --dir={{ item }} create single-node-ignition-config
+        {{ mirrorfolder }}/{{ ocp_version}}/openshift-install --dir={{ item }} create single-node-ignition-config
       args:
         chdir: "{{ tempfolder }}"
       with_items: "{{ snos }}"
@@ -55,7 +54,7 @@
     - name: Run coreos ignition embedding
       ansible.builtin.shell: |
         set -e
-        cp rhcos-live.iso "{{ item }}/rhcos-live.iso"
+        cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ item }}/rhcos-live.iso"
         podman run --privileged --pull always --rm \
             -v /dev:/dev -v /run/udev:/run/udev -v "{{ tempfolder }}:/data" \
             -w /data quay.io/coreos/coreos-installer:release \
