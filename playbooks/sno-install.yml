@@ -213,6 +213,8 @@
       until: lvmcluster is not failed
       with_items: "{{ snos }}"
 
-    - name: Print output of lvm cluster install
-      ansible.builtin.debug:
-        msg: "LVMCLUSTER: {{ lvmcluster }}"
+    - name: Remove isos from /ramfs to free up ramfs
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -f "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
+      with_items: "{{ snos }}"

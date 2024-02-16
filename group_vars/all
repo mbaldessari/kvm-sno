@@ -6,7 +6,6 @@ ocp_versions:
   - "4.14.12"
   - "4.15.0-rc.7"
 
-
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
 ocp_version: "4.14.12"
@@ -48,7 +47,7 @@ additional_trust_bundle: |
   U8LwiGLfCl7vTrz+27FHTCx0IBxU
   -----END CERTIFICATE-----
 
-vm_pool: "fast"
+vm_pool: "default"
 clusters:
   sno1:
     cpus: 12

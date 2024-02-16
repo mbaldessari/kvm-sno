@@ -18,8 +18,12 @@ help: ## This help message
 ocp-versions: ## Prints latest minor versions for ocp
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/print-ocp-versions.yml
 
+.PHONY: ocp-clients
+ocp-clients: ## Reads ocp_versions list and makes sure client tools are downloaded and uncompressed
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/ocp-clients.yml
+
 .PHONY: ocp-mirror
-ocp-mirror: ## Reads ocp_versions list and makes sure everything is downloaded and uncompressed
+ocp-mirror: ## Reads ocp_versions list and makes sure client tools are downloaded and uncompressed
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/ocp-mirror.yml
 
 .PHONY: sno
