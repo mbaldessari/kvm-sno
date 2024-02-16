@@ -1,0 +1,22 @@
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v1alpha2
+storageConfig:
+  registry:
+    imageURL: https://fw.int.rhx/ocp/
+    skipTLS: false
+mirror:
+  platform:
+    channels:
+    - name: stable-4.15
+      type: ocp
+    - name: stable-4.14
+      type: ocp
+    - name: stable-4.13
+      type: ocp
+    graph: true
+  operators:
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.15
+  additionalImages:
+  - name: registry.redhat.io/ubi8/ubi:latest
+  - name: registry.redhat.io/ubi9/ubi:latest
+  helm: {}

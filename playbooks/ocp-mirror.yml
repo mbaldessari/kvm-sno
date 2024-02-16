@@ -15,7 +15,38 @@
   hosts: kvm
   gather_facts: false
   become: true
+  vars:
+    local_mirror: "{{ mirrorfolder }}/mirror"
   tasks:
+    # This was downloaded from https://console.redhat.com/openshift/downloads#tool-oc-mirror-plugin
     - name: Create mirror folders
-      ansible.builtin.debug:
-        msg: "Start"
+      ansible.builtin.get_url:
+        url: "{{ oc_mirror_url }}"
+        dest: "/usr/local/bin/oc-mirror"
+        mode: "0755"
+
+    - name: Create secret folder
+      ansible.builtin.file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - "/root/.docker/"
+        - "{{ local_mirror }}"
+
+    - name: Template pull secret
+      ansible.builtin.template:
+        dest: /root/.docker/config.json
+        src: ../templates/pullsecret.json.j2
+
+    # The initial template was created via:
+    # ./oc mirror init --registry {{ oc_mirror_local_registry }}/{{ item }} > imageset-config.yaml
+    # See: https://docs.openshift.com/container-platform/4.14/installing/disconnected_install/installing-mirroring-disconnected.html
+    - name: Create imageset-config 
+      ansible.builtin.template:
+        src: ../templates/imageset-config.yaml
+        dest: "{{ local_mirror }}/imageset-config.yaml"
+        mode: "0644"
+
+
+
+
