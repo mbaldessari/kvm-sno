@@ -29,6 +29,7 @@
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
+        mode: "0755"
       with_items:
         - "/root/.docker/"
         - "{{ local_mirror }}"
@@ -37,6 +38,7 @@
       ansible.builtin.template:
         dest: /root/.docker/config.json
         src: ../templates/pullsecret.json.j2
+        mode: "0640"
 
     # The initial template was created via:
     # ./oc mirror init --registry {{ oc_mirror_local_registry }}/{{ item }} > imageset-config.yaml
