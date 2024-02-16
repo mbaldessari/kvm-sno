@@ -21,7 +21,7 @@
     - name: Create ocp manifests
       ansible.builtin.shell: |
         set -e
-        {{ mirrorfolder }}/{{ ocp_version}}/openshift-install --dir={{ item }} create manifests
+        {{ mirrorfolder }}/{{ ocp_version }}/openshift-install --dir={{ item }} create manifests
       args:
         chdir: "{{ tempfolder }}"
       with_items: "{{ snos }}"
@@ -37,7 +37,7 @@
     - name: Create ocp folder and run openshift-install
       ansible.builtin.shell: |
         set -e
-        {{ mirrorfolder }}/{{ ocp_version}}/openshift-install --dir={{ item }} create single-node-ignition-config
+        {{ mirrorfolder }}/{{ ocp_version }}/openshift-install --dir={{ item }} create single-node-ignition-config
       args:
         chdir: "{{ tempfolder }}"
       with_items: "{{ snos }}"
