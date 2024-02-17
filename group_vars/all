@@ -294,7 +294,7 @@ activation_key: "{{ lookup('file', '~/.rhn_activation_key') }}"
 rhel_version: "9.2"
 gitea:
   fqdn: "gitea.{{ domain }}"
-  url: "https://gitea.{{ domain }}:3000"
+  url: "https://gitea.{{ domain }}"
   admin_user: "{{ lookup('ansible.builtin.ini', 'ADMIN_USER', section='secrets', file='~/.giteasecrets.ini') }}"
   admin_pass: "{{ lookup('ansible.builtin.ini', 'ADMIN_PASS', section='secrets', file='~/.giteasecrets.ini') }}"
   LFS_JWT_SECRET: "{{ lookup('ansible.builtin.ini', 'LFS_JWT_SECRET', section='secrets', file='~/.giteasecrets.ini') }}"

@@ -105,6 +105,7 @@
         mv /tmp/{{ gitea_file }} /usr/local/bin/gitea
         chmod +x /usr/local/bin/gitea
         restorecon -v /usr/local/bin/gitea
+        setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/gitea
 
     - name: Add git user
       ansible.builtin.shell: |
