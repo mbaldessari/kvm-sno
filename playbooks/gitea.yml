@@ -100,8 +100,9 @@
     - name: Move git to proper path
       ansible.builtin.shell: |
         set -e -o pipefail
-        chmod +x /tmp/{{ gitea_file }}
-        mv /tmp/{{ gitea_file }} /usr/local/bin/
+        mv /tmp/{{ gitea_file }} /usr/local/bin/gitea
+        chmod +x /usr/local/bin/gitea
+        restorecon -v /usr/local/bin/gitea
 
     - name: Add git user
       ansible.builtin.shell: |
