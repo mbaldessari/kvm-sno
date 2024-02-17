@@ -24,12 +24,6 @@
         state: absent
       with_items: "{{ snos }}"
 
-    - name: Remove sno folder
-      ansible.builtin.file:
-        path: "{{ tempfolder }}"
-        state: absent
-
-
     - name: Delete sno kubeconfig file locally if they exist
       delegate_to: localhost
       become: true
