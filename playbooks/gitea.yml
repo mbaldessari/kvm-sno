@@ -136,10 +136,14 @@
         - /home/michele/ssl-ca/certs/gitea.ocplab.ocp.crt
         - /home/michele/ssl-ca/certs/gitea.ocplab.ocp.key
 
+    - name: debug
+      ansible.builtin.debug:
+        msg: "{{ gitea.fqdn }}"
+
     - name: Template app.ini
       tags:
         - zozzo
-      ansible.builtin.copy:
+      ansible.builtin.template:
         src: ../templates/gitea-app.ini
         dest: /etc/gitea/app.ini
         mode: "0644"
