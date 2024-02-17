@@ -42,6 +42,10 @@ sno-parallel: ## Install snos in parallel (experimental)
 	done;\
 	parallel --ungroup -a /tmp/parallel eval ansible-playbook -i hosts playbooks/sno-install.yml
 
+.PHONY: sno-pki
+sno-pki: ## Fetches all CAs from all SNOs
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-pki.yml
+
 .PHONY: ssl
 ssl: ## Install my SSL certs on the SNO nodes
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-ssl.yml

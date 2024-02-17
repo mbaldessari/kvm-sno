@@ -1,0 +1,43 @@
+---
+- name: Fixup PKI for firefox
+  hosts: localhost
+  gather_facts: false
+  become: true
+  become_user: michele
+  vars:
+    ca_folder: "/tmp/sno-ca"
+    firefox_profile: "/home/michele/.mozilla/firefox/1u0ue9rm.OpenShift-1708184658172"
+  tasks:
+    - name: Reset ca folder
+      ansible.builtin.shell: |
+        rm -rf "{{ ca_folder }}"
+        mkdir "{{ ca_folder }}"
+
+    - name: Fetch all CAs for each cluster
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        #/home/michele/Bin/yq '.clusters[0].cluster.certificate-authority-data' {{ item }}-kubeconfig | base64 -d > "{{ ca_folder }}/{{ item }}-ca-api"
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        echo "{{ item }}" > "{{ ca_folder }}/{{ item }}"
+        oc get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
+        #oc get -n default configmap/openshift-service-ca.crt -o jsonpath="{.data.service-ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-ingress"
+      with_items: "{{ snos }}"
+
+    - name: Blast shit away
+      ansible.builtin.shell: |
+        rm -f "{{ firefox_profile }}/cert9.db" "{{ firefox_profile }}/key4.db" "{{ firefox_profile }}/pkcs11.txt"
+        certutil -N --empty-password -d "sql:{{ firefox_profile }}"
+
+    - name: Import all CAs into my firefox profile
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -f {{ ca_folder }}/cert*
+        awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
+        for i in cert*; do
+          certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
+        done
+      args:
+        chdir: "{{ ca_folder }}"
+      with_items: "{{ snos }}"
+      #certutil -A -n "{{ item }}-ingress" -t "TC,C,C"  -i {{ ca_folder }}/{{ item }}-ca-ingress -d sql:"{{ firefox_profile }}"
+      #certutil -A -n "{{ item }}-api" -t "TC,C,C"  -i {{ ca_folder }}/{{ item }}-ca-api -d sql:"{{ firefox_profile }}"

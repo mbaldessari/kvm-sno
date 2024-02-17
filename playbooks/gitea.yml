@@ -77,6 +77,8 @@
     gitea_version: 1.21.5
     gitea_file: "gitea-{{ gitea_version }}-linux-amd64"
     gitea_url: "https://dl.gitea.com/gitea/{{ gitea_version }}/{{ gitea_file }}"
+    upstream_repo: "https://github.com/validatedpatterns/multicloud-gitops"
+    downstream_name: "mcg"
   tasks:
     - name: Wait for boxes
       ansible.builtin.wait_for_connection:
@@ -134,10 +136,6 @@
         - /home/michele/ssl-ca/certs/gitea.ocplab.ocp.crt
         - /home/michele/ssl-ca/certs/gitea.ocplab.ocp.key
 
-    - name: debug
-      ansible.builtin.debug:
-        msg: "{{ gitea.fqdn }}"
-
     - name: Template app.ini
       ansible.builtin.template:
         src: ../templates/gitea-app.ini
@@ -157,9 +155,49 @@
         state: started
         enabled: true
 
+    - name: Give the service some time
+      ansible.builtin.pause:
+        seconds: 30
+
     - name: Create gitea admin user
       become: true
       become_user: git
       ansible.builtin.shell: |
         /usr/local/bin/gitea  -c /etc/gitea/app.ini admin user create \
           --username "{{ gitea.admin_user }}" --password "{{ gitea.admin_pass }}" --email yo@yo.yo --admin
+
+    - name: Generate an access token for admin user
+      become: true
+      become_user: git
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        /usr/local/bin/gitea  -c /etc/gitea/app.ini admin user generate-access-token \
+        --username "{{ gitea.admin_user }}" --scopes 'write:repository,write:admin' --raw 
+      register: gitea_token
+
+    - name: Set migration info
+      ansible.builtin.set_fact:
+        migration_info:
+          clone_addr: "{{ upstream_repo }}"
+          uid: 1
+          repo_name: "{{ downstream_name }}"
+          mirror: true
+          private: false
+          description: "Mirror"
+
+    - name: Create repo
+      ansible.builtin.uri:
+        url: "{{ gitea.url }}/api/v1/repos/migrate"
+        validate_certs: false
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: token {{ gitea_token.stdout }}
+        body_format: json
+        body: "{{ migration_info }}"
+        return_content: yes
+        status_code: 201
+      register: migrate_out
+      retries: 10
+      delay: 10
+      until: migrate_out is not failed
