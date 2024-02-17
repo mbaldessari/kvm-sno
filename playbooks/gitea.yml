@@ -123,6 +123,28 @@
         chown root:git /etc/gitea
         chmod 770 /etc/gitea
 
+    - name: Copy TLS certs on VM
+      tags:
+        - zozzo
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/gitea
+        mode: 0640
+        owner: git
+        group: git
+      with_items:
+        - /home/michele/ssl-ca/certs/gitea.ocplab.ocp.crt
+        - /home/michele/ssl-ca/certs/gitea.ocplab.ocp.key
+
+    - name: Template app.ini
+      tags:
+        - zozzo
+      ansible.builtin.copy:
+        src: ../templates/gitea-app.ini
+        dest: /etc/gitea/app.ini
+        mode: "0644"
+        owner: git
+
     - name: Get systemd service
       ansible.builtin.shell: |
         set -e -o pipefail
