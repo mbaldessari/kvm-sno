@@ -57,6 +57,13 @@ rhels: ## Create RHEL vms
 rhels-destroy: ## Destroy installed RHELs VMS
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/rhels-destroy.yml
 
+.PHONY: gitea
+gitea: ## Create RHEL vms
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/gitea.yml
+
+.PHONY: gitea-destroy
+gitea-destroy: ## Destroy installed RHELs VMS
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/gitea-destroy.yml
 ##@ Day-2 Tasks
 .PHONY: mcg
 mcg: ## Install multicloud gitops on all three snos

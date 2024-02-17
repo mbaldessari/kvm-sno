@@ -4,9 +4,12 @@ kuemper.int.rhx ansible_user=root
 [fw]
 fw.int.rhx ansible_user=michele
 
+[giteas]
+gitea.ocplab.ocp ansible_user=michele ansible_host=192.168.66.140
+
 [rhels]
-rhel1.ocplab.ocp ansible_user=michele ansible_host=192.168.66.120
-rhel2.ocplab.ocp ansible_user=michele ansible_host=192.168.66.121
+rhel1.ocplab.ocp ansible_user=michele ansible_host=192.168.66.130
+rhel2.ocplab.ocp ansible_user=michele ansible_host=192.168.66.131
 
 [rhel1]
 rhel1.ocplab.ocp ansible_user=michele

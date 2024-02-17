@@ -1,0 +1,129 @@
+---
+- name: Install Gitea
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Template kickstart file to the firewall where it is hosted
+      ansible.builtin.template:
+        src: ../templates/rhel-ks.yaml.j2
+        dest: "/var/www/html/rhel.ks"
+        mode: "0644"
+      delegate_to: fw
+
+    - name: Copy non-secure boot vars on rhel7
+      ansible.builtin.command: |
+        cp -f /usr/share/edk2/ovmf/OVMF_VARS.fd "/var/lib/libvirt/qemu/nvram/{{ item }}.fd"
+      with_items: "{{ giteas }}"
+      when: rhel_version is match("7.*")
+
+    - name: Set bootloader fact
+      ansible.builtin.set_fact:
+        bootlines: "{{ bootlines | default({}) | combine({item: '--boot menu=on,useserial=on,uefi'}) }}"
+      when: rhel_version is not match("7.*")
+      with_items: "{{ giteas }}"
+
+    - name: Set bootloader fact on rhel7
+      ansible.builtin.set_fact:
+        bootlines: "{{ bootlines | default({}) | combine({item: '--boot loader=/usr/share/edk2/ovmf/OVMF_CODE.secboot.fd,loader.readonly=yes,loader.secure=no,loader.type=pflash,nvram=/var/lib/libvirt/qemu/nvram/.fd'}) }}"
+      when: rhel_version is match("7.*")
+      with_items: "{{ giteas }}"
+
+    - name: Create Gitea VMs
+      ansible.builtin.command: >-
+        virt-install
+        --name {{ item }}
+        --hvm
+        --virt-type kvm
+        --arch {{ arch }}
+        --location {{ rhel_isos[giteas[item].version] }}
+        --os-variant {{ rhel_variants[giteas[item].version] }}
+        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ giteas[item].mac_nr }}"
+        --vcpus {{ giteas[item].cpus }}
+        --ram {{ giteas[item].ram }}
+        --disk pool={{ rhel_pool }},size={{ giteas[item].disk }},format=qcow2,bus=scsi,cache={{ giteas[item].cache }},wwn={{ giteas[item].wwn }}
+        --check disk_size=off
+        --graphics spice,listen=127.0.0.1
+        --noautoconsole
+        --extra-args "inst.ks=http://fw.int.rhx/rhel.ks"
+        {{ bootlines[item] }}
+      with_items: "{{ giteas }}"
+      retries: 2
+      delay: 10
+      register: vm_creation
+      until: vm_creation is not failed
+
+    - name: Wait for vm to be stopped
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        virsh list --all | grep -w "{{ item }}" | grep -v running
+      register: running
+      retries: 100
+      delay: 10
+      until: running is not failed
+      with_items: "{{ giteas }}"
+
+    - name: Start "{{ item }}"
+      ansible.builtin.command: |
+        virsh start "{{ item }}"
+      with_items: "{{ giteas }}"
+
+- name: Wait for RHEL boxes
+  hosts: giteas
+  gather_facts: false
+  become: true
+  vars:
+    gitea_gpg: 7C9E68152594688862D62AF62D9AE806EC1592E2
+    gitea_version: 1.21.5
+    gitea_file: "gitea-{{ gitea_version }}-linux-amd64"
+    gitea_url: "https://dl.gitea.com/gitea/{{ gitea_version }}/{{ gitea_file }}"
+  tasks:
+    - name: Wait for boxes
+      ansible.builtin.wait_for_connection:
+
+    - name: Download gitea binary
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        curl -L -O "{{ gitea_url }}"
+        curl -L -O "{{ gitea_url }}.asc"
+      args:
+        chdir: /tmp
+
+    - name: Verify binary
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        gpg --keyserver keys.openpgp.org --recv "{{ gitea_gpg }}" || /bin/true
+        gpg --verify "{{ gitea_file }}.asc" "{{ gitea_file }}"
+      args:
+        chdir: /tmp
+
+    - name: Move git to proper path
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        chmod +x /tmp/{{ gitea_file }}
+        mv /tmp/{{ gitea_file }} /usr/local/bin/
+
+    - name: Add git user
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        groupadd --system git
+        adduser --system --shell /bin/bash \
+          --comment 'Git Version Control' \
+          --gid git --home-dir /home/git --create-home \
+          git
+
+    - name: Create folders
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        mkdir -p /var/lib/gitea/{custom,data,log}
+        chown -R git:git /var/lib/gitea/
+        chmod -R 750 /var/lib/gitea/
+        mkdir /etc/gitea
+        chown root:git /etc/gitea
+        chmod 770 /etc/gitea
+
+    - name: Get systemd service
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        curl -L -o /etc/systemd/system/gitea.service https://raw.githubusercontent.com/go-gitea/gitea/main/contrib/systemd/gitea.service
+        systemctl daemon-reload
