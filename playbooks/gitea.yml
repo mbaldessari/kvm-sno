@@ -124,8 +124,6 @@
         chmod 770 /etc/gitea
 
     - name: Copy TLS certs on VM
-      tags:
-        - zozzo
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /etc/gitea
@@ -141,8 +139,6 @@
         msg: "{{ gitea.fqdn }}"
 
     - name: Template app.ini
-      tags:
-        - zozzo
       ansible.builtin.template:
         src: ../templates/gitea-app.ini
         dest: /etc/gitea/app.ini
@@ -162,7 +158,8 @@
         enabled: true
 
     - name: Create gitea admin user
-      become: git
+      become: true
+      become_user: git
       ansible.builtin.shell: |
         /usr/local/bin/gitea  -c /etc/gitea/app.ini admin user create \
           --username "{{ gitea.admin_user }}" --password "{{ gitea.admin_pass }}" --email yo@yo.yo --admin
