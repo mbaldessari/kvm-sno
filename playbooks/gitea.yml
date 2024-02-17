@@ -154,3 +154,15 @@
         set -e -o pipefail
         curl -L -o /etc/systemd/system/gitea.service https://raw.githubusercontent.com/go-gitea/gitea/main/contrib/systemd/gitea.service
         systemctl daemon-reload
+
+    - name: Start gitea service
+      ansible.builtin.systemd:
+        name: gitea
+        state: started
+        enabled: true
+
+    - name: Create gitea admin user
+      become: git
+      ansible.builtin.shell: |
+        /usr/local/bin/gitea  -c /etc/gitea/app.ini admin user create \
+          --username "{{ gitea.admin_user }}" --password "{{ gitea.admin_pass }}" --email yo@yo.yo --admin
