@@ -87,6 +87,8 @@ subscription-manager syspurpose service-level --set Self-Support
 subscription-manager syspurpose usage --set "Development/Test"
 subscription-manager register --org "{{ rhn_org }}" --activationkey "{{ activation_key }}" --force
 dnf update -y
+curl -L -o /etc/pki/ca-trust/source/anchors/rhx-ca.crt http://fw.int.rhx/ca-bundle.crt
+update-ca-trust
 %end
 
 reboot --eject
