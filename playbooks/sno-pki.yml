@@ -25,8 +25,9 @@
 
     - name: Blast shit away
       ansible.builtin.shell: |
-        rm -f "{{ firefox_profile }}/cert9.db" "{{ firefox_profile }}/key4.db" "{{ firefox_profile }}/pkcs11.txt"
-        certutil -N --empty-password -d "sql:{{ firefox_profile }}"
+        #rm -f "{{ firefox_profile }}/cert9.db" "{{ firefox_profile }}/key4.db" "{{ firefox_profile }}/pkcs11.txt"
+        #certutil -N --empty-password -d "sql:{{ firefox_profile }}"
+        echo lol
 
     - name: Import all CAs into my firefox profile
       ansible.builtin.shell: |
