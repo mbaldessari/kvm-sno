@@ -23,12 +23,6 @@
         #oc get -n default configmap/openshift-service-ca.crt -o jsonpath="{.data.service-ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-ingress"
       with_items: "{{ snos }}"
 
-    - name: Blast shit away
-      ansible.builtin.shell: |
-        #rm -f "{{ firefox_profile }}/cert9.db" "{{ firefox_profile }}/key4.db" "{{ firefox_profile }}/pkcs11.txt"
-        #certutil -N --empty-password -d "sql:{{ firefox_profile }}"
-        echo lol
-
     - name: Import all CAs into my firefox profile
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -41,5 +35,3 @@
       args:
         chdir: "{{ ca_folder }}"
       with_items: "{{ snos }}"
-      #certutil -A -n "{{ item }}-ingress" -t "TC,C,C"  -i {{ ca_folder }}/{{ item }}-ca-ingress -d sql:"{{ firefox_profile }}"
-      #certutil -A -n "{{ item }}-api" -t "TC,C,C"  -i {{ ca_folder }}/{{ item }}-ca-api -d sql:"{{ firefox_profile }}"
