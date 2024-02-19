@@ -35,6 +35,7 @@
         rm -f {{ ca_folder }}/cert*
         awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
         for i in cert*; do
+          certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}"
           certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
         done
       args:
