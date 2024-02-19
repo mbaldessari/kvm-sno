@@ -24,7 +24,7 @@ ocp-clients: ## Reads ocp_versions list and makes sure client tools are download
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/ocp-clients.yml
 
 .PHONY: ocp-mirror
-ocp-mirror: ## Reads ocp_versions list and makes sure client tools are downloaded and uncompressed
+ocp-mirror: ## Reads ocp_versions list and makes a mirror
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/ocp-mirror.yml
 
 .PHONY: sno

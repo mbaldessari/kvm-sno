@@ -25,7 +25,7 @@
         dest: "/usr/local/bin/oc-mirror"
         mode: "0755"
 
-    - name: Create secret folder
+    - name: Create folders
       ansible.builtin.file:
         path: "{{ item }}"
         state: directory
@@ -49,6 +49,9 @@
         dest: "{{ local_mirror }}/imageset-config.yaml"
         mode: "0644"
 
-
-
-
+    - name: Mirror images
+      ansible.builtin.shell: |
+        ./oc mirror --config={{ local_mirror }}/imageset-config.yaml \
+          docker://{{ oc_mirror_local_registry }}
+      args:
+        chdir: "{{ mirrorfolder }}/{{ ocp_version }}"

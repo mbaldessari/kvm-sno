@@ -2,13 +2,13 @@ kind: ImageSetConfiguration
 apiVersion: mirror.openshift.io/v1alpha2
 storageConfig:
   registry:
-    imageURL: https://fw.int.rhx/ocp/
+    imageURL: {{ oc_mirror_local_registry }}
     skipTLS: false
 mirror:
   platform:
     channels:
-    - name: stable-4.15
-      type: ocp
+    #- name: stable-4.15
+    #  type: ocp
     - name: stable-4.14
       type: ocp
     - name: stable-4.13
