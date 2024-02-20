@@ -59,7 +59,7 @@
         virsh list --all | grep -w "{{ item }}" | grep -v running
       register: running
       retries: 100
-      delay: 10
+      delay: 20
       until: running is not failed
       with_items: "{{ giteas }}"
 
