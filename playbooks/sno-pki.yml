@@ -18,9 +18,19 @@
         set -e -o pipefail
         #/home/michele/Bin/yq '.clusters[0].cluster.certificate-authority-data' {{ item }}-kubeconfig | base64 -d > "{{ ca_folder }}/{{ item }}-ca-api"
         export KUBECONFIG=~/{{ item }}-kubeconfig
-        echo "{{ item }}" > "{{ ca_folder }}/{{ item }}"
         oc get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
-        #oc get -n default configmap/openshift-service-ca.crt -o jsonpath="{.data.service-ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-ingress"
+      with_items: "{{ snos }}"
+
+    - name: Delete exiting CAs from SNOs
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -f {{ ca_folder }}/cert*
+        awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
+        for i in cert*; do
+          certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" || true
+        done
+      args:
+        chdir: "{{ ca_folder }}"
       with_items: "{{ snos }}"
 
     - name: Import all CAs into my firefox profile
@@ -29,7 +39,6 @@
         rm -f {{ ca_folder }}/cert*
         awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
         for i in cert*; do
-          certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}"
           certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
         done
       args:
