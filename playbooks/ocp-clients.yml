@@ -60,7 +60,7 @@
         set -e -o pipefail
         ./openshift-install coreos print-stream-json | grep location | grep "{{ arch }}" | grep iso | cut -d\" -f4
       args:
-        chdir: "{{ tempfolder }}"
+        chdir: "{{ mirrorfolder }}/{{ item }}"
       register: iso_url_raw
       with_items: "{{ ocp_versions }}"
 

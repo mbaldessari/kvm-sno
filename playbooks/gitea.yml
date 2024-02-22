@@ -77,33 +77,24 @@
     gitea_version: 1.21.5
     gitea_file: "gitea-{{ gitea_version }}-linux-amd64"
     gitea_url: "https://dl.gitea.com/gitea/{{ gitea_version }}/{{ gitea_file }}"
-    upstream_repo: "https://github.com/validatedpatterns/multicloud-gitops"
+    upstream_repo: "https://github.com/mbaldessari/multicloud-gitops"
     downstream_name: "mcg"
   tasks:
     - name: Wait for boxes
       ansible.builtin.wait_for_connection:
 
     - name: Download gitea binary
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        curl -L -O "{{ gitea_url }}"
-        curl -L -O "{{ gitea_url }}.asc"
-      args:
-        chdir: /tmp
-
-    - name: Verify binary
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        gpg --keyserver keys.openpgp.org --recv "{{ gitea_gpg }}" || /bin/true
-        gpg --verify "{{ gitea_file }}.asc" "{{ gitea_file }}"
-      args:
-        chdir: /tmp
+      ansible.builtin.get_url:
+        url: "{{ gitea_url }}"
+        dest: "/tmp/{{ gitea_file }}"
+        mode: "0755"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
 
     - name: Move git to proper path
       ansible.builtin.shell: |
         set -e -o pipefail
         mv /tmp/{{ gitea_file }} /usr/local/bin/gitea
-        chmod +x /usr/local/bin/gitea
         restorecon -v /usr/local/bin/gitea
         setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/gitea
 
@@ -196,7 +187,7 @@
         body_format: json
         body: "{{ migration_info }}"
         return_content: yes
-        status_code: 201
+        status_code: [201, 409]
       register: migrate_out
       retries: 10
       delay: 10

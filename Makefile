@@ -1,4 +1,5 @@
-SNOS ?= sno1,sno2,sno3,sno4,sno5,sno6,sno7,sno8,sno9,sno10,sno11,sno12
+SNOS ?= sno1,sno2,sno3,sno4,sno5,sno6,sno7,sno8
+#,sno9,sno10,sno11,sno12
 #,sno13,sno14,sno15,sno16,sno17,sno18,sno19,sno20
 NODE ?= sno1
 IIB ?=
@@ -42,6 +43,7 @@ sno-parallel: ## Install snos in parallel (experimental)
 		echo "--extra-vars='{\"snos\":[$$i]}'" >> /tmp/parallel;\
 	done;\
 	parallel --ungroup -a /tmp/parallel eval ansible-playbook -i hosts playbooks/sno-install.yml
+	make sno-pki
 
 .PHONY: sno-pki
 sno-pki: ## Fetches all CAs from all SNOs
