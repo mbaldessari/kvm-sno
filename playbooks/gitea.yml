@@ -41,7 +41,7 @@
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ giteas[item].mac_nr }}"
         --vcpus {{ giteas[item].cpus }}
         --ram {{ giteas[item].ram }}
-        --disk pool={{ rhel_pool }},size={{ giteas[item].disk }},format=qcow2,bus=scsi,cache={{ giteas[item].cache }},wwn={{ giteas[item].wwn }}
+        --disk pool={{ fast_pool }},size={{ giteas[item].disk }},format=qcow2,bus=scsi,cache={{ giteas[item].cache }},wwn={{ giteas[item].wwn }}
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
@@ -67,6 +67,10 @@
       ansible.builtin.command: |
         virsh start "{{ item }}"
       with_items: "{{ giteas }}"
+      retries: 3
+      delay: 10
+      register: restart
+      until: restart is not failed
 
 - name: Wait for RHEL boxes
   hosts: giteas
@@ -79,6 +83,8 @@
     gitea_url: "https://dl.gitea.com/gitea/{{ gitea_version }}/{{ gitea_file }}"
     upstream_repo: "https://github.com/mbaldessari/multicloud-gitops"
     downstream_name: "mcg"
+    upstream_repo2: "https://github.com/mbaldessari/argocd-tests"
+    downstream_name2: "argocd-tests"
   tasks:
     - name: Wait for boxes
       ansible.builtin.wait_for_connection:
@@ -186,6 +192,32 @@
           Authorization: token {{ gitea_token.stdout }}
         body_format: json
         body: "{{ migration_info }}"
+        return_content: yes
+        status_code: [201, 409]
+      register: migrate_out
+      retries: 10
+      delay: 10
+      until: migrate_out is not failed
+
+    - name: Set migration info2
+      ansible.builtin.set_fact:
+        migration_info2:
+          clone_addr: "{{ upstream_repo2 }}"
+          uid: 1
+          repo_name: "{{ downstream_name2 }}"
+          mirror: true
+          private: false
+          description: "Mirror"
+
+    - name: Create repo2
+      ansible.builtin.uri:
+        url: "{{ gitea.url }}/api/v1/repos/migrate"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: token {{ gitea_token.stdout }}
+        body_format: json
+        body: "{{ migration_info2 }}"
         return_content: yes
         status_code: [201, 409]
       register: migrate_out

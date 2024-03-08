@@ -286,6 +286,7 @@ rhel_variants:
   "7.9": "rhel7.9"
 
 rhel_pool: "default"
+fast_pool: "fast"
 passwd: "{{ lookup('file', '~/.fwpass') }}"
 ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3YhhpKweKeyW+iCK michele@oshie"
 rhn_org: "{{ lookup('file', '~/.rhn_org') }}"
