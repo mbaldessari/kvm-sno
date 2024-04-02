@@ -170,8 +170,8 @@
       with_items: "{{ snos }}"
       register: uri
       until: uri is not failed
-      retries: 100
-      delay: 20
+      retries: 150
+      delay: 30
 
     - name: Set kubeadmin password
       ansible.builtin.shell: |
