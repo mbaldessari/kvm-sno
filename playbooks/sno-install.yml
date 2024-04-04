@@ -17,6 +17,13 @@
         recurse: true
       with_items: "{{ snos }}"
 
+    - name: Template one install-config.yaml for reference
+      ansible.builtin.template:
+        src: ../templates/install-config.yaml.j2
+        dest: "{{ tempfolder }}/install-config.yaml"
+        mode: "0640"
+      with_items: "{{ snos | first }}"
+
     - name: Template install-config.yaml
       ansible.builtin.template:
         src: ../templates/install-config.yaml.j2

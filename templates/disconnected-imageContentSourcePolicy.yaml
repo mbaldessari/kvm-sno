@@ -1,291 +1,260 @@
----
-apiVersion: operator.openshift.io/v1alpha1
-kind: ImageContentSourcePolicy
-metadata:
-  name: generic-0
-spec:
-  repositoryDigestMirrors:
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ubi9
-    source: registry.redhat.io/ubi9
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ubi8
-    source: registry.access.redhat.com/ubi8
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ubi8
-    source: registry.redhat.io/ubi8
----
-apiVersion: operator.openshift.io/v1alpha1
-kind: ImageContentSourcePolicy
-metadata:
-  labels:
-    operators.openshift.org/catalog: "true"
-  name: operator-0
-spec:
-  repositoryDigestMirrors:
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/devspaces
-    source: registry.redhat.io/devspaces
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/cluster-observability-operator
-    source: registry.redhat.io/cluster-observability-operator
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/kube-descheduler-operator
-    source: registry.redhat.io/kube-descheduler-operator
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhbk
-    source: registry.redhat.io/rhbk
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/oadp
-    source: registry.redhat.io/oadp
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/quay
-    source: registry.redhat.io/quay
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/container-native-virtualization
-    source: registry.redhat.io/container-native-virtualization
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhceph
-    source: registry.redhat.io/rhceph
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/noo
-    source: registry.redhat.io/noo
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhpam-7
-    source: registry.redhat.io/rhpam-7
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhel7
-    source: registry.redhat.io/rhel7
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/devworkspace
-    source: registry.redhat.io/devworkspace
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-builds
-    source: registry.redhat.io/openshift-builds
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-secondary-scheduler-operator
-    source: registry.redhat.io/openshift-secondary-scheduler-operator
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/custom-metrics-autoscaler
-    source: registry.redhat.io/custom-metrics-autoscaler
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift4-wincw
-    source: registry.redhat.io/openshift4-wincw
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhdh
-    source: registry.redhat.io/rhdh
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/jboss-datagrid-7
-    source: registry.redhat.io/jboss-datagrid-7
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/redhat-sso-7
-    source: registry.redhat.io/redhat-sso-7
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/amq7
-    source: registry.redhat.io/amq7
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/mtr
-    source: registry.redhat.io/mtr
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/albo
-    source: registry.redhat.io/albo
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/jboss-webserver-5
-    source: registry.redhat.io/jboss-webserver-5
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ubi8
-    source: registry.access.redhat.com/ubi8
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/source-to-image
-    source: registry.redhat.io/source-to-image
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhosdt
-    source: registry.redhat.io/rhosdt
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift4
-    source: registry.redhat.io/openshift4
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/fuse7
-    source: registry.redhat.io/fuse7
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/amq-streams
-    source: registry.redhat.io/amq-streams
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/multicluster-engine
-    source: registry.redhat.io/multicluster-engine
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhmtc
-    source: registry.redhat.io/rhmtc
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/service-interconnect
-    source: registry.redhat.io/service-interconnect
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-power-monitoring
-    source: registry.redhat.io/openshift-power-monitoring
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/migration-toolkit-virtualization
-    source: registry.redhat.io/migration-toolkit-virtualization
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-pipelines
-    source: registry.redhat.io/openshift-pipelines
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhacm2
-    source: registry.redhat.io/rhacm2
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/network-observability
-    source: registry.redhat.io/network-observability
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-sandboxed-containers-tech-preview
-    source: registry.redhat.io/openshift-sandboxed-containers-tech-preview
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/compliance
-    source: registry.redhat.io/compliance
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/jboss-eap
-    source: registry.redhat.io/jboss-eap
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ocp-tools-4
-    source: registry.redhat.io/ocp-tools-4
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/mta
-    source: registry.redhat.io/mta
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-logging
-    source: registry.redhat.io/openshift-logging
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-gitops-1
-    source: registry.redhat.io/openshift-gitops-1
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/cryostat-tech-preview
-    source: registry.redhat.io/cryostat-tech-preview
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/run-once-duration-override-operator
-    source: registry.redhat.io/run-once-duration-override-operator
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-serverless-1
-    source: registry.redhat.io/openshift-serverless-1
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ocp-tools-4-tech-preview
-    source: registry.redhat.io/ocp-tools-4-tech-preview
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhods
-    source: registry.redhat.io/rhods
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rh-sso-7
-    source: registry.redhat.io/rh-sso-7
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/costmanagement
-    source: registry.redhat.io/costmanagement
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhbac-4-tech-preview
-    source: registry.redhat.io/rhbac-4-tech-preview
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/gatekeeper
-    source: registry.redhat.io/gatekeeper
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-serverless-1-tech-preview
-    source: registry.redhat.io/openshift-serverless-1-tech-preview
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-service-mesh
-    source: registry.redhat.io/openshift-service-mesh
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/dvo
-    source: registry.redhat.io/dvo
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/cert-manager
-    source: registry.redhat.io/cert-manager
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/3scale-mas
-    source: registry.redhat.io/3scale-mas
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/3scale-tech-preview
-    source: registry.redhat.io/3scale-tech-preview
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhel8
-    source: registry.redhat.io/rhel8
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhel9
-    source: registry.redhat.io/rhel9
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/3scale-amp2
-    source: registry.redhat.io/3scale-amp2
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift3
-    source: registry.redhat.io/openshift3
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/kmm
-    source: registry.redhat.io/kmm
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/lvms4
-    source: registry.redhat.io/lvms4
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/web-terminal
-    source: registry.redhat.io/web-terminal
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/integration
-    source: registry.redhat.io/integration
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-update-service
-    source: registry.redhat.io/openshift-update-service
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rh-acs
-    source: registry.redhat.io/rh-acs
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ubi8-minimal
-    source: registry.redhat.io/ubi8-minimal
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/odf4
-    source: registry.redhat.io/odf4
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/advanced-cluster-security
-    source: registry.redhat.io/advanced-cluster-security
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/edo
-    source: registry.redhat.io/edo
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/datagrid
-    source: registry.redhat.io/datagrid
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/nbde-tang-server
-    source: registry.redhat.io/nbde-tang-server
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ubi8
-    source: registry.redhat.io/ubi8
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/multicluster-globalhub
-    source: registry.redhat.io/multicluster-globalhub
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ibm-bamoe
-    source: registry.redhat.io/ibm-bamoe
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhoai
-    source: registry.redhat.io/rhoai
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ansible-automation-platform-24
-    source: registry.redhat.io/ansible-automation-platform-24
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift-sandboxed-containers
-    source: registry.redhat.io/openshift-sandboxed-containers
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/rhscl
-    source: registry.redhat.io/rhscl
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/workload-availability
-    source: registry.redhat.io/workload-availability
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/ansible-automation-platform
-    source: registry.redhat.io/ansible-automation-platform
----
-apiVersion: operator.openshift.io/v1alpha1
-kind: ImageContentSourcePolicy
-metadata:
-  name: release-0
-spec:
-  repositoryDigestMirrors:
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift/release
-    source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
-  - mirrors:
-    - {{ oc_mirror_local_registry }}/openshift/release-images
-    source: quay.io/openshift-release-dev/ocp-release
+imageContentSources:
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift/release
+  source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift/release-images
+  source: quay.io/openshift-release-dev/ocp-release
+- mirrors:
+  - {{ oc_mirror_local_registry }}/devspaces
+  source: registry.redhat.io/devspaces
+- mirrors:
+  - {{ oc_mirror_local_registry }}/cluster-observability-operator
+  source: registry.redhat.io/cluster-observability-operator
+- mirrors:
+  - {{ oc_mirror_local_registry }}/kube-descheduler-operator
+  source: registry.redhat.io/kube-descheduler-operator
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhbk
+  source: registry.redhat.io/rhbk
+- mirrors:
+  - {{ oc_mirror_local_registry }}/oadp
+  source: registry.redhat.io/oadp
+- mirrors:
+  - {{ oc_mirror_local_registry }}/quay
+  source: registry.redhat.io/quay
+- mirrors:
+  - {{ oc_mirror_local_registry }}/container-native-virtualization
+  source: registry.redhat.io/container-native-virtualization
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhceph
+  source: registry.redhat.io/rhceph
+- mirrors:
+  - {{ oc_mirror_local_registry }}/noo
+  source: registry.redhat.io/noo
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhpam-7
+  source: registry.redhat.io/rhpam-7
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhel7
+  source: registry.redhat.io/rhel7
+- mirrors:
+  - {{ oc_mirror_local_registry }}/devworkspace
+  source: registry.redhat.io/devworkspace
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-builds
+  source: registry.redhat.io/openshift-builds
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-secondary-scheduler-operator
+  source: registry.redhat.io/openshift-secondary-scheduler-operator
+- mirrors:
+  - {{ oc_mirror_local_registry }}/custom-metrics-autoscaler
+  source: registry.redhat.io/custom-metrics-autoscaler
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift4-wincw
+  source: registry.redhat.io/openshift4-wincw
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhdh
+  source: registry.redhat.io/rhdh
+- mirrors:
+  - {{ oc_mirror_local_registry }}/jboss-datagrid-7
+  source: registry.redhat.io/jboss-datagrid-7
+- mirrors:
+  - {{ oc_mirror_local_registry }}/redhat-sso-7
+  source: registry.redhat.io/redhat-sso-7
+- mirrors:
+  - {{ oc_mirror_local_registry }}/amq7
+  source: registry.redhat.io/amq7
+- mirrors:
+  - {{ oc_mirror_local_registry }}/mtr
+  source: registry.redhat.io/mtr
+- mirrors:
+  - {{ oc_mirror_local_registry }}/albo
+  source: registry.redhat.io/albo
+- mirrors:
+  - {{ oc_mirror_local_registry }}/jboss-webserver-5
+  source: registry.redhat.io/jboss-webserver-5
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ubi8
+  source: registry.access.redhat.com/ubi8
+- mirrors:
+  - {{ oc_mirror_local_registry }}/source-to-image
+  source: registry.redhat.io/source-to-image
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhosdt
+  source: registry.redhat.io/rhosdt
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift4
+  source: registry.redhat.io/openshift4
+- mirrors:
+  - {{ oc_mirror_local_registry }}/fuse7
+  source: registry.redhat.io/fuse7
+- mirrors:
+  - {{ oc_mirror_local_registry }}/amq-streams
+  source: registry.redhat.io/amq-streams
+- mirrors:
+  - {{ oc_mirror_local_registry }}/multicluster-engine
+  source: registry.redhat.io/multicluster-engine
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhmtc
+  source: registry.redhat.io/rhmtc
+- mirrors:
+  - {{ oc_mirror_local_registry }}/service-interconnect
+  source: registry.redhat.io/service-interconnect
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-power-monitoring
+  source: registry.redhat.io/openshift-power-monitoring
+- mirrors:
+  - {{ oc_mirror_local_registry }}/migration-toolkit-virtualization
+  source: registry.redhat.io/migration-toolkit-virtualization
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-pipelines
+  source: registry.redhat.io/openshift-pipelines
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhacm2
+  source: registry.redhat.io/rhacm2
+- mirrors:
+  - {{ oc_mirror_local_registry }}/network-observability
+  source: registry.redhat.io/network-observability
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-sandboxed-containers-tech-preview
+  source: registry.redhat.io/openshift-sandboxed-containers-tech-preview
+- mirrors:
+  - {{ oc_mirror_local_registry }}/compliance
+  source: registry.redhat.io/compliance
+- mirrors:
+  - {{ oc_mirror_local_registry }}/jboss-eap
+  source: registry.redhat.io/jboss-eap
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ocp-tools-4
+  source: registry.redhat.io/ocp-tools-4
+- mirrors:
+  - {{ oc_mirror_local_registry }}/mta
+  source: registry.redhat.io/mta
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-logging
+  source: registry.redhat.io/openshift-logging
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-gitops-1
+  source: registry.redhat.io/openshift-gitops-1
+- mirrors:
+  - {{ oc_mirror_local_registry }}/cryostat-tech-preview
+  source: registry.redhat.io/cryostat-tech-preview
+- mirrors:
+  - {{ oc_mirror_local_registry }}/run-once-duration-override-operator
+  source: registry.redhat.io/run-once-duration-override-operator
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-serverless-1
+  source: registry.redhat.io/openshift-serverless-1
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ocp-tools-4-tech-preview
+  source: registry.redhat.io/ocp-tools-4-tech-preview
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhods
+  source: registry.redhat.io/rhods
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rh-sso-7
+  source: registry.redhat.io/rh-sso-7
+- mirrors:
+  - {{ oc_mirror_local_registry }}/costmanagement
+  source: registry.redhat.io/costmanagement
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhbac-4-tech-preview
+  source: registry.redhat.io/rhbac-4-tech-preview
+- mirrors:
+  - {{ oc_mirror_local_registry }}/gatekeeper
+  source: registry.redhat.io/gatekeeper
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-serverless-1-tech-preview
+  source: registry.redhat.io/openshift-serverless-1-tech-preview
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-service-mesh
+  source: registry.redhat.io/openshift-service-mesh
+- mirrors:
+  - {{ oc_mirror_local_registry }}/dvo
+  source: registry.redhat.io/dvo
+- mirrors:
+  - {{ oc_mirror_local_registry }}/cert-manager
+  source: registry.redhat.io/cert-manager
+- mirrors:
+  - {{ oc_mirror_local_registry }}/3scale-mas
+  source: registry.redhat.io/3scale-mas
+- mirrors:
+  - {{ oc_mirror_local_registry }}/3scale-tech-preview
+  source: registry.redhat.io/3scale-tech-preview
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhel8
+  source: registry.redhat.io/rhel8
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhel9
+  source: registry.redhat.io/rhel9
+- mirrors:
+  - {{ oc_mirror_local_registry }}/3scale-amp2
+  source: registry.redhat.io/3scale-amp2
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift3
+  source: registry.redhat.io/openshift3
+- mirrors:
+  - {{ oc_mirror_local_registry }}/kmm
+  source: registry.redhat.io/kmm
+- mirrors:
+  - {{ oc_mirror_local_registry }}/lvms4
+  source: registry.redhat.io/lvms4
+- mirrors:
+  - {{ oc_mirror_local_registry }}/web-terminal
+  source: registry.redhat.io/web-terminal
+- mirrors:
+  - {{ oc_mirror_local_registry }}/integration
+  source: registry.redhat.io/integration
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-update-service
+  source: registry.redhat.io/openshift-update-service
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rh-acs
+  source: registry.redhat.io/rh-acs
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ubi8-minimal
+  source: registry.redhat.io/ubi8-minimal
+- mirrors:
+  - {{ oc_mirror_local_registry }}/odf4
+  source: registry.redhat.io/odf4
+- mirrors:
+  - {{ oc_mirror_local_registry }}/advanced-cluster-security
+  source: registry.redhat.io/advanced-cluster-security
+- mirrors:
+  - {{ oc_mirror_local_registry }}/edo
+  source: registry.redhat.io/edo
+- mirrors:
+  - {{ oc_mirror_local_registry }}/datagrid
+  source: registry.redhat.io/datagrid
+- mirrors:
+  - {{ oc_mirror_local_registry }}/nbde-tang-server
+  source: registry.redhat.io/nbde-tang-server
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ubi8
+  source: registry.redhat.io/ubi8
+- mirrors:
+  - {{ oc_mirror_local_registry }}/multicluster-globalhub
+  source: registry.redhat.io/multicluster-globalhub
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ibm-bamoe
+  source: registry.redhat.io/ibm-bamoe
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhoai
+  source: registry.redhat.io/rhoai
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ansible-automation-platform-24
+  source: registry.redhat.io/ansible-automation-platform-24
+- mirrors:
+  - {{ oc_mirror_local_registry }}/openshift-sandboxed-containers
+  source: registry.redhat.io/openshift-sandboxed-containers
+- mirrors:
+  - {{ oc_mirror_local_registry }}/rhscl
+  source: registry.redhat.io/rhscl
+- mirrors:
+  - {{ oc_mirror_local_registry }}/workload-availability
+  source: registry.redhat.io/workload-availability
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ansible-automation-platform
+  source: registry.redhat.io/ansible-automation-platform
 

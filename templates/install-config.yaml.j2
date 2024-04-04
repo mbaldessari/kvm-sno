@@ -35,7 +35,7 @@ imageContentSources:
   source: docker.io
 {% endif %}
 {% if enable_disconnected %}
-{% include disconnected-imageContentSourcePolicy.yaml %}
+{% include "disconnected-imageContentSourcePolicy.yaml" %}
 {% endif %}
 sshKey: |
   {{ sshkey | regex_replace('"', '') }}
