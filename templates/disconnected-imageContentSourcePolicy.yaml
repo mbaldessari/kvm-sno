@@ -1,4 +1,4 @@
-imageContentSources:
+imageDigestSources:
 - mirrors:
   - {{ oc_mirror_local_registry }}/openshift/release
   source: quay.io/openshift-release-dev/ocp-v4.0-art-dev

@@ -23,7 +23,7 @@ bootstrapInPlace:
   installationDisk: /dev/disk/by-id/wwn-{{ clusters[item].wwn }}
 pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
 {% if enable_local_docker_mirror %}
-imageContentSources:
+imageDigestSources:
 - mirrors:
   - fw.int.rhx:5001
   source: quay.io
