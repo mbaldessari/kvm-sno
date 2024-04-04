@@ -3,12 +3,12 @@
 ocp_versions:
   - "4.12.53"
   - "4.13.38"
-  - "4.14.19"
+  - "4.14.18"
   - "4.15.6"
 
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
-ocp_version: "4.14.19"
+ocp_version: "4.14.18"
 #ocp_version: "4.15.0-rc.7"
 arch: "x86_64"
 mirrorfolder: /var/lib/libvirt/ocp-mirror
@@ -25,8 +25,8 @@ mac_prefix: "52:54:00:00:01"
 http_proxy: http://192.168.66.254:3128/
 https_proxy: http://192.168.66.254:3129/
 no_proxy: "{{ domain }},172.16.0.0/16,10.0.0.0/8,192.168.66.0/24"
-enable_local_docker_mirror: true
-enable_disconnected: false
+enable_local_docker_mirror: false
+enable_disconnected: true
 iib_index_image_base: registry-proxy.engineering.redhat.com/rh-osbs
 additional_trust_bundle: |
   -----BEGIN CERTIFICATE-----
@@ -50,7 +50,7 @@ additional_trust_bundle: |
   U8LwiGLfCl7vTrz+27FHTCx0IBxU
   -----END CERTIFICATE-----
 
-vm_pool: "default"
+vm_pool: "fast"
 clusters:
   sno1:
     cpus: 12
