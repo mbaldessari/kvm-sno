@@ -6,3 +6,13 @@ imageDigestSources:
   - {{ oc_mirror_local_registry }}/openshift/release-images
   source: quay.io/openshift-release-dev/ocp-release
 
+# cache pull through fallbacks
+- mirrors:
+  - fw.int.rhx:5001
+  source: quay.io
+- mirrors:
+  - fw.int.rhx:5003
+  source: registry.redhat.io
+- mirrors:
+  - fw.int.rhx:5004
+  source: docker.io

@@ -156,15 +156,6 @@
         mode: "0644"
       with_items: "{{ snos }}"
 
-    - name: Template out imagetagmirrorset 
-      tags:
-        - imagetagmirrorset
-      ansible.builtin.template:
-        src: ../templates/imagetagmirrorset.yaml
-        dest: "{{ tempfolder }}/{{ item }}"
-        mode: "0644"
-      with_items: "{{ snos }}"
-
     - name: Fetch kubeconfig file
       ansible.posix.synchronize:
         mode: pull
@@ -178,16 +169,14 @@
       with_items: "{{ snos }}"
       delegate_to: localhost
 
-    - name: Wait for console to be up
-      ansible.builtin.uri:
-        url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
-        validate_certs: false
-        follow_redirects: all
+    - name: Template out imagetagmirrorset 
+      tags:
+        - imagetagmirrorset
+      ansible.builtin.template:
+        src: ../templates/imagetagmirrorset.yaml
+        dest: "{{ tempfolder }}/{{ item }}"
+        mode: "0644"
       with_items: "{{ snos }}"
-      register: uri
-      until: uri is not failed
-      retries: 150
-      delay: 30
 
     - name: Apply imagetagmirrorset
       tags:
@@ -199,8 +188,20 @@
       with_items: "{{ snos }}"
       register: imagetagmirrorset
       until: imagetagmirrorset is not failed
-      retries: 5
-      delay: 2
+      retries: 20
+      delay: 10
+
+    - name: Wait for console to be up
+      ansible.builtin.uri:
+        url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+        validate_certs: false
+        follow_redirects: all
+      with_items: "{{ snos }}"
+      register: uri
+      until: uri is not failed
+      retries: 150
+      delay: 30
+
 
     - name: Set kubeadmin password
       ansible.builtin.shell: |
