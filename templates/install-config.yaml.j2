@@ -37,6 +37,7 @@ imageContentSources:
 {% if enable_disconnected %}
 {% include "disconnected-imageContentSourcePolicy.yaml" %}
 {% endif %}
+
 sshKey: |
   {{ sshkey | regex_replace('"', '') }}
 {% if additional_trust_bundle is defined %}

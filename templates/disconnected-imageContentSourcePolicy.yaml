@@ -5,6 +5,24 @@ imageContentSources:
 - mirrors:
   - {{ oc_mirror_local_registry }}/openshift/release-images
   source: quay.io/openshift-release-dev/ocp-release
+
+# catalogs
+- mirrors:
+  - {{ oc_mirror_local_registry }}/redhat/redhat-operator-index
+  source: registry.redhat.io/redhat/redhat-operator-index
+
+# This is because I am unable to oc mirror the following operator indexes
+- mirrors:
+  - fw.int.rhx:5003
+  source: registry.redhat.io/redhat/community-operator-index
+- mirrors:
+  - fw.int.rhx:5003
+  source: registry.redhat.io/redhat/redhat-marketplace-index
+- mirrors:
+  - fw.int.rhx:5003
+  source: registry.redhat.io/redhat/redhat-operator-index
+
+# operators
 - mirrors:
   - {{ oc_mirror_local_registry }}/devspaces
   source: registry.redhat.io/devspaces
@@ -257,4 +275,15 @@ imageContentSources:
 - mirrors:
   - {{ oc_mirror_local_registry }}/ansible-automation-platform
   source: registry.redhat.io/ansible-automation-platform
+
+# cache pull through fallbacks
+- mirrors:
+  - fw.int.rhx:5001
+  source: quay.io
+- mirrors:
+  - fw.int.rhx:5003
+  source: registry.redhat.io
+- mirrors:
+  - fw.int.rhx:5004
+  source: docker.io
 
