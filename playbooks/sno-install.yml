@@ -156,6 +156,15 @@
         mode: "0644"
       with_items: "{{ snos }}"
 
+    - name: Template out imagetagmirrorset 
+      tags:
+        - imagetagmirrorset
+      ansible.builtin.template:
+        src: ../templates/imagetagmirrorset.yaml
+        dest: "{{ tempfolder }}/{{ item }}"
+        mode: "0644"
+      with_items: "{{ snos }}"
+
     - name: Fetch kubeconfig file
       ansible.posix.synchronize:
         mode: pull
@@ -179,6 +188,19 @@
       until: uri is not failed
       retries: 150
       delay: 30
+
+    - name: Apply imagetagmirrorset
+      tags:
+        - imagetagmirrorset
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/imagetagmirrorset.yaml"
+      with_items: "{{ snos }}"
+      register: imagetagmirrorset
+      until: imagetagmirrorset is not failed
+      retries: 5
+      delay: 2
 
     - name: Set kubeadmin password
       ansible.builtin.shell: |
