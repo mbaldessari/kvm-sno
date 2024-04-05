@@ -8,8 +8,14 @@ spec:
       - fw.int.rhx:5001
       source: quay.io
     - mirrors:
+      - fw.int.rhx:5002
+      source: ghcr.io
+    - mirrors:
       - fw.int.rhx:5003
       source: registry.redhat.io
     - mirrors:
       - fw.int.rhx:5004
       source: docker.io
+    - mirrors:
+      - fw.int.rhx:5005
+      source: gcr.io

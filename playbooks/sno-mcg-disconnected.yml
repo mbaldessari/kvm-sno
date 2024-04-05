@@ -1,0 +1,144 @@
+---
+- name: Install MCG on the three clusters private gitea
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  become_user: michele
+  vars:
+    mcgtempfolder: "~/sno-mcg"
+    gitrepo: https://github.com/validatedpatterns/multicloud-gitops
+    gitbranch: main
+  tasks:
+    - name: Check that all kubeconfig files exist
+      ansible.builtin.stat:
+        path: "~/{{ item }}-kubeconfig"
+      with_items: "{{ snos }}"
+      register: kubeconfig_files
+
+    - name: Verifying if files exists
+      ansible.builtin.debug:
+        msg: "File {{ item.stat.path }} exist"
+      loop: "{{ kubeconfig_files.results }}"
+      loop_control:
+        label: "{{ item.stat.path }}"
+      failed_when: not item.stat.exists
+
+    - name: Delete temporary folder
+      ansible.builtin.file:
+        path: "{{ mcgtempfolder }}"
+        state: absent
+
+    - name: Create temporary folder
+      ansible.builtin.file:
+        path: "{{ mcgtempfolder }}/multicloud-gitops"
+        state: directory
+        recurse: true
+
+    - name: Clone git repo
+      ansible.builtin.git:
+        repo: "{{ gitrepo }}"
+        version: "{{ gitbranch }}"
+        dest: "{{ mcgtempfolder }}/multicloud-gitops"
+        clone: true
+
+    - name: Install pattern on HUB/sno1
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/sno1-kubeconfig
+        export EXTRA_HELM_OPTS="--set main.git.repoURL=https://gitea.ocplab.ocp/bandini/mcg"
+        ./pattern.sh make install
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+
+    - name: Wait for all argo apps to be green
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/sno1-kubeconfig
+        APPS=$(oc get applications -A -o jsonpath='{range .items[*]}{@.metadata.namespace}{","}{@.metadata.name}{"\n"}{end}')
+        NOTSYNCED=0
+        for i in $APPS; do
+          NS=$(echo "${i}" | cut -f1 -d,)
+          APP=$(echo "${i}" | cut -f2 -d,)
+          STATUS=$(oc get -n "${NS}" application/"${APP}" -o jsonpath='{.status.sync.status}')
+          if [ $STATUS != "Synced" ]; then
+            NOTSYNCED=$((NOTSYNCED + 1))
+          fi
+          echo "${NS} ${APP} -> ${STATUS}"
+        done
+        if [ $NOTSYNCED -gt 0 ]; then
+           echo "Applications not synced: ${NOTSYNCED}"
+           exit 1
+        fi
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argo
+      until: argo is not failed
+
+    - name: Wait for ManagedCluster API to show up
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/sno1-kubeconfig
+        oc api-resources | grep cluster.open-cluster-management.io/v1 | grep ManagedCluster
+      retries: 50
+      delay: 20
+      register: managedcluster_api
+      until: managedcluster_api is not failed
+
+    - name: Join sno2 to HUB(sno1) env vars
+      ansible.builtin.set_fact:
+        HUBCONFIG: "{{ '~/sno1-kubeconfig' | expanduser }}"
+        REGIONCONFIG: "{{ '~/sno2-kubeconfig' | expanduser }}"
+
+    - name: Import sno2
+      ansible.builtin.import_role:
+        name: acm_import
+      retries: 10
+      delay: 30
+      register: acm1
+      until: acm1 is not failed
+
+    - name: Join sno3 to HUB(sno1) env vars
+      ansible.builtin.set_fact:
+        HUBCONFIG: "{{ '~/sno1-kubeconfig' | expanduser }}"
+        REGIONCONFIG: "{{ '~/sno3-kubeconfig' | expanduser }}"
+
+    - name: Import sno3
+      ansible.builtin.import_role:
+        name: acm_import
+      retries: 10
+      delay: 30
+      register: acm2
+      until: acm2 is not failed
+
+    - name: Wait for all argo apps to be green on regional clusters
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        APPS=$(oc get applications -A -o jsonpath='{range .items[*]}{@.metadata.namespace}{","}{@.metadata.name}{"\n"}{end}')
+        NOTSYNCED=0
+        for i in $APPS; do
+          NS=$(echo "${i}" | cut -f1 -d,)
+          APP=$(echo "${i}" | cut -f2 -d,)
+          STATUS=$(oc get -n "${NS}" application/"${APP}" -o jsonpath='{.status.sync.status}')
+          if [ $STATUS != "Synced" ]; then
+            NOTSYNCED=$((NOTSYNCED + 1))
+          fi
+          echo "${NS} ${APP} -> ${STATUS}"
+        done
+        if [ $NOTSYNCED -gt 0 ]; then
+           echo "Applications not synced: ${NOTSYNCED}"
+           exit 1
+        fi
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argoregional
+      until: argoregional is not failed
+      with_items:
+        - sno2
+        - sno3
+

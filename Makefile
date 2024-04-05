@@ -73,10 +73,15 @@ gitea: ## Create RHEL vms
 .PHONY: gitea-destroy
 gitea-destroy: ## Destroy installed RHELs VMS
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/gitea-destroy.yml
+
 ##@ Day-2 Tasks
 .PHONY: mcg
 mcg: ## Install multicloud gitops on all three snos
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml
+
+.PHONY: mcg-disconnected
+mcg-disconnected: ## Install multicloud gitops on all three snos using an internal gitea
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg-disconnected.yml
 
 .PHONY: agof
 agof: ## Install AGOF on the two RHEL boxes
