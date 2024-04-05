@@ -35,7 +35,7 @@ imageDigestSources:
   source: docker.io
 {% endif %}
 {% if enable_disconnected %}
-{% include "disconnected-imageContentSourcePolicy.yaml" %}
+{% include "disconnected-imagedigestsources.yaml" %}
 {% endif %}
 
 sshKey: |
