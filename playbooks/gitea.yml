@@ -41,7 +41,7 @@
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ giteas[item].mac_nr }}"
         --vcpus {{ giteas[item].cpus }}
         --ram {{ giteas[item].ram }}
-        --disk pool={{ fast_pool }},size={{ giteas[item].disk }},format=qcow2,bus=scsi,cache={{ giteas[item].cache }},wwn={{ giteas[item].wwn }}
+        --disk pool={{ rhel_pool }},size={{ giteas[item].disk }},format=qcow2,bus=scsi,cache={{ giteas[item].cache }},wwn={{ giteas[item].wwn }}
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
