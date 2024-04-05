@@ -178,6 +178,17 @@
         mode: "0644"
       with_items: "{{ snos }}"
 
+    - name: Wait for console to be up
+      ansible.builtin.uri:
+        url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+        validate_certs: false
+        follow_redirects: all
+      with_items: "{{ snos }}"
+      register: uri
+      until: uri is not failed
+      retries: 150
+      delay: 30
+
     - name: Apply imagetagmirrorset
       tags:
         - imagetagmirrorset
@@ -190,17 +201,6 @@
       until: imagetagmirrorset is not failed
       retries: 20
       delay: 10
-
-    - name: Wait for console to be up
-      ansible.builtin.uri:
-        url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
-        validate_certs: false
-        follow_redirects: all
-      with_items: "{{ snos }}"
-      register: uri
-      until: uri is not failed
-      retries: 150
-      delay: 30
 
 
     - name: Set kubeadmin password
