@@ -56,7 +56,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 66
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea71aa"
     disk2: 30
@@ -65,9 +65,9 @@ clusters:
     network: 192.168.66.0/24
   sno2:
     cpus: 12
-    ram: 64768
+    ram: 40960
     mac_nr: 67
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea71cc"
     disk2: 30
@@ -76,9 +76,9 @@ clusters:
     network: 192.168.66.0/24
   sno3:
     cpus: 12
-    ram: 64768
+    ram: 40960
     mac_nr: 68
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea71ee"
     disk2: 30
@@ -87,9 +87,9 @@ clusters:
     network: 192.168.66.0/24
   sno4:
     cpus: 12
-    ram: 64768
+    ram: 40960
     mac_nr: 69
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea72aa"
     disk2: 30
@@ -98,9 +98,9 @@ clusters:
     network: 192.168.66.0/24
   sno5:
     cpus: 12
-    ram: 64768
+    ram: 40960
     mac_nr: 70
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea72cc"
     disk2: 30
@@ -109,9 +109,9 @@ clusters:
     network: 192.168.66.0/24
   sno6:
     cpus: 12
-    ram: 64768
+    ram: 40960
     mac_nr: 71
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea72ee"
     disk2: 30
@@ -120,9 +120,9 @@ clusters:
     network: 192.168.66.0/24
   sno7:
     cpus: 12
-    ram: 64768
+    ram: 40960
     mac_nr: 72
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7311"
     disk2: 30
@@ -131,9 +131,9 @@ clusters:
     network: 192.168.66.0/24
   sno8:
     cpus: 12
-    ram: 64768
+    ram: 40960
     mac_nr: 73
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7333"
     disk2: 30
@@ -142,9 +142,9 @@ clusters:
     network: 192.168.66.0/24
   sno9:
     cpus: 12
-    ram: 64768
+    ram: 40960
     mac_nr: 74
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7355"
     disk2: 30
@@ -153,9 +153,9 @@ clusters:
     network: 192.168.66.0/24
   sno10:
     cpus: 12
-    ram: 64768
+    ram: 40960
     mac_nr: 75
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7377"
     disk2: 30
@@ -167,7 +167,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 76
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7399"
     disk2: 30
@@ -178,7 +178,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 77
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea73bb"
     disk2: 30
@@ -189,7 +189,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 78
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea73dd"
     disk2: 30
@@ -200,7 +200,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 79
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7400"
     disk2: 30
@@ -211,7 +211,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 80
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7422"
     disk2: 30
@@ -222,7 +222,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 81
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7444"
     disk2: 30
@@ -233,7 +233,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 82
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7466"
     disk2: 30
@@ -244,7 +244,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 83
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea7488"
     disk2: 30
@@ -255,7 +255,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 84
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea74aa"
     disk2: 30
@@ -266,7 +266,7 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 85
-    disk: 128
+    disk: 75
     cache: unsafe
     wwn: "0x5000c50015ea74cc"
     disk2: 30
