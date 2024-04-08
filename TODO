@@ -1,5 +1,2 @@
-- Do not serialize tasks around container VMs and statuses or at all?
-  * We can parallelize a few tasks here and there
-  * Split the storage pools in three so the vms can be created in parallel without the
-    "error: pool 'default' has asynchronous jobs running." error
-
+1. Make a role out of it so we can can stop serializing
+2. Inject the PKI injection in that role as well

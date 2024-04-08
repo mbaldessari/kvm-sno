@@ -5,6 +5,12 @@ metadata:
 spec:
   imageTagMirrors:
     - mirrors:
+      - fw.int.rhx/ocp/ubi8/ubi-minimal
+      source: registry.access.redhat.com/ubi8/ubi-minimal
+    - mirrors:
+      - fw.int.rhx/ocp/ubi9/ubi-minimal
+      source: registry.access.redhat.com/ubi9/ubi-minimal
+    - mirrors:
       - fw.int.rhx:5001
       source: quay.io
     - mirrors:

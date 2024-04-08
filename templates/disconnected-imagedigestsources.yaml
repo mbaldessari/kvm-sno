@@ -6,6 +6,14 @@ imageDigestSources:
   - {{ oc_mirror_local_registry }}/openshift/release-images
   source: quay.io/openshift-release-dev/ocp-release
 
+# I mirror ubi images locally
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ubi8/ubi-minmal
+  source: registry.access.redhat.com/ubi8/ubi-minimal
+- mirrors:
+  - {{ oc_mirror_local_registry }}/ubi9/ubi-minimal
+  source: registry.access.redhat.com/ubi9/ubi-minimal
+
 # cache pull through fallbacks
 - mirrors:
   - fw.int.rhx:5001
