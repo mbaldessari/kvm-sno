@@ -1,14 +1,14 @@
 ---
 # ocp_versions is only used by the ocp-mirror target to mirror locally all the versions and uncompress them *once*
 ocp_versions:
-  - "4.12.53"
-  - "4.13.38"
-  - "4.14.18"
-  - "4.15.6"
+  - "4.12.55"
+  - "4.13.40"
+  - "4.14.19"
+  - "4.15.9"
 
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
-ocp_version: "4.14.18"
+ocp_version: "4.14.19"
 #ocp_version: "4.15.0-rc.7"
 arch: "x86_64"
 mirrorfolder: /var/lib/libvirt/ocp-mirror
