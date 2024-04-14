@@ -101,5 +101,4 @@
       register: argoregional
       until: argoregional is not failed
       with_items:
-        - spoke
-        - sno3
+        - "{{ spoke }}"
