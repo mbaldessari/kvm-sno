@@ -76,7 +76,7 @@
       register: managedcluster_api
       until: managedcluster_api is not failed
 
-    - name: Join {{ spoke }} to HUB({{ hub }}) env vars
+    - name: Add {{ spoke }}
       ansible.builtin.set_fact:
         HUBCONFIG: "{{ '~/{{ hub }}-kubeconfig' | expanduser }}"
         REGIONCONFIG: "{{ '~/{{ spoke }}-kubeconfig' | expanduser }}"
