@@ -80,7 +80,7 @@
     gitea_gpg: 7C9E68152594688862D62AF62D9AE806EC1592E2
     gitea_version: 1.21.5
     gitea_file: "gitea-{{ gitea_version }}-linux-amd64"
-    gitea_url: "https://dl.gitea.com/gitea/{{ gitea_version }}/{{ gitea_file }}"
+    gitea_url: "http://fw.int.rhx/{{ gitea_file }}"
     upstream_repo: "https://github.com/mbaldessari/multicloud-gitops"
     downstream_name: "mcg"
     upstream_repo2: "https://github.com/mbaldessari/argocd-tests"
