@@ -89,6 +89,20 @@
       register: acm1
       until: acm1 is not failed
 
+    - name: Wait for namespaced argo on spoke
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        oc get argocds -A | grep multicloud-gitops-group-one
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argoregional
+      until: argoregional is not failed
+      with_items:
+        - "{{ spoke }}"
+
     - name: Wait for all argo apps to be green on regional clusters
       ansible.builtin.shell: |
         set -e -o pipefail
