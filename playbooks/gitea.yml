@@ -146,6 +146,33 @@
         src: /dev/sdb
         fstype: xfs
 
+    - name: Create minio folders
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        mkdir /etc/minio
+        chown -R minio-user:minio-user /etc/minio
+        chmod 750 /etc/minio
+
+    - name: Copy TLS certs for minio
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/minio/public.crt
+        mode: 0640
+        owner: minio-user
+        group: minio-user
+      with_items:
+        - /home/michele/ssl-ca/certs/gitea.ocplab.ocp.crt
+
+    - name: Copy TLS certs for minio (2)
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/minio/private.key
+        mode: 0640
+        owner: minio-user
+        group: minio-user
+      with_items:
+        - /home/michele/ssl-ca/certs/gitea.ocplab.ocp.key
+
     - name: Start minio
       ansible.builtin.systemd_service:
         name: minio

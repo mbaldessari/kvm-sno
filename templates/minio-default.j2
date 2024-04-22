@@ -13,7 +13,7 @@ MINIO_VOLUMES="https://{{ minio.fqdn }}:9000/mnt/data/disk{1...4}/minio"
 # The following explicitly sets the MinIO Console listen address to
 # port 9001 on all network interfaces. The default behavior is dynamic
 # port selection.
-MINIO_OPTS="--console-address :9001"
+MINIO_OPTS="--console-address :9001 --certs-dir /etc/minio"
 
 # Set the root username. This user has unrestricted permissions to
 # perform S3 and administrative API operations on any resource in the
