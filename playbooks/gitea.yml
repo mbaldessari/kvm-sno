@@ -1,5 +1,5 @@
 ---
-- name: Install Gitea
+- name: Install Gitea and minio
   hosts: kvm
   gather_facts: false
   become: true
@@ -42,6 +42,7 @@
         --vcpus {{ giteas[item].cpus }}
         --ram {{ giteas[item].ram }}
         --disk pool={{ rhel_pool }},size={{ giteas[item].disk }},format=qcow2,bus=scsi,cache={{ giteas[item].cache }},wwn={{ giteas[item].wwn }}
+        --disk pool={{ rhel_pool }},size={{ giteas[item].disk2 }},format=qcow2,bus=scsi,cache={{ giteas[item].cache2 }},wwn={{ giteas[item].wwn2 }}
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
@@ -81,6 +82,10 @@
     gitea_version: 1.21.5
     gitea_file: "gitea-{{ gitea_version }}-linux-amd64"
     gitea_url: "http://fw.int.rhx/{{ gitea_file }}"
+    minio_file: "minio-20240418190919.0.0-1.x86_64.rpm"
+    minio_client_file: "mcli-20240418164529.0.0-1.x86_64.rpm"
+    minio_url: "http://fw.int.rhx/{{ minio_file }}"
+    minio_client_url: "http://fw.int.rhx/{{ minio_client_file }}"
     upstream_repo: "https://github.com/mbaldessari/multicloud-gitops"
     downstream_name: "mcg"
     upstream_repo2: "https://github.com/mbaldessari/argocd-tests"
@@ -88,6 +93,64 @@
   tasks:
     - name: Wait for boxes
       ansible.builtin.wait_for_connection:
+
+    - name: Download minio binary
+      ansible.builtin.get_url:
+        url: "{{ minio_url }}"
+        dest: "/tmp/{{ minio_file }}"
+        mode: "0755"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+
+    - name: Download minio client binary
+      ansible.builtin.get_url:
+        url: "{{ minio_client_url }}"
+        dest: "/tmp/{{ minio_client_file }}"
+        mode: "0755"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+
+    - name: Install minio rpm
+      ansible.builtin.shell: |
+        dnf install -y "/tmp/{{ minio_file }}" "/tmp/{{ minio_client_file }}"
+
+    - name: Add minio-user user
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        groupadd --system minio-user
+        adduser --system --shell /bin/bash \
+          --comment 'MINIO' \
+          --gid minio-user --home-dir /home/minio-user --create-home \
+          minio-user
+
+    - name: Template /etc/default/minio
+      ansible.builtin.template:
+        src: ../templates/minio-default.j2
+        dest: /etc/default/minio
+        mode: "0640"
+        owner: minio-user
+        group: minio-user
+
+    - name: Create disks and mount
+      ansible.builtin.shell: |
+        mkfs.xfs /dev/sdb
+        mkdir /mnt/data
+        mount /dev/sdb /mnt/data
+        mkdir -p /mnt/data/disk{1,2,3,4}
+        chown -R minio-user: /mnt/data/disk{1,2,3,4}
+
+    - name: Add sdb in fstab
+      ansible.posix.mount:
+        state: present
+        path: /mnt/data
+        src: /dev/sdb
+        fstype: xfs
+
+    - name: Start minio
+      ansible.builtin.systemd_service:
+        name: minio
+        state: started
+        enabled: true
 
     - name: Download gitea binary
       ansible.builtin.get_url:

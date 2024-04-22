@@ -294,6 +294,11 @@ rhn_org: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key: "{{ lookup('file', '~/.rhn_activation_key') }}"
     
 rhel_version: "9.2"
+minio:
+  fqdn: "gitea.{{ domain }}"
+  admin_user: "{{ lookup('ansible.builtin.ini', 'ADMIN_USER', section='secrets', file='~/.miniosecrets.ini') }}"
+  admin_pass: "{{ lookup('ansible.builtin.ini', 'ADMIN_PASS', section='secrets', file='~/.miniosecrets.ini') }}"
+
 gitea:
   fqdn: "gitea.{{ domain }}"
   url: "https://gitea.{{ domain }}"
@@ -304,14 +309,17 @@ gitea:
   JWT_SECRET:  "{{ lookup('ansible.builtin.ini', 'JWT_SECRET', section='secrets', file='~/.giteasecrets.ini') }}"
 giteas:
   gitea:
-      version: "{{ rhel_version }}"
-      cpus: 4
-      ram: 32768
-      mac_nr: 90
-      disk: 64
-      cache: unsafe
-      wwn: "0x5000c50015eb81aa"
-      network: 192.168.66.0/24
+    version: "{{ rhel_version }}"
+    cpus: 4
+    ram: 32768
+    mac_nr: 90
+    disk: 64
+    cache: unsafe
+    wwn: "0x5000c50015eb81aa"
+    disk2: 30
+    cache2: unsafe
+    wwn2: "0x5000c50015eb81ab"
+    network: 192.168.66.0/24
 rhels:
   rhel1:
     version: "{{ rhel_version }}"
