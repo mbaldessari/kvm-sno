@@ -179,6 +179,13 @@
         state: started
         enabled: true
 
+    - name: Init myminio
+      ansible.builtin.shell: |
+        set -e
+        /usr/local/bin/mcli alias set {{ minio.org}} https://{{ minio.fqdn }}:9000 {{ minio.admin_user }} {{ minio.admin_pass }}
+        /usr/local/bin/mcli admin user add {{ minio.org }} {{ minio.user }} {{ minio.pass }}
+        /usr/local/bin/mcli mb --with-lock {{ minio.org }}/{{ minio.bucket }}
+
     - name: Download gitea binary
       ansible.builtin.get_url:
         url: "{{ gitea_url }}"

@@ -298,6 +298,10 @@ minio:
   fqdn: "gitea.{{ domain }}"
   admin_user: "{{ lookup('ansible.builtin.ini', 'ADMIN_USER', section='secrets', file='~/.miniosecrets.ini') }}"
   admin_pass: "{{ lookup('ansible.builtin.ini', 'ADMIN_PASS', section='secrets', file='~/.miniosecrets.ini') }}"
+  org: "myminio"
+  bucket: "mydata"
+  user: "{{ lookup('ansible.builtin.ini', 'USER_NAME', section='secrets', file='~/.miniosecrets.ini') }}"
+  pass: "{{ lookup('ansible.builtin.ini', 'USER_PASS', section='secrets', file='~/.miniosecrets.ini') }}"
 
 gitea:
   fqdn: "gitea.{{ domain }}"
