@@ -8,10 +8,10 @@ if [ -d /sys/firmware/efi ] ; then
     touch /tmp/legacy
     cat > /tmp/uefi <<END
 clearpart --all --initlabel --drives=sda
-part /boot --fstype="ext4" --size=512 --ondisk=sda
-part /boot/efi --fstype="vfat" --size=1024 --ondisk=sda
-part swap  --size=100  --fstype=swap --ondisk=sda
-part pv.13 --size=1 --grow --ondisk=sda
+part /boot --fstype="ext4" --size=512 --ondisk={{ root_wwn | default('sda') }}
+part /boot/efi --fstype="vfat" --size=1024 --ondisk={{ root_wwn | default('sda') }}
+part swap  --size=100  --fstype=swap --ondisk={{ root_wwn | default('sda') }}
+part pv.13 --size=1 --grow --ondisk={{ root_wwn | default('sda') }}
 volgroup VolGroup00 pv.13
 logvol / --fstype xfs --name=rootsys --percent=100 --vgname=VolGroup00
 END
@@ -20,7 +20,7 @@ else
     cat > /tmp/legacy <<END
 clearpart --all --initlabel --drives=sda,sdb
 part /boot  --fstype=ext4 --size=300
-part pv.6 --size=1000 --grow --ondisk=sda
+part pv.6 --size=1000 --grow --ondisk={{ root_wwn | default('sda') }}
 part swap  --size=100  --fstype=swap
 part pv.13 --size=1 --grow
 volgroup VolGroup00 pv.13

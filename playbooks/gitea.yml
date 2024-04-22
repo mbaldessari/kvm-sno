@@ -4,10 +4,14 @@
   gather_facts: false
   become: true
   tasks:
+    - name: Set root_wwn to be sure sda is the right disk
+      ansible.builtin.set_fact:
+        root_wwn: "disk/by-id/wwn-{{ giteas['gitea'].wwn }}"
+
     - name: Template kickstart file to the firewall where it is hosted
       ansible.builtin.template:
         src: ../templates/rhel-ks.yaml.j2
-        dest: "/data/html/rhel.ks"
+        dest: "/data/html/rhel-gitea.ks"
         mode: "0644"
       delegate_to: fw
 
@@ -46,7 +50,7 @@
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
-        --extra-args "inst.ks=http://fw.int.rhx/rhel.ks"
+        --extra-args "inst.ks=http://fw.int.rhx/rhel-gitea.ks"
         {{ bootlines[item] }}
       with_items: "{{ giteas }}"
       retries: 2
@@ -185,6 +189,7 @@
         /usr/local/bin/mcli alias set {{ minio.org}} https://{{ minio.fqdn }}:9000 {{ minio.admin_user }} {{ minio.admin_pass }}
         /usr/local/bin/mcli admin user add {{ minio.org }} {{ minio.user }} {{ minio.pass }}
         /usr/local/bin/mcli mb --with-lock {{ minio.org }}/{{ minio.bucket }}
+        /usr/local/bin/mcli admin user svcacct add {{ minio.org }} {{ minio.admin_user }} --name adminkey --description "adminkey" --access-key {{ minio.admin_access_key }} --secret-key {{ minio.admin_secret_key }}
 
     - name: Download gitea binary
       ansible.builtin.get_url:
