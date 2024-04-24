@@ -8,16 +8,21 @@
   vars:
     mcgtempfolder: "~/sno-mcg"
     gitrepo: https://github.com/validatedpatterns/multicloud-gitops
+    gitbranch: main
+    hub: sno1
+    spoke: sno2
   tasks:
-    - name: Fail if node or iib are not defined
+    - name: Fail if iib is not defined
       ansible.builtin.fail:
-        msg: "IIB or NODE not defined"
-      when: iib is not defined or node is not defined or iib == "" or node == ""
+        msg: "IIB is not defined"
+      when: iib is not defined or iib == ""
 
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
         path: "~/{{ item }}-kubeconfig"
-      with_items: "{{ snos | intersect(node) }}"
+      with_items: 
+        - "{{ hub }}"
+        - "{{ spoke }}"
       register: kubeconfig_files
 
     - name: Verifying if files exists
@@ -31,7 +36,7 @@
     - name: Enable SNO internal registry
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG=~/{{ node }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
         oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
 
@@ -49,14 +54,15 @@
     - name: Clone git repo
       ansible.builtin.git:
         repo: "{{ gitrepo }}"
+        version: "{{ gitbranch }}"
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
     - name: Load IIB "{{ iib }}"
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG=~/{{ node }}-kubeconfig
-        make load-iib &> /tmp/iib-ansible-{{ node }}.log
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        make load-iib &> /tmp/iib-ansible-{{ hub }}.log
       environment:
         KUBEADMINPASS: "{{ kubeadmin_pass }}"
         OPERATOR: advanced-cluster-management
@@ -65,10 +71,10 @@
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
 
-    - name: Install pattern on HUB/{{ node }}
+    - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG=~/{{ node }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         export CHANNEL=$(oc get -n openshift-marketplace packagemanifests -l "catalog=iib-${IIB}" --field-selector "metadata.name=${OPERATOR}" -o jsonpath='{.items[0].status.defaultChannel}')
         make EXTRA_HELM_OPTS="--set main.extraParameters[0].name=clusterGroup.subscriptions.acm.source --set main.extraParameters[0].value=iib-${IIB} --set main.extraParameters[1].name=clusterGroup.subscriptions.acm.channel --set main.extraParameters[1].value=${CHANNEL}" install
       environment:
@@ -78,3 +84,39 @@
         INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+
+    - name: Wait for all argo apps to be green
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        make argo-healthcheck
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argo
+      until: argo is not failed
+
+    - name: Wait for ManagedCluster API to show up
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        oc api-resources | grep cluster.open-cluster-management.io/v1 | grep ManagedCluster
+      retries: 50
+      delay: 20
+      register: managedcluster_api
+      until: managedcluster_api is not failed
+
+    - name: Add {{ spoke }}
+      ansible.builtin.set_fact:
+        HUBCONFIG: "{{ '~/{{ hub }}-kubeconfig' | expanduser }}"
+        REGIONCONFIG: "{{ '~/{{ spoke }}-kubeconfig' | expanduser }}"
+
+    - name: Import {{ spoke }}
+      ansible.builtin.import_role:
+        name: acm_import
+      retries: 10
+      delay: 30
+      register: acm1
+      until: acm1 is not failed
+
