@@ -76,7 +76,10 @@
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
         export CHANNEL=$(oc get -n openshift-marketplace packagemanifests -l "catalog=iib-${IIB}" --field-selector "metadata.name=${OPERATOR}" -o jsonpath='{.items[0].status.defaultChannel}')
-        make EXTRA_HELM_OPTS="--set main.extraParameters[0].name=clusterGroup.subscriptions.acm.source --set main.extraParameters[0].value=iib-${IIB} --set main.extraParameters[1].name=clusterGroup.subscriptions.acm.channel --set main.extraParameters[1].value=${CHANNEL}" install
+        make EXTRA_HELM_OPTS="--set main.extraParameters[0].name=clusterGroup.subscriptions.acm.source --set main.extraParameters[0].value=iib-${IIB} \
+                              --set main.extraParameters[1].name=clusterGroup.subscriptions.acm.channel --set main.extraParameters[1].value=${CHANNEL} \
+                              --set main.extraparameters[2].name=mce_iib.source --set main.extraParameters[2].value=redhat-operators \
+                              --set main.extraParameters[3].name=mce_iib.channel --set main.extraParameters[3].values=stable-2.5" install
       environment:
         KUBEADMINPASS: "{{ kubeadmin_pass }}"
         OPERATOR: advanced-cluster-management
