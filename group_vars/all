@@ -50,7 +50,7 @@ additional_trust_bundle: |
   U8LwiGLfCl7vTrz+27FHTCx0IBxU
   -----END CERTIFICATE-----
 
-vm_pool: "fast"
+vm_pool: "default"
 clusters:
   sno1:
     cpus: 12
