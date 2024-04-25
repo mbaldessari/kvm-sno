@@ -46,6 +46,7 @@ imageDigestSources:
 
 sshKey: |
   {{ sshkey | regex_replace('"', '') }}
+  {{ sshkey2 | regex_replace('"', '') }}
 {% if additional_trust_bundle is defined %}
 additionalTrustBundle: |
 {{ additional_trust_bundle | indent(2, True) }}
