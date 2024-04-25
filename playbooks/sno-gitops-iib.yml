@@ -10,7 +10,6 @@
     gitrepo: https://github.com/validatedpatterns/multicloud-gitops
     gitbranch: main
     hub: sno1
-    spoke: sno2
   tasks:
     - name: Fail if iib is not defined
       ansible.builtin.fail:
@@ -22,7 +21,6 @@
         path: "~/{{ item }}-kubeconfig"
       with_items: 
         - "{{ hub }}"
-        - "{{ spoke }}"
       register: kubeconfig_files
 
     - name: Verifying if files exists
