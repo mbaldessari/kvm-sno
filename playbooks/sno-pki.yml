@@ -11,7 +11,19 @@
     - name: Reset ca folder
       ansible.builtin.shell: |
         rm -rf "{{ ca_folder }}"
-        mkdir "{{ ca_folder }}"
+        mkdir -p "{{ ca_folder }}"
+
+    - name: Does the firefox profile exist
+      ansible.builtin.stat:
+        path: "{{ firefox_profile }}"
+      register: profile_path
+
+    - name: Init firefox profile path
+      ansible.builtin.shell: |
+        mkdir -p "{{ firefox_profile }}"
+
+      when: not profile_path.stat.exists
+
 
     - name: Fetch all CAs for each cluster
       ansible.builtin.shell: |
