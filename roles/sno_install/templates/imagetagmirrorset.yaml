@@ -1,0 +1,27 @@
+apiVersion: config.openshift.io/v1
+kind: ImageTagMirrorSet
+metadata:
+  name: disconnected-lab
+spec:
+  imageTagMirrors:
+    - mirrors:
+      - fw.int.rhx/ocp/ubi8/ubi-minimal
+      source: registry.access.redhat.com/ubi8/ubi-minimal
+    - mirrors:
+      - fw.int.rhx/ocp/ubi9/ubi-minimal
+      source: registry.access.redhat.com/ubi9/ubi-minimal
+    - mirrors:
+      - fw.int.rhx:5001
+      source: quay.io
+    - mirrors:
+      - fw.int.rhx:5002
+      source: ghcr.io
+    - mirrors:
+      - fw.int.rhx:5003
+      source: registry.redhat.io
+    - mirrors:
+      - fw.int.rhx:5004
+      source: docker.io
+    - mirrors:
+      - fw.int.rhx:5005
+      source: gcr.io
