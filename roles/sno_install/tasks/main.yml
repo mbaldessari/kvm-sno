@@ -183,9 +183,6 @@
   retries: 150
   delay: 30
 
-- name: Set up PKI steps
-  ansible.builtin.include_tasks: pki-setup.yml
-
 - name: Apply imagetagmirrorset
   tags:
     - imagetagmirrorset
@@ -225,6 +222,10 @@
   until: lvm is not failed
   retries: 10
   delay: 2
+
+# We do something productive while we wait for the LVM bits to install
+- name: Set up PKI steps
+  ansible.builtin.include_tasks: pki-setup.yml
 
 - name: Install LVM Cluster
   tags:
