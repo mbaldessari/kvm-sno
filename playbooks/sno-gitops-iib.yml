@@ -8,16 +8,21 @@
   vars:
     mcgtempfolder: "~/sno-mcg"
     gitrepo: https://github.com/validatedpatterns/multicloud-gitops
+    gitbranch: main
+    hub: sno1
+    spoke: sno2
   tasks:
-    - name: Fail if node or iib are not defined
+    - name: Fail if iib is not defined
       ansible.builtin.fail:
-        msg: "IIB or NODE not defined"
-      when: iib is not defined or node is not defined or iib == "" or node == ""
+        msg: "IIB is not defined"
+      when: iib is not defined or iib == ""
 
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
         path: "~/{{ item }}-kubeconfig"
-      with_items: "{{ snos | intersect(node) }}"
+      with_items: 
+        - "{{ hub }}"
+        - "{{ spoke }}"
       register: kubeconfig_files
 
     - name: Verifying if files exists
@@ -31,7 +36,7 @@
     - name: Enable SNO internal registry
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG=~/{{ node }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
         oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
 
@@ -49,14 +54,15 @@
     - name: Clone git repo
       ansible.builtin.git:
         repo: "{{ gitrepo }}"
+        version: "{{ gitbranch }}"
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
     - name: Load IIB "{{ iib }}"
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG=~/{{ node }}-kubeconfig
-        make load-iib &> /tmp/iib-ansible-{{ node }}.log
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        make load-iib &> /tmp/iib-ansible-{{ hub }}.log
       environment:
         KUBEADMINPASS: "{{ kubeadmin_pass }}"
         OPERATOR: openshift-gitops-operator
@@ -65,10 +71,10 @@
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
 
-    - name: Install pattern on HUB/{{ node }}
+    - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG=~/{{ node }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         export CHANNEL=$(oc get -n openshift-marketplace packagemanifests -l "catalog=iib-${IIB}" --field-selector "metadata.name=${OPERATOR}" -o jsonpath='{.items[0].status.defaultChannel}')
         make EXTRA_HELM_OPTS="--set main.gitops.operatorSource=iib-${IIB} --set main.gitops.channel=${CHANNEL}" install
       environment:
