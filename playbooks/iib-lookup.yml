@@ -54,7 +54,7 @@
       ansible.builtin.set_fact:
         iib: "{{ iib_image.split(':')[-1] }}"
 
-    - name: print IIB
+    - name: Print IIB
       ansible.builtin.debug:
         msg: "{{ iib }}"
 
