@@ -1,0 +1,65 @@
+---
+- name: IIB CI playbook
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  vars:
+    rh_url: "https://datagrepper.engineering.redhat.com/raw?topic=/topic/VirtualTopic.eng.ci.redhat-container-image.index.built&delta=15780000&contains=%s"
+    operator: "openshift-gitops-1-gitops-operator-bundle"
+    used_version: "v4.14"
+    output_ocp_versions: {}
+  tasks:
+    - name: Set url fact
+      ansible.builtin.set_fact:
+        url: "{{ rh_url | format(operator) }}"
+
+    - name: Fetch URI
+      ansible.builtin.uri:
+        url: "{{ url }}"
+        return_content: true
+      register: jsoncontent
+
+    - name: Setting content
+      ansible.builtin.set_fact:
+        content: "{{ jsoncontent['content'] | from_json }}"
+
+    - name: Set messages fact
+      ansible.builtin.set_fact:
+        raw_messages: "{{ content.raw_messages }}"
+
+    # The when clause is because if we already have an IIB for an ocp version we do not
+    # want to override it (combine will always override existing keys)
+    # Reason for this is that the messages are sorted last first and we only want the
+    # last entries
+    - name: Set output
+      ansible.builtin.set_fact:
+        output_ocp_versions: "{{ output_ocp_versions | combine({item['msg']['index']['ocp_version']: {'indeximage': item['msg']['index']['index_image'], 'bundleimage': item['msg']['index']['added_bundle_images'][0]}}) }}"
+      loop: "{{ raw_messages }}"
+      when: item['msg']['index']['ocp_version'] is not in output_ocp_versions
+      loop_control:
+        label: "{{ item['msg']['index']['ocp_version'] }}"
+
+    - name: Print OCP versions for "{{ operator }}"
+      ansible.builtin.debug:
+        msg: "{{ item.key }} -> {{ item.value }}"
+      loop: "{{ output_ocp_versions | dict2items }}"
+      loop_control:
+        label: "{{ item.key }}"
+
+    - name: Fetch IIB image
+      ansible.builtin.set_fact:
+        iib_image: "{{ output_ocp_versions[used_version].indeximage }}"
+
+    - name: Fetch IIB
+      ansible.builtin.set_fact:
+        iib: "{{ iib_image.split(':')[-1] }}"
+
+    - name: print IIB
+      ansible.builtin.debug:
+        msg: "{{ iib }}"
+
+    - name: Write iib on to file
+      ansible.builtin.copy:
+        content: "{{ iib }}"
+        dest: "/tmp/gitops-iib"
+        mode: 0644
