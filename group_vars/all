@@ -21,6 +21,8 @@ sshkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 pullsecret: "{{ lookup('file', '~/.pullsecret.json') }}"
 kubeadmin_pass: "{{ lookup('file', '~/.kubeadminpass') }}"
 bridge_interface: "br0"
+ca_folder: "/tmp/sno-ca"
+firefox_profile: "/home/michele/.mozilla/firefox/1u0ue9rm.OpenShift-1708184658172"
 mac_prefix: "52:54:00:00:01"
 http_proxy: http://192.168.66.254:3128/
 https_proxy: https://192.168.66.254:3130/

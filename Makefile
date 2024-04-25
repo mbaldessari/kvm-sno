@@ -30,7 +30,6 @@ ocp-mirror: ## Reads ocp_versions list and makes a mirror
 .PHONY: sno
 sno: ## Install an SNO vm on kuemper host
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-install.yml
-	make sno-pki
 
 .PHONY: sno-nomirror
 sno-nomirror: ## Install SNO without using docker pull through caches (needed for IIB)

@@ -183,6 +183,9 @@
   retries: 150
   delay: 30
 
+- name: Set up PKI steps
+  ansible.builtin.include_tasks: pki-setup.yml
+
 - name: Apply imagetagmirrorset
   tags:
     - imagetagmirrorset
