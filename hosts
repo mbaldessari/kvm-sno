@@ -5,17 +5,17 @@ kuemper.int.rhx ansible_user=root
 fw.int.rhx ansible_user=michele
 
 [giteas]
-gitea.ocplab.ocp ansible_user=michele ansible_host=192.168.66.140
+gitea.ocplab.ocp ansible_user=michele ansible_host=192.168.66.140 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
 [rhels]
-rhel1.ocplab.ocp ansible_user=michele ansible_host=192.168.66.130
-rhel2.ocplab.ocp ansible_user=michele ansible_host=192.168.66.131
+rhel1.ocplab.ocp ansible_user=michele ansible_host=192.168.66.130 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+rhel2.ocplab.ocp ansible_user=michele ansible_host=192.168.66.131 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
 [rhel1]
-rhel1.ocplab.ocp ansible_user=michele
+rhel1.ocplab.ocp ansible_user=michele ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
 [rhel2]
-rhel2.ocplab.ocp ansible_user=michele
+rhel2.ocplab.ocp ansible_user=michele ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
 [build_control]
 localhost ansible_user=michele
