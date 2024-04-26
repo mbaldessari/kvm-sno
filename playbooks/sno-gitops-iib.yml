@@ -74,7 +74,7 @@
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
         export CHANNEL=$(oc get -n openshift-marketplace packagemanifests -l "catalog=iib-${IIB}" --field-selector "metadata.name=${OPERATOR}" -o jsonpath='{.items[0].status.defaultChannel}')
-        make EXTRA_HELM_OPTS="--set main.gitops.operatorSource=iib-${IIB} --set main.gitops.channel=${CHANNEL}" install
+        make EXTRA_HELM_OPTS="--set main.gitops.operatorSource=iib-${IIB} --set main.gitops.channel=${CHANNEL}" install &> /tmp/mcg-gitops-install-{{ hub }}.log
       environment:
         KUBEADMINPASS: "{{ kubeadmin_pass }}"
         OPERATOR: openshift-gitops-operator
@@ -82,3 +82,25 @@
         INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+
+    - name: Wait for all argo apps to be green
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        make argo-healthcheck
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argo
+      until: argo is not failed
+
+    - name: Wait for ManagedCluster API to show up
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        oc api-resources | grep cluster.open-cluster-management.io/v1 | grep ManagedCluster
+      retries: 50
+      delay: 20
+      register: managedcluster_api
+      until: managedcluster_api is not failed
