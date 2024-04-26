@@ -226,6 +226,8 @@
 # We do something productive while we wait for the LVM bits to install
 - name: Set up PKI steps
   ansible.builtin.import_tasks: pki-setup.yml
+  delegate_to: localhost
+  become: false
   tags:
     - pki
 
