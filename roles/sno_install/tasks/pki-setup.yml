@@ -13,11 +13,11 @@
     mkdir -p "{{ firefox_profile }}"
   when: not profile_path.stat.exists
 
+# KUBECONFIG certificate-authority-data has the CA only for the API endpoint, we want all of them
+#/home/michele/Bin/yq '.clusters[0].cluster.certificate-authority-data' {{ item }}-kubeconfig | base64 -d > "{{ ca_folder }}/{{ item }}-ca-api"
 - name: Fetch all CAs for each cluster
   ansible.builtin.shell: |
-    set -e -o pipefail
-    # KUBECONFIG certificate-authority-data has the CA only for the API endpoint, we want all of them
-    #/home/michele/Bin/yq '.clusters[0].cluster.certificate-authority-data' {{ item }}-kubeconfig | base64 -d > "{{ ca_folder }}/{{ item }}-ca-api"
+    set -x -e -o pipefail
     export KUBECONFIG=/home/michele/{{ item }}-kubeconfig
     oc get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
   with_items: "{{ snos }}"

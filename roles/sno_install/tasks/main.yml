@@ -225,7 +225,9 @@
 
 # We do something productive while we wait for the LVM bits to install
 - name: Set up PKI steps
-  ansible.builtin.include_tasks: pki-setup.yml
+  ansible.builtin.import_tasks: pki-setup.yml
+  tags:
+    - pki
 
 - name: Install LVM Cluster
   tags:
