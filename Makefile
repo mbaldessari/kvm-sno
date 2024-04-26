@@ -1,4 +1,4 @@
-SNOS ?= sno1,sno2,sno3,sno4,sno5,sno6,sno7,sno8,sno9,sno10
+SNOS ?= sno1,sno2,sno3,sno4,sno5
 #,sno11,sno12,sno13,sno14,sno15,sno16,sno17,sno18,sno19,sno20
 NODE ?= sno1
 IIB ?=
