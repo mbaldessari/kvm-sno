@@ -47,6 +47,7 @@ services --disabled=mlocate-updatedb,mlocate-updatedb.timer,geoclue,avahi-daemon
 timezone Europe/Rome
 user --name=michele --shell=/bin/zsh --groups=wheel --iscrypted --password="{{ passwd }}"
 sshkey --username=michele "{{ ssh_pubkey }}"
+sshkey --username=michele "{{ sshkey2 }}"
 text
 
 %packages
