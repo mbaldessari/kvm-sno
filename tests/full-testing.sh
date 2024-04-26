@@ -10,6 +10,10 @@ LOGDIR="/var/log/vp-testing/${TODAY}"
 sudo mkdir -p "${LOGDIR}"
 sudo chown -R michele: "${LOGDIR}"
 
+# We kick off the setting up of the work SNOs in the background
+# That way they can chug along while we test gitops-iib etc
+make SNOS=sno1,sno2,sno3,sno4,sno5,sno6 sno-destroy sno &> "${LOGDIR}/mcg-fresh.log" &
+
 # Destroy testing VMs first
 make SNOS=sno10,sno11,sno12 sno-destroy sno &> "${LOGDIR}/mcg-sno.log"
 
@@ -27,5 +31,3 @@ ret_mcg=$?
 if [ $ret_mcg -eq 0 ] && [ $ret_gitops_iib ]; then
     make SNOS=sno10,sno11,sno12 sno-destroy gitea-destroy &> "${LOGDIR}/mcg-destroy-after.log"
 fi
-make SNOS=sno1,sno2,sno3,sno4,sno5,sno6,sno7,sno8,sno9,sno10,sno11,sno12 sno-destroy &> "${LOGDIR}/mcg-destroy.log"
-make SNOS=sno1,sno2,sno3,sno4,sno5,sno6,sno7,sno8,sno9 sno &> "${LOGDIR}/mcg-fresh-install.log"
