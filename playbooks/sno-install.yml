@@ -3,6 +3,6 @@
   hosts: "{{ snos | default('snohosts') }}"
   gather_facts: false
   become: true
-  strategy: free
+  strategy: ansible.builtin.free
   roles:
     - sno_install
