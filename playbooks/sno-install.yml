@@ -3,6 +3,6 @@
   hosts: "{{ snos | default('snohosts') }}"
   gather_facts: false
   become: true
-  strategy: linear
+  strategy: free
   roles:
     - sno_install

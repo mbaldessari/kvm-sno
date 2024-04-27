@@ -1,6 +1,6 @@
 ---
 - name: Destroy SNO cluster
-  hosts: kvm
+  hosts: "{{ snos | default('snohosts') }}"
   gather_facts: false
   become: true
   roles:

@@ -11,13 +11,13 @@
   when: 
     - item is match("sno.*")
     - 'item in all_vms.list_vms'
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Remove sno tempfolders
   ansible.builtin.file:
     path: "{{ tempfolder }}/{{ item }}"
     state: absent
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Delete sno kubeconfig file locally if they exist
   delegate_to: localhost
@@ -26,4 +26,4 @@
   ansible.builtin.file:
     path: "~/{{ item }}-kubeconfig"
     state: absent
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"

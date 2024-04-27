@@ -1,2 +1,0 @@
-- Parallelize everything via ansible
-  We could abuse the inventory and create one fake host per sno and get out of the current serial design more easily
