@@ -1,16 +1,24 @@
 ---
+- name: Print vars
+  ansible.builtin.debug:
+    msg: "{{ inventory_hostname }} - {{ inventory_hostname_short }}"
+
+# - name: osti
+#   ansible.builtin.fail:
+#     msg: "OPS"
+
 - name: Remove folders
   ansible.builtin.file:
     path: "{{ tempfolder }}/{{ item }}"
     state: absent
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Create folders
   ansible.builtin.file:
     path: "{{ tempfolder }}/{{ item }}"
     state: directory
     recurse: true
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Template one install-config.yaml for reference
   ansible.builtin.template:
@@ -24,7 +32,7 @@
     src: ./templates/install-config.yaml.j2
     dest: "{{ tempfolder }}/{{ item }}/install-config.yaml"
     mode: "0640"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Create ocp manifests
   ansible.builtin.shell: |
@@ -32,7 +40,7 @@
     {{ mirrorfolder }}/{{ ocp_version }}/openshift-install --dir={{ item }} create manifests
   args:
     chdir: "{{ tempfolder }}"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 # Not working yet?!
 - name: Template machineconfig for kernel args
@@ -40,7 +48,7 @@
     src: ./templates/machineconfig-kargs.yaml
     dest: "{{ tempfolder }}/{{ item }}/openshift/99-openshift-machineconfig-kargs.yaml"
     mode: "0644"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 # This is because single-node-ignition-config removes the manifests
 - name: Copy manifests in another folder for debuggability
@@ -50,7 +58,7 @@
     cp -avf * .backupfiles/
   args:
     chdir: "{{ tempfolder }}/{{ item }}"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Create ocp folder and run openshift-install
   ansible.builtin.shell: |
@@ -58,7 +66,7 @@
     {{ mirrorfolder }}/{{ ocp_version }}/openshift-install --dir={{ item }} create single-node-ignition-config
   args:
     chdir: "{{ tempfolder }}"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 # - name: Inject kernel args
 #   ansible.builtin.shell: |
@@ -67,7 +75,7 @@
 #         "{{ tempfolder }}/{{ item }}/bootstrap-in-place-for-live-iso.ign" | \
 #         jq '.ignition.version="3.3.0"' > "{{ tempfolder }}/tmp-{{ item }}.ign" 
 #     cp -f "{{ tempfolder }}/tmp-{{ item }}.ign" "{{ tempfolder }}/{{ item }}/bootstrap-in-place-for-live-iso.ign"
-#   with_items: "{{ snos }}"
+#   with_items: "{{ inventory_hostname_short }}"
 
 - name: Run coreos ignition embedding
   ansible.builtin.shell: |
@@ -79,7 +87,7 @@
         iso ignition embed -fi bootstrap-in-place-for-live-iso.ign "rhcos-live.iso"
   args:
     chdir: "{{ tempfolder }}"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Create SNO VM
   ansible.builtin.command: >-
@@ -100,7 +108,7 @@
     --graphics spice,listen=127.0.0.1
     --noautoconsole
     --boot menu=on,useserial=on,uefi
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
   retries: 10
   delay: 10
   register: vm_creation
@@ -114,19 +122,19 @@
   retries: 100
   delay: 10
   until: running is not failed
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Start "{{ item }}"
   ansible.builtin.command: |
     virsh start "{{ item }}"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Wait for node to be Ready
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc get nodes | grep "{{ item }}" | grep -v NotReady
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
   register: cluster_info
   until: cluster_info is not failed
   retries: 100
@@ -139,7 +147,7 @@
     src: ./templates/lvm-base.yaml
     dest: "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
     mode: "0644"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Template out lvm cluster
   tags:
@@ -148,19 +156,19 @@
     src: ./templates/lvm-cluster.yaml
     dest: "{{ tempfolder }}/{{ item }}"
     mode: "0644"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Fetch kubeconfig file
   ansible.posix.synchronize:
     mode: pull
     src: "{{ tempfolder }}/{{ item }}/auth/kubeconfig"
     dest: "~/{{ item }}-kubeconfig"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Fix permissions
   ansible.builtin.shell: |
     chmod 0600 "/home/michele/{{ item }}-kubeconfig"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
   delegate_to: localhost
 
 - name: Template out imagetagmirrorset 
@@ -170,14 +178,14 @@
     src: ./templates/imagetagmirrorset.yaml
     dest: "{{ tempfolder }}/{{ item }}"
     mode: "0644"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Wait for console to be up
   ansible.builtin.uri:
     url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
     validate_certs: false
     follow_redirects: all
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
   register: uri
   until: uri is not failed
   retries: 150
@@ -190,7 +198,7 @@
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/imagetagmirrorset.yaml"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
   register: imagetagmirrorset
   until: imagetagmirrorset is not failed
   retries: 20
@@ -203,7 +211,7 @@
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch secret -n kube-system kubeadmin --type json \
       -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
   when: kubeadmin_pass is defined
   register: kubepass
   until: kubepass is not failed
@@ -217,7 +225,7 @@
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
   register: lvm
   until: lvm is not failed
   retries: 10
@@ -242,10 +250,10 @@
   retries: 50
   delay: 20
   until: lvmcluster is not failed
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Remove isos from /ramfs to free up ramfs
   ansible.builtin.shell: |
     set -e -o pipefail
     rm -f "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"

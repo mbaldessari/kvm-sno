@@ -1,7 +1,8 @@
 ---
 - name: Install SNO clusters
-  hosts: kvm
+  hosts: "{{ snos | default('snohosts') }}"
   gather_facts: false
   become: true
+  strategy: linear
   roles:
     - sno_install

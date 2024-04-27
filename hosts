@@ -1,6 +1,28 @@
 [kvm]
 kuemper.int.rhx ansible_user=root
 
+[snohosts]
+sno1 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno2 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno3 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno4 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno5 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno6 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno7 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno8 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno9 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno10 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno11 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno12 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno13 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno14 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno15 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno16 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno17 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno18 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno19 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+sno20 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+
 [fw]
 fw.int.rhx ansible_user=michele
 
