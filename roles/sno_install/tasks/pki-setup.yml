@@ -20,7 +20,7 @@
     set -x -e -o pipefail
     export KUBECONFIG=/home/michele/{{ item }}-kubeconfig
     oc get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Delete exiting CAs from SNOs
   ansible.builtin.shell: |
@@ -32,7 +32,7 @@
     done
   args:
     chdir: "{{ ca_folder }}"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Import all CAs into my firefox profile
   ansible.builtin.shell: |
@@ -44,5 +44,5 @@
     done
   args:
     chdir: "{{ ca_folder }}"
-  with_items: "{{ snos }}"
+  with_items: "{{ inventory_hostname_short }}"
 
