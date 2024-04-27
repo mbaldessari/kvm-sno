@@ -11,8 +11,8 @@ sudo mkdir -p "${LOGDIR}"
 sudo chown -R michele: "${LOGDIR}"
 
 START=$(date -Iminutes)
-echo "Start: ${START}"
-echo "Start: ${START}" > "${LOGDIR}/start.txt"
+echo "${START}: Start"
+echo "${START}: Start" > "${LOGDIR}/start.txt"
 
 TIME=$(date -Iminutes)
 echo "${TIME}: Destroying and then installing test SNOs"
@@ -51,5 +51,11 @@ echo "${TIME}: Install fresh SNOs"
 make sno-destroy sno &> "${LOGDIR}/mcg-fresh.log"
 
 END=$(date -Iminutes)
-echo "End: ${END}"
-echo "End: ${END}" > "${LOGDIR}/end.txt"
+echo "${END}: End"
+echo "${END}: End" > "${LOGDIR}/end.txt"
+
+S1=$(date +%s.%N -d "${START}")
+E1=$(date +%s.%N -d "${END}")
+D=$(echo "${E1}-${S1}" | bc)
+TOTAL=$(date +%M -d @0${D})
+echo "Total minutes: ${TOTAL}"
