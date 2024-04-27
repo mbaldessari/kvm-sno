@@ -20,6 +20,7 @@
     recurse: true
   with_items: "{{ inventory_hostname_short }}"
 
+# This is okay as we only want to see the template
 - name: Template one install-config.yaml for reference
   ansible.builtin.template:
     src: ./templates/install-config.yaml.j2
