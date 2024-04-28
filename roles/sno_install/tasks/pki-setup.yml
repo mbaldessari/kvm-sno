@@ -26,9 +26,9 @@
 - name: Delete exiting CAs from SNOs
   ansible.builtin.shell: |
     set -e -o pipefail
-    rm -f {{ ca_folder }}/cert*
+    rm -f {{ ca_folder }}/{{ item }}-cert*pem
     awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
-    for i in cert*; do
+    for i in {{ item }}-cert*; do
       certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" || true
     done
   args:
@@ -40,7 +40,7 @@
     set -e -o pipefail
     rm -f {{ ca_folder }}/cert*
     awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
-    for i in cert*; do
+    for i in {{ item }}-cert*; do
       certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
     done
   args:

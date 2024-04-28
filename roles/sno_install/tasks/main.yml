@@ -1,12 +1,4 @@
 ---
-- name: Print vars
-  ansible.builtin.debug:
-    msg: "{{ inventory_hostname }} - {{ inventory_hostname_short }}"
-
-# - name: osti
-#   ansible.builtin.fail:
-#     msg: "OPS"
-
 - name: Remove folders
   ansible.builtin.file:
     path: "{{ tempfolder }}/{{ item }}"
