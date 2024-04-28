@@ -23,8 +23,24 @@ echo "${START}: Start"
 echo "${START}: Start" > "${LOGDIR}/start.txt"
 
 TIME=$(date -Iminutes)
+echo "${TIME}: Install gitea in the background"
+make gitea-destroy gitea &> "${LOGDIR}/gitea-install.log" &
+
+# We kick off the setting up of the work SNOs in the background
+# That way they can chug along while we test gitops-iib etc
+TIME=$(date -Iminutes)
+echo "${TIME}: Install fresh SNOs in the background"
+make sno-destroy sno &> "${LOGDIR}/mcg-fresh.log" &
+
+TIME=$(date -Iminutes)
 echo "${TIME}: Destroying and then installing test SNOs"
-make SNOS=sno10,sno11,sno12 sno-destroy sno &> "${LOGDIR}/mcg-sno.log"
+make SNOS=sno10,sno11,sno12 sno-destroy sno &> "${LOGDIR}/mcg-test-snos.log"
+
+# We kick off the setting up of the work SNOs in the background
+# That way they can chug along while we test gitops-iib etc
+TIME=$(date -Iminutes)
+echo "${TIME}: Install fresh SNOs in the background"
+make sno-destroy sno &> "${LOGDIR}/mcg-fresh.log" &
 
 set +e
 # This gets the latest IIB for gitops and writes it to /tmp/gitops-iib
@@ -35,10 +51,6 @@ TIME=$(date -Iminutes)
 echo "${TIME}: Install mcg via gitops IIB"
 make gitops-iib EXTRA_VARS="-e iib=$(cat /tmp/gitops-iib) -e hub=sno12" &> "${LOGDIR}/gitops-iib.log"
 ret_gitops_iib=$?
-
-TIME=$(date -Iminutes)
-echo "${TIME}: Install gitea"
-make gitea-destroy gitea &> "${LOGDIR}/gitea-install.log" 
 
 TIME=$(date -Iminutes)
 echo "${TIME}: Install mcg on sno10 and sno11"
@@ -52,11 +64,6 @@ if [ $ret_mcg -eq 0 ] && [ $ret_gitops_iib ]; then
     make SNOS=sno10,sno11,sno12 sno-destroy gitea-destroy &> "${LOGDIR}/mcg-destroy-after.log"
 fi
 
-# We kick off the setting up of the work SNOs in the background
-# That way they can chug along while we test gitops-iib etc
-TIME=$(date -Iminutes)
-echo "${TIME}: Install fresh SNOs"
-make sno-destroy sno &> "${LOGDIR}/mcg-fresh.log"
 
 END=$(date -Iminutes)
 echo "${END}: End"
@@ -65,6 +72,6 @@ echo "${END}: End" > "${LOGDIR}/end.txt"
 S1=$(date +%s.%N -d "${START}")
 E1=$(date +%s.%N -d "${END}")
 D=$(echo "${E1}-${S1}" | bc)
-TOTAL=$(date +%M -d @0${D})
+TOTAL=$(echo "${D}/60" | bc)
 echo "Total minutes: ${TOTAL}"
 sudo rm -f "${LOCKFILE}"
