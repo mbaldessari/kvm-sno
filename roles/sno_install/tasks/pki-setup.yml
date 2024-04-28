@@ -50,4 +50,3 @@
   delay: 10
   register: pki_import
   until: pki_import is not failed
-

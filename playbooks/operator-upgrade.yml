@@ -1,5 +1,5 @@
 ---
-- name: Install MCG on the three clusters
+- name: Test operator upgrades
   hosts: localhost
   connection: local
   gather_facts: false
@@ -14,6 +14,8 @@
     from_version: 6.6.6
     to_version: 6.6.7
     registry: fw.int.rhx/bandini
+    mcggitrepo: https://github.com/validatedpatterns/multicloud-gitops
+    mcggitbranch: main
   tasks:
     - name: Print versions
       ansible.builtin.debug:
@@ -40,8 +42,10 @@
         version: "{{ upgrade_from }}"
         dest: "{{ vp_operator_tempfolder }}/patterns-operator"
         clone: true
+      tags:
+        - operator-install
 
-    - name: Build and upload operator version {{ upgrade_from }}
+    - name: Build and upload operator version {{ upgrade_from }} - {{ from_version }}
       ansible.builtin.shell: |
         export KUBECONFIG=~/{{ node }}-kubeconfig
         make VERSION={{ from_version }} IMAGE_TAG_BASE={{ registry }}/patterns-operator \
@@ -49,6 +53,8 @@
             CHANNELS=fast bundle generate docker-build docker-push bundle-build bundle-push catalog-build catalog-push catalog-install
       args:
         chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
+      tags:
+        - operator-install
 
     - name: Wait for the catalog source to show up
       ansible.builtin.shell: |
@@ -58,6 +64,8 @@
       delay: 10
       register: catalogsource_ret
       until: catalogsource_ret is not failed
+      tags:
+        - operator-install
 
     - name: Install the subscription and operator
       ansible.builtin.shell: |
@@ -80,6 +88,8 @@
           sourceNamespace: openshift-marketplace
         EOF
         oc apply -f /tmp/vp-sub.yaml
+      tags:
+        - operator-install
 
     - name: Wait for the operator to be installed
       ansible.builtin.shell: |
@@ -89,3 +99,68 @@
       delay: 10
       register: patterninstall_ret
       until: patterninstall_ret is not failed
+      tags:
+        - operator-install
+
+    - name: Clone mcg git repo
+      ansible.builtin.git:
+        repo: "{{ mcggitrepo }}"
+        version: "{{ mcggitbranch }}"
+        dest: "{{ mcgtempfolder }}/multicloud-gitops"
+        clone: true
+
+    # We explicitely do not wait for all the argo apps to be green
+    # if vault is up and unsealed it is good enough
+    - name: Install pattern on HUB/{{ node }}
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ node }}-kubeconfig
+        ./pattern.sh make install &> /tmp/vp-operator-upgrade-mcg.log
+      args:
+        chdir: "{{ vp_operator_tempfolder }}/multicloud-gitops"
+
+    - name: Reset git repo to upgraded version
+      ansible.builtin.git:
+        repo: "{{ gitrepo }}"
+        version: "{{ upgrade_to }}"
+        dest: "{{ vp_operator_tempfolder }}/patterns-operator"
+        force: true
+      tags:
+        - operator-upgrade
+
+    - name: Prepare catalog/template.yaml
+      ansible.builtin.shell: |
+        cat > catalog/template.yaml<<EOF
+        schema: olm.package
+        name: patterns-operator
+        defaultChannel: fast
+        ---
+        schema: olm.channel
+        package: patterns-operator
+        name: fast
+        entries:
+        - name: patterns-operator.v{{ from_version }}
+        - name: patterns-operator.v\$VERSION
+          replaces: patterns-operator.v{{ from_version }}
+        ---
+        schema: olm.bundle
+        image: fw.int.rhx/bandini/patterns-operator-bundle:v{{ from_version }}
+        ---
+        schema: olm.bundle
+        image: \$BUNDLE_IMG
+        EOF
+      args:
+        chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
+      tags:
+        - operator-upgrade
+
+    - name: Build and upload upgraded operator version {{ upgrade_to }} - {{ to_version }}
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/{{ node }}-kubeconfig
+        make VERSION={{ to_version }} IMAGE_TAG_BASE={{ registry }}/patterns-operator \
+            IMG={{ registry }}/patterns-operator:{{ to_version }} \
+            CHANNELS=fast bundle generate docker-build docker-push bundle-build bundle-push catalog-build catalog-push catalog-install
+      args:
+        chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
+      tags:
+        - operator-upgrade

@@ -1,0 +1,61 @@
+---
+- name: Fetch Certs from remote node
+  hosts: kvm
+  become_user: michele
+  vars:
+    remote_ca_dir: "/tmp/kuemper-ca"
+  tasks:
+    - name: Fetch sno-ca folder from remote
+      ansible.builtin.synchronize:
+        src: "{{ ca_folder }}"
+        dest: "{{ remote_ca_dir }}"
+        recursive: true
+        mode: pull
+
+    - name: Fetch local
+      delegate_to: localhost
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ls -1 sno*ca-kube | cut -f1 -d-
+      args:
+        chdir: "{{ remote_ca_dir }}/sno-ca"
+      register: ca_files
+
+    - name: Set sno cert var
+      ansible.builtin.set_fact:
+        sno_certs: "{{ ca_files.stdout_lines }}"
+
+    - name: debug
+      delegate_to: localhost
+      ansible.builtin.debug:
+        msg: "{{ sno_certs}}"
+        
+    - name: Delete exiting CAs from SNOs
+      delegate_to: localhost
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -f {{ remote_ca_dir }}/sno-ca/{{ item }}-cert*pem
+        awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ remote_ca_dir }}/sno-ca/{{ item }}-ca-kube
+        for i in {{ item }}-cert*; do
+          certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" || true
+        done
+      args:
+        chdir: "{{ ca_folder }}"
+      with_items: "{{ sno_certs }}"
+    
+    - name: Import all CAs into my firefox profile
+      delegate_to: localhost
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -f {{ remote_ca_dir }}/sno-ca/{{ item }}-cert*pem
+        awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ remote_ca_dir }}/sno-ca/{{ item }}-ca-kube
+        for i in {{ item }}-cert*; do
+          certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
+        done
+      args:
+        chdir: "{{ ca_folder }}"
+      with_items: "{{ sno_certs }}"
+      retries: 10
+      delay: 10
+      register: pki_import
+      until: pki_import is not failed

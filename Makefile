@@ -59,6 +59,10 @@ gitea: ## Create RHEL vms
 gitea-destroy: ## Destroy installed RHELs VMS
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/gitea-destroy.yml
 
+.PHONY: get-remote-pki
+get-remote-pki: ## Get certs installed from remote node
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/get-remote-pki.yml
+
 ##@ Day-2 Tasks
 .PHONY: mcg
 mcg: ## Install multicloud gitops on all three snos
