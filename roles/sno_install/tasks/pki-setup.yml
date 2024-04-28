@@ -46,4 +46,8 @@
   args:
     chdir: "{{ ca_folder }}"
   with_items: "{{ inventory_hostname_short }}"
+  retries: 10
+  delay: 10
+  register: pki_import
+  until: pki_import is not failed
 

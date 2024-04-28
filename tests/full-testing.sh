@@ -67,3 +67,4 @@ E1=$(date +%s.%N -d "${END}")
 D=$(echo "${E1}-${S1}" | bc)
 TOTAL=$(date +%M -d @0${D})
 echo "Total minutes: ${TOTAL}"
+sudo rm -f "${LOCKFILE}"
