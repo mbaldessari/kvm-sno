@@ -2,6 +2,7 @@
   ansible.builtin.shell: |
     mkdir -p "{{ ca_folder }}"
     rm -f "{{ ca_folder }}/{{ item }}-ca-kube"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Does the firefox profile exist
   ansible.builtin.stat:
@@ -26,7 +27,7 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     rm -f {{ ca_folder }}/cert*
-    awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
+    awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
     for i in cert*; do
       certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" || true
     done
@@ -38,7 +39,7 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     rm -f {{ ca_folder }}/cert*
-    awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
+    awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
     for i in cert*; do
       certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
     done

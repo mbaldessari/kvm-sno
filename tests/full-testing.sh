@@ -6,6 +6,14 @@ git pull > /dev/null
 # Deploy MCG on sno10 and sno11 
 TODAY=$(date +%F)
 LOGDIR="/var/log/vp-testing/${TODAY}"
+LOCKFILE=/var/local/lock-vp-testing.lock
+if [ -e "${LOCKFILE}" ]; then
+   echo "vp testing is already running" | tee -a $logfile
+   exit 1
+fi
+
+trap "sudo rm -f ${LOCKFILE}; exit" INT TERM EXIT
+sudo touch "${LOCKFILE}"
 
 sudo mkdir -p "${LOGDIR}"
 sudo chown -R michele: "${LOGDIR}"
