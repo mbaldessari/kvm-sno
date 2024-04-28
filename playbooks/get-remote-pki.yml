@@ -31,7 +31,7 @@
       ansible.builtin.fetch:
         src: "/home/michele/{{ item }}-kubeconfig"
         dest: "/home/michele/"
-        flat: yes
+        flat: true
       with_items: "{{ sno_certs }}"
       failed_when: false
 
@@ -47,7 +47,7 @@
       args:
         chdir: "{{ ca_folder }}"
       with_items: "{{ sno_certs }}"
-    
+
     - name: Import all CAs into my firefox profile
       delegate_to: localhost
       ansible.builtin.shell: |

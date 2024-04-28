@@ -54,7 +54,7 @@
         dest: "{{ mirrorfolder }}/{{ item }}"
         remote_src: true
       with_items: "{{ ocp_versions }}"
-    
+
     - name: Register iso URL
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -73,4 +73,3 @@
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
       with_items: "{{ iso_url_raw.results }}"
-

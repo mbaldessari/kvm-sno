@@ -62,4 +62,4 @@
       ansible.builtin.copy:
         content: "{{ iib }}"
         dest: "/tmp/gitops-iib"
-        mode: 0644
+        mode: "0644"

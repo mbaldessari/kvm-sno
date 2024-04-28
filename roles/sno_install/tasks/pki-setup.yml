@@ -15,7 +15,7 @@
   when: not profile_path.stat.exists
 
 # KUBECONFIG certificate-authority-data has the CA only for the API endpoint, we want all of them
-#/home/michele/Bin/yq '.clusters[0].cluster.certificate-authority-data' {{ item }}-kubeconfig | base64 -d > "{{ ca_folder }}/{{ item }}-ca-api"
+# /home/michele/Bin/yq '.clusters[0].cluster.certificate-authority-data' {{ item }}-kubeconfig | base64 -d > "{{ ca_folder }}/{{ item }}-ca-api"
 - name: Fetch all CAs for each cluster
   ansible.builtin.shell: |
     set -x -e -o pipefail

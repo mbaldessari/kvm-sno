@@ -43,7 +43,7 @@
     # The initial template was created via:
     # ./oc mirror init --registry {{ oc_mirror_local_registry }}/{{ item }} > imageset-config.yaml
     # See: https://docs.openshift.com/container-platform/4.14/installing/disconnected_install/installing-mirroring-disconnected.html
-    - name: Create imageset-config 
+    - name: Create imageset-config
       ansible.builtin.template:
         src: ../templates/imageset-config.yaml
         dest: "{{ local_mirror }}/imageset-config.yaml"

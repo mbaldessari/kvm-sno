@@ -161,7 +161,7 @@
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /etc/minio/public.crt
-        mode: 0640
+        mode: "0640"
         owner: minio-user
         group: minio-user
       with_items:
@@ -171,7 +171,7 @@
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /etc/minio/private.key
-        mode: 0640
+        mode: "0640"
         owner: minio-user
         group: minio-user
       with_items:
@@ -229,7 +229,7 @@
       ansible.builtin.copy:
         src: "{{ item }}"
         dest: /etc/gitea
-        mode: 0640
+        mode: "0640"
         owner: git
         group: git
       with_items:
@@ -294,7 +294,7 @@
           Authorization: token {{ gitea_token.stdout }}
         body_format: json
         body: "{{ migration_info }}"
-        return_content: yes
+        return_content: true
         status_code: [201, 409]
       register: migrate_out
       retries: 10
@@ -320,7 +320,7 @@
           Authorization: token {{ gitea_token.stdout }}
         body_format: json
         body: "{{ migration_info2 }}"
-        return_content: yes
+        return_content: true
         status_code: [201, 409]
       register: migrate_out
       retries: 10
@@ -342,7 +342,7 @@
           Authorization: token {{ gitea_token.stdout }}
         body_format: json
         body: "{{ ssh_info }}"
-        return_content: yes
+        return_content: true
         status_code: 201
       register: ssh_out
       retries: 10

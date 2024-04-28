@@ -8,7 +8,7 @@
   ansible.builtin.shell: |
     virsh destroy {{ item }}
     virsh undefine --nvram --remove-all-storage {{ item }}
-  when: 
+  when:
     - item is match("sno.*")
     - 'item in all_vms.list_vms'
   with_items: "{{ inventory_hostname_short }}"

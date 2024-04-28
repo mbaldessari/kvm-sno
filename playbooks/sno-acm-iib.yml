@@ -20,7 +20,7 @@
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
         path: "~/{{ item }}-kubeconfig"
-      with_items: 
+      with_items:
         - "{{ hub }}"
         - "{{ spoke }}"
       register: kubeconfig_files
@@ -122,4 +122,3 @@
       delay: 30
       register: acm1
       until: acm1 is not failed
-

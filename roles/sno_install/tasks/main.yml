@@ -66,7 +66,7 @@
 #     set -e -o pipefail
 #     jq '. += {"kernelArguments": { "shouldExist": ["mitigations=off", "selinux=0"] }}' \
 #         "{{ tempfolder }}/{{ item }}/bootstrap-in-place-for-live-iso.ign" | \
-#         jq '.ignition.version="3.3.0"' > "{{ tempfolder }}/tmp-{{ item }}.ign" 
+#         jq '.ignition.version="3.3.0"' > "{{ tempfolder }}/tmp-{{ item }}.ign"
 #     cp -f "{{ tempfolder }}/tmp-{{ item }}.ign" "{{ tempfolder }}/{{ item }}/bootstrap-in-place-for-live-iso.ign"
 #   with_items: "{{ inventory_hostname_short }}"
 
@@ -164,7 +164,7 @@
   with_items: "{{ inventory_hostname_short }}"
   delegate_to: localhost
 
-- name: Template out imagetagmirrorset 
+- name: Template out imagetagmirrorset
   tags:
     - imagetagmirrorset
   ansible.builtin.template:

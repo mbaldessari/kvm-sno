@@ -55,4 +55,3 @@
       until: uri is not failed
       retries: 100
       delay: 20
-
