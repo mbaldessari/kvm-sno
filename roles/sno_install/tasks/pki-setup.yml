@@ -1,7 +1,7 @@
 - name: Reset ca folder
   ansible.builtin.shell: |
-    rm -rf "{{ ca_folder }}"
     mkdir -p "{{ ca_folder }}"
+    rm -f "{{ ca_folder }}/{{ item }}-ca-kube"
 
 - name: Does the firefox profile exist
   ansible.builtin.stat:
