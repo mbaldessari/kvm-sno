@@ -2,6 +2,7 @@
 - name: Fetch Certs from remote node
   hosts: kvm
   become_user: michele
+  gather_facts: false
   vars:
     remote_ca_dir: "/tmp/kuemper-ca"
   tasks:
