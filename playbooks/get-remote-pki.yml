@@ -25,11 +25,14 @@
       ansible.builtin.set_fact:
         sno_certs: "{{ ca_files.stdout_lines }}"
 
-    - name: debug
-      delegate_to: localhost
-      ansible.builtin.debug:
-        msg: "{{ sno_certs}}"
-        
+    - name: Fetch remote kubeconfig files
+      ansible.builtin.fetch:
+        src: "/home/michele/{{ item }}-kubeconfig"
+        dest: "/home/michele/"
+        flat: yes
+      with_items: "{{ sno_certs }}"
+      failed_when: false
+
     - name: Delete exiting CAs from SNOs
       delegate_to: localhost
       ansible.builtin.shell: |
