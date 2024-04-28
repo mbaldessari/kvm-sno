@@ -64,6 +64,10 @@ gitea-destroy: ## Destroy installed RHELs VMS
 mcg: ## Install multicloud gitops on all three snos
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml
 
+.PHONY: operator-upgrade
+operator-upgrade: ## Tests operator upgrade
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/operator-upgrade.yml
+
 .PHONY: mcg-disconnected
 mcg-disconnected: ## Install multicloud gitops on all three snos using an internal gitea
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg-disconnected.yml

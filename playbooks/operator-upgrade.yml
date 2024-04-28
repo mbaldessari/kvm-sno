@@ -1,0 +1,91 @@
+---
+- name: Install MCG on the three clusters
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  become_user: michele
+  vars:
+    vp_operator_tempfolder: "~/sno-vp-operator"
+    gitrepo: https://github.com/validatedpatterns/patterns-operator
+    upgrade_from: 0.0.45
+    upgrade_to: main
+    node: sno1
+    from_version: 6.6.6
+    to_version: 6.6.7
+    registry: fw.int.rhx/bandini
+  tasks:
+    - name: Print versions
+      ansible.builtin.debug:
+        msg: "Testing upgrade on {{ node }} from {{ upgrade_from }} to {{ upgrade_to }} of {{ gitrepo }}"
+
+    - name: Check that all kubeconfig files exist
+      ansible.builtin.stat:
+        path: "~/{{ node }}-kubeconfig"
+      register: kubeconfig_file
+
+    - name: Verifying if file exists
+      ansible.builtin.debug:
+        msg: "Kubeconfig exists"
+      failed_when: not kubeconfig_file.stat.exists
+
+    - name: Delete temporary folder
+      ansible.builtin.file:
+        path: "{{ vp_operator_tempfolder }}"
+        state: absent
+
+    - name: Clone git repo
+      ansible.builtin.git:
+        repo: "{{ gitrepo }}"
+        version: "{{ upgrade_from }}"
+        dest: "{{ vp_operator_tempfolder }}/patterns-operator"
+        clone: true
+
+    - name: Build and upload operator version {{ upgrade_from }}
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/{{ node }}-kubeconfig
+        make VERSION={{ from_version }} IMAGE_TAG_BASE={{ registry }}/patterns-operator \
+            IMG={{ registry }}/patterns-operator:{{ from_version }} \
+            CHANNELS=fast bundle generate docker-build docker-push bundle-build bundle-push catalog-build catalog-push catalog-install
+      args:
+        chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
+
+    - name: Wait for the catalog source to show up
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/{{ node }}-kubeconfig
+        oc get -n openshift-marketplace packagemanifests -l "catalog=test-pattern-operator" --field-selector "metadata.name=patterns-operator"
+      retries: 20
+      delay: 10
+      register: catalogsource_ret
+      until: catalogsource_ret is not failed
+
+    - name: Install the subscription and operator
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG=~/{{ node }}-kubeconfig
+        cat > /tmp/vp-sub.yaml<<EOF
+        apiVersion: operators.coreos.com/v1alpha1
+        kind: Subscription
+        metadata:
+          name: patterns-operator
+          namespace: openshift-operators
+          labels:
+            operators.coreos.com/patterns-operator.openshift-operators: ""
+        spec:
+          channel: fast
+          installPlanApproval: Automatic
+          name: patterns-operator
+          #source: community-operators
+          source: test-pattern-operator
+          sourceNamespace: openshift-marketplace
+        EOF
+        oc apply -f /tmp/vp-sub.yaml
+
+    - name: Wait for the operator to be installed
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/{{ node }}-kubeconfig
+        oc get -n openshift-marketplace packagemanifests -l "catalog=test-pattern-operator" --field-selector "metadata.name=patterns-operator"  &> /dev/null
+      retries: 20
+      delay: 10
+      register: patterninstall_ret
+      until: patterninstall_ret is not failed
