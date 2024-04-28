@@ -97,27 +97,48 @@
         oc get -n openshift-marketplace packagemanifests -l "catalog=test-pattern-operator" --field-selector "metadata.name=patterns-operator"  &> /dev/null
       retries: 20
       delay: 10
+      register: operatorinstall_ret
+      until: operatorinstall_ret is not failed
+      tags:
+        - operator-install
+
+    - name: Install MCG pattern
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/{{ node }}-kubeconfig
+        cat > /tmp/vp-upgrade-pattern.yaml<<EOF
+        apiVersion: gitops.hybrid-cloud-patterns.io/v1alpha1
+        kind: Pattern
+        metadata:
+          name: multicloud-gitops
+          namespace: openshift-operators
+        spec:
+          experimentalCapabilities: initcontainers
+          clusterGroupName: hub
+          multiSourceConfig:
+            enabled: true
+          gitSpec:
+            targetRepo: {{ mcggitrepo }}
+            targetRevision: {{ mcggitbranch }}
+        EOF
+        oc apply -f /tmp/vp-upgrade-pattern.yaml
+      retries: 20
+      delay: 10
       register: patterninstall_ret
       until: patterninstall_ret is not failed
       tags:
         - operator-install
 
-    - name: Clone mcg git repo
-      ansible.builtin.git:
-        repo: "{{ mcggitrepo }}"
-        version: "{{ mcggitbranch }}"
-        dest: "{{ vp_operator_tempfolder }}/multicloud-gitops"
-        clone: true
-
-    # We explicitely do not wait for all the argo apps to be green
-    # if vault is up and unsealed it is good enough
-    - name: Install pattern on HUB/{{ node }}
+    - name: Wait for clusterwide gitops
       ansible.builtin.shell: |
-        set -e -o pipefail
+        set -e
         export KUBECONFIG=~/{{ node }}-kubeconfig
-        ./pattern.sh make install &> /tmp/vp-operator-upgrade-mcg.log
-      args:
-        chdir: "{{ vp_operator_tempfolder }}/multicloud-gitops"
+        oc get namespace/openshift-gitops
+      retries: 50
+      delay: 10
+      register: clusterwide_gitops
+      until: clusterwide_gitops is not failed
+      tags:
+        - operator-install
 
     - name: Reset git repo to upgraded version
       ansible.builtin.git:
