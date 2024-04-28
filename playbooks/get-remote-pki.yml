@@ -2,12 +2,13 @@
 - name: Fetch Certs from remote node
   hosts: kvm
   become_user: michele
+  become: true
   gather_facts: false
   vars:
     remote_ca_dir: "/tmp/kuemper-ca"
   tasks:
     - name: Fetch sno-ca folder from remote
-      ansible.builtin.synchronize:
+      ansible.posix.synchronize:
         src: "{{ ca_folder }}"
         dest: "{{ remote_ca_dir }}"
         recursive: true

@@ -106,7 +106,7 @@
       ansible.builtin.git:
         repo: "{{ mcggitrepo }}"
         version: "{{ mcggitbranch }}"
-        dest: "{{ mcgtempfolder }}/multicloud-gitops"
+        dest: "{{ vp_operator_tempfolder }}/multicloud-gitops"
         clone: true
 
     # We explicitely do not wait for all the argo apps to be green
