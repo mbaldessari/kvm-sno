@@ -8,20 +8,18 @@
   vars:
     vehicletempfolder: "~/sno-connected-vehicle"
     gitrepo: https://github.com/validatedpatterns/connected-vehicle-architecture
+    gitbranch: main
+    node: sno1
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
-        path: "~/{{ item }}-kubeconfig"
-      with_items: "{{ snos }}"
+        path: "~/{{ node }}-kubeconfig"
       register: kubeconfig_files
 
     - name: Verifying if files exists
       ansible.builtin.debug:
-        msg: "File {{ item.stat.path }} exist"
-      loop: "{{ kubeconfig_files.results }}"
-      loop_control:
-        label: "{{ item.stat.path }}"
-      failed_when: not item.stat.exists
+        msg: "File exist"
+      failed_when: not kubeconfig_files.stat.exists
 
     - name: Delete temporary folder
       ansible.builtin.file:
@@ -38,12 +36,13 @@
       ansible.builtin.git:
         repo: "{{ gitrepo }}"
         dest: "{{ vehicletempfolder }}/connected-vehicle-architecture"
+        version: "{{ gitbranch }}"
         clone: true
 
     - name: Install pattern on HUB/sno1
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG=~/sno1-kubeconfig
+        export KUBECONFIG=~/{{ node }}-kubeconfig
         ./pattern.sh make install &> /tmp/connected1.log
       args:
         chdir: "{{ vehicletempfolder }}/connected-vehicle-architecture"
