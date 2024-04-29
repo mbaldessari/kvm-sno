@@ -45,7 +45,7 @@
           certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" || true
         done
       args:
-        chdir: "{{ ca_folder }}"
+        chdir: "{{ remote_ca_dir }}/sno-ca"
       with_items: "{{ sno_certs }}"
 
     - name: Import all CAs into my firefox profile
@@ -58,7 +58,7 @@
           certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
         done
       args:
-        chdir: "{{ ca_folder }}"
+        chdir: "{{ remote_ca_dir }}/sno-ca"
       with_items: "{{ sno_certs }}"
       retries: 10
       delay: 10
