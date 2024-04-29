@@ -11,7 +11,7 @@
     gitbranch: main
     node: sno1
   tasks:
-    - name: Check that all kubeconfig files exist
+    - name: Check that all kubeconfig files exist {{ node }}
       ansible.builtin.stat:
         path: "~/{{ node }}-kubeconfig"
       register: kubeconfig_files
@@ -46,3 +46,15 @@
         ./pattern.sh make install &> /tmp/connected1.log
       args:
         chdir: "{{ vehicletempfolder }}/connected-vehicle-architecture"
+
+    - name: Wait for all argo apps to be green
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ node }}-kubeconfig
+        make argo-healthcheck
+      args:
+        chdir: "{{ vehicletempfolder }}/connected-vehicle-architecture"
+      retries: 30
+      delay: 20
+      register: argo
+      until: argo is not failed
