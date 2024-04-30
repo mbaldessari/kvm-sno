@@ -1,5 +1,5 @@
 ---
-- name: Install MCG using an IIB that is not gitops
+- name: Install MCG using an ACM and MCE from IIBs
   hosts: localhost
   connection: local
   gather_facts: false
@@ -12,10 +12,15 @@
     hub: sno1
     spoke: sno2
   tasks:
-    - name: Fail if iib is not defined
+    - name: Fail if iib_acm is not defined
       ansible.builtin.fail:
         msg: "IIB is not defined"
-      when: iib is not defined or iib == ""
+      when: iib_acm is not defined or iib_acm == ""
+
+    - name: Fail if iib_mce is not defined
+      ansible.builtin.fail:
+        msg: "IIB is not defined"
+      when: iib_mce is not defined or iib_mce == ""
 
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
@@ -58,33 +63,33 @@
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
-    - name: Load IIB "{{ iib }}"
+    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }}"
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        make load-iib &> /tmp/iib-ansible-{{ hub }}.log
+        make load-iib &> /tmp/iib-acm-ansible-{{ hub }}.log
       environment:
         KUBEADMINPASS: "{{ kubeadmin_pass }}"
-        OPERATOR: advanced-cluster-management
-        IIB: "{{ iib }}"
-        INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib }}"
+        OPERATOR: advanced-cluster-management,multicluster-engine
+        INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_acm }},{{ iib_index_image_base }}/iib:{{ iib_mce }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+
+    - name: OSTI
+      ansible.builtin.fail:
+        msg: "STOP"
 
     - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        export CHANNEL=$(oc get -n openshift-marketplace packagemanifests -l "catalog=iib-${IIB}" --field-selector "metadata.name=${OPERATOR}" -o jsonpath='{.items[0].status.defaultChannel}')
-        make EXTRA_HELM_OPTS="--set main.extraParameters[0].name=clusterGroup.subscriptions.acm.source --set main.extraParameters[0].value=iib-${IIB} \
-                              --set main.extraParameters[1].name=clusterGroup.subscriptions.acm.channel --set main.extraParameters[1].value=${CHANNEL} \
-                              --set main.extraParameters[2].name=acm.mce_operator.source --set main.extraParameters[2].value=redhat-operators \
-                              --set main.extraParameters[3].name=acm.mce_operator.channel --set main.extraParameters[3].value=stable-2.5" install &> /tmp/acm-iib-install.log
-      environment:
-        KUBEADMINPASS: "{{ kubeadmin_pass }}"
-        OPERATOR: advanced-cluster-management
-        IIB: "{{ iib }}"
-        INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib }}"
+        export ACM_CHANNEL=$(oc get -n openshift-marketplace packagemanifests -l "catalog=iib-{{ iib_acm }}" --field-selector "metadata.name=advanced-cluster-management" -o jsonpath='{.items[0].status.defaultChannel}')
+        export MCE_CHANNEL=$(oc get -n openshift-margetplace packagemanifests -l "catalog=iib-{{ iib_mce }}" --field-selector "metadata.name=multicluster-engine" -o jsonpath='{.items[0].status.defaultChannel}')
+
+        make EXTRA_HELM_OPTS="--set main.extraParameters[0].name=clusterGroup.subscriptions.acm.source --set main.extraParameters[0].value=iib-{{ iib_acm }} \
+                              --set main.extraParameters[1].name=clusterGroup.subscriptions.acm.channel --set main.extraParameters[1].value=${ACM_CHANNEL} \
+                              --set main.extraParameters[2].name=acm.mce_operator.source --set main.extraParameters[2].value="iib-{{ iib_mce }}" \
+                              --set main.extraParameters[3].name=acm.mce_operator.channel --set main.extraParameters[3].value=${MCE_CHANNEL}" install &> /tmp/acm-iib-install.log
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
 
