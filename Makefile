@@ -33,7 +33,7 @@ sno: ## Install an SNO vm on kuemper host
 
 .PHONY: sno-nomirror
 sno-nomirror: ## Install SNO without using docker pull through caches (needed for IIB)
-	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' --extra-vars='{enable_local_docker_mirror: False}' playbooks/sno-install.yml
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' --extra-vars='{enable_local_docker_mirror: False}' $(EXTRA_VARS) playbooks/sno-install.yml
 
 .PHONY: ssl
 ssl: ## Install my SSL certs on the SNO nodes
