@@ -26,6 +26,12 @@ TIME=$(date -Iminutes)
 echo "${TIME}: Install gitea in the background"
 make gitea-destroy gitea &> "${LOGDIR}/gitea-install.log" &
 
+# We kick off the setting up of the work SNOs in the background
+# That way they can chug along while we test gitops-iib etc
+TIME=$(date -Iminutes)
+echo "${TIME}: Install fresh SNOs in the background"
+make sno-destroy sno &> "${LOGDIR}/mcg-fresh.log" &
+
 
 TIME=$(date -Iminutes)
 echo "${TIME}: Destroying and then installing test SNOs"
@@ -57,12 +63,6 @@ if [ $ret_acm_iib -eq 0 ] && [ $ret_gitops_iib ]; then
     echo "${TIME}: Everyting worked ok. Destroying test SNOs"
     make SNOS=sno10,sno11,sno12 sno-destroy gitea-destroy &> "${LOGDIR}/mcg-destroy-after.log"
 fi
-
-# We kick off the setting up of the work SNOs in the background
-# That way they can chug along while we test gitops-iib etc
-TIME=$(date -Iminutes)
-echo "${TIME}: Install fresh SNOs in the background"
-make sno-destroy sno &> "${LOGDIR}/mcg-fresh.log"
 
 END=$(date -Iminutes)
 echo "${END}: End"
