@@ -44,7 +44,7 @@ echo "${TIME}: Lookup gitops IIB"
 ansible-playbook playbooks/iib-lookup.yml &> "${LOGDIR}/lookup-iib.log"
 TIME=$(date -Iminutes)
 echo "${TIME}: Install mcg via gitops IIB"
-make gitops-iib EXTRA_VARS="-e iib=$(cat /tmp/gitops-iib) -e hub=sno12" &> "${LOGDIR}/gitops-iib-gitops.log"
+make gitops-iib EXTRA_VARS="-e iib=$(cat /tmp/openshift-gitops-1-gitops-operator-bundle-iib) -e hub=sno12" &> "${LOGDIR}/gitops-iib-gitops.log"
 ret_gitops_iib=$?
 
 # Let's do the ACM + MCE IIB dance here
