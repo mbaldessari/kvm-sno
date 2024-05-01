@@ -27,6 +27,10 @@
       ansible.builtin.set_fact:
         raw_messages: "{{ content.raw_messages }}"
 
+    - name: Debug
+      ansible.builtin.debug:
+        msg: "{{ raw_messages }}"
+
     # The when clause is because if we already have an IIB for an ocp version we do not
     # want to override it (combine will always override existing keys)
     # Reason for this is that the messages are sorted last first and we only want the
@@ -61,5 +65,5 @@
     - name: Write iib on to file
       ansible.builtin.copy:
         content: "{{ iib }}"
-        dest: "/tmp/gitops-iib"
+        dest: "/tmp/{{ operator }}-iib"
         mode: "0644"
