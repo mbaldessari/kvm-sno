@@ -8,8 +8,8 @@ ocp_versions:
 
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
-ocp_version: "4.14.19"
-#ocp_version: "4.15.9"
+#ocp_version: "4.14.19"
+ocp_version: "4.15.9"
 arch: "x86_64"
 mirrorfolder: /var/lib/libvirt/ocp-mirror
 tempfolder: "/ramfs/sno-temp-folder"
