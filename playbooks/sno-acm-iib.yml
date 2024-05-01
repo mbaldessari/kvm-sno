@@ -75,10 +75,6 @@
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
 
-    - name: OSTI
-      ansible.builtin.fail:
-        msg: "STOP"
-
     - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
         set -e -o pipefail
