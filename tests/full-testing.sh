@@ -30,7 +30,7 @@ make gitea-destroy gitea &> "${LOGDIR}/gitea-install.log" &
 # That way they can chug along while we test gitops-iib etc
 TIME=$(date -Iminutes)
 echo "${TIME}: Install fresh SNOs"
-make sno-destroy sno &> "${LOGDIR}/mcg-fresh.log"
+make EXTRA_VARS="-e vm_pool=fast" sno-destroy sno &> "${LOGDIR}/mcg-fresh.log"
 
 
 TIME=$(date -Iminutes)

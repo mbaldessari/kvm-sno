@@ -1,0 +1,2 @@
+- Stop using lvm storage and just use the minio test vm (?)
+- Add some forcing of argo refresh to speed up mcg
