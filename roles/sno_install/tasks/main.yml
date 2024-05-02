@@ -102,6 +102,8 @@
     --noautoconsole
     --boot menu=on,useserial=on,uefi
   with_items: "{{ inventory_hostname_short }}"
+  # We serialize this because the *virt stack seems to get fragile when things are run concurrently
+  throttle: 1
   retries: 10
   delay: 10
   register: vm_creation

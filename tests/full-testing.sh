@@ -29,7 +29,7 @@ make gitea-destroy gitea &> "${LOGDIR}/gitea-install.log" &
 # We kick off the setting up of the work SNOs in the background
 # That way they can chug along while we test gitops-iib etc
 TIME=$(date -Iminutes)
-echo "${TIME}: Install fresh SNOs in the background"
+echo "${TIME}: Install fresh SNOs"
 make sno-destroy sno &> "${LOGDIR}/mcg-fresh.log"
 
 
