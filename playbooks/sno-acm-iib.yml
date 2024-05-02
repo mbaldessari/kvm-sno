@@ -41,9 +41,12 @@
     - name: Enable SNO internal registry
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        export KUBECONFIG=~/{{ item }}-kubeconfig
         oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
         oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+      with_items:
+        - "{{ hub }}"
+        - "{{ spoke }}"
 
     - name: Delete temporary folder
       ansible.builtin.file:
@@ -63,7 +66,7 @@
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
-    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }}"
+    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }} on hub"
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG=~/{{ hub }}-kubeconfig
@@ -72,6 +75,18 @@
         KUBEADMINPASS: "{{ kubeadmin_pass }}"
         OPERATOR: advanced-cluster-management,multicluster-engine
         INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_acm }},{{ iib_index_image_base }}/iib:{{ iib_mce }}"
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+
+    - name: Load IIB {{ iib_mce }} on spoke"
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG=~/{{ spoke }}-kubeconfig
+        make load-iib &> /tmp/iib-acm-ansible-{{ spoke }}.log
+      environment:
+        KUBEADMINPASS: "{{ kubeadmin_pass }}"
+        OPERATOR: multicluster-engine
+        INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_mce }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
 
