@@ -66,10 +66,10 @@
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
-    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }} on hub"
+    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }} on {{ item }}"
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        export KUBECONFIG=~/{{ item }}-kubeconfig
         make load-iib &> /tmp/iib-acm-ansible-{{ hub }}.log
       environment:
         KUBEADMINPASS: "{{ kubeadmin_pass }}"
@@ -77,18 +77,8 @@
         INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_acm }},{{ iib_index_image_base }}/iib:{{ iib_mce }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-
-    - name: Load IIB {{ iib_mce }} on spoke"
-      ansible.builtin.shell: |
-        set -e
-        export KUBECONFIG=~/{{ spoke }}-kubeconfig
-        make load-iib &> /tmp/iib-acm-ansible-{{ spoke }}.log
-      environment:
-        KUBEADMINPASS: "{{ kubeadmin_pass }}"
-        OPERATOR: multicluster-engine
-        INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_mce }}"
-      args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      with_items:
+        - "{{ hub }}"
 
     - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
@@ -103,6 +93,20 @@
                               --set main.extraParameters[3].name=acm.mce_operator.channel --set main.extraParameters[3].value=${MCE_CHANNEL}" install &> /tmp/acm-iib-install.log
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+
+    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }} on {{ item }}"
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        make load-iib &> /tmp/iib-acm-ansible-{{ hub }}.log
+      environment:
+        KUBEADMINPASS: "{{ kubeadmin_pass }}"
+        OPERATOR: advanced-cluster-management,multicluster-engine
+        INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_acm }},{{ iib_index_image_base }}/iib:{{ iib_mce }}"
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      with_items:
+        - "{{ spoke }}"
 
     - name: Wait for all argo apps to be green
       ansible.builtin.shell: |
