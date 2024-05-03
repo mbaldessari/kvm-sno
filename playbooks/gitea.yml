@@ -7,7 +7,6 @@
     - name: Set root_wwn to be sure sda is the right disk
       ansible.builtin.set_fact:
         root_wwn: "disk/by-id/wwn-{{ giteas['gitea'].wwn }}"
-        extra_wwn: "disk/by-id/wwn-{{ giteas['gitea'].wwn2 }}"
 
     - name: Template kickstart file to the firewall where it is hosted
       ansible.builtin.template:
@@ -96,6 +95,10 @@
     upstream_repo2: "https://github.com/mbaldessari/argocd-tests"
     downstream_name2: "argocd-tests"
   tasks:
+    - name: Set extra_wwn to be sure sdb is the right disk
+      ansible.builtin.set_fact:
+        extra_wwn: "disk/by-id/wwn-{{ giteas['gitea'].wwn2 }}"
+
     - name: Wait for boxes
       ansible.builtin.wait_for_connection:
 
@@ -138,6 +141,7 @@
 
     - name: Create disks and mount
       ansible.builtin.shell: |
+        set -e
         mkfs.xfs "/dev/{{ extra_wwn }}"
         mkdir /mnt/data
         mount "/dev/{{ extra_wwn }}" /mnt/data
