@@ -98,7 +98,7 @@
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG=~/{{ item }}-kubeconfig
-        make load-iib &> /tmp/iib-acm-ansible-{{ hub }}.log
+        make load-iib &> /tmp/iib-acm-ansible-{{ spoke }}.log
       environment:
         KUBEADMINPASS: "{{ kubeadmin_pass }}"
         OPERATOR: advanced-cluster-management,multicluster-engine
