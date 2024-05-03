@@ -7,6 +7,7 @@
     - name: Set root_wwn to be sure sda is the right disk
       ansible.builtin.set_fact:
         root_wwn: "disk/by-id/wwn-{{ giteas['gitea'].wwn }}"
+        extra_wwn: "disk/by-id/wwn-{{ giteas['gitea'].wwn2 }}"
 
     - name: Template kickstart file to the firewall where it is hosted
       ansible.builtin.template:
@@ -137,17 +138,17 @@
 
     - name: Create disks and mount
       ansible.builtin.shell: |
-        mkfs.xfs /dev/sdb
+        mkfs.xfs "/dev/{{ extra_wwn }}"
         mkdir /mnt/data
-        mount /dev/sdb /mnt/data
+        mount /dev/{{ extra_wwn }}" /mnt/data
         mkdir -p /mnt/data/disk{1,2,3,4}
         chown -R minio-user: /mnt/data/disk{1,2,3,4}
 
-    - name: Add sdb in fstab
+    - name: Add {{ extra_wwn }} in fstab
       ansible.posix.mount:
         state: present
         path: /mnt/data
-        src: /dev/sdb
+        src: /dev/"{{ extra_wwn }}"
         fstype: xfs
 
     - name: Create minio folders
