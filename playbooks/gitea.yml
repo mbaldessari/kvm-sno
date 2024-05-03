@@ -140,7 +140,7 @@
       ansible.builtin.shell: |
         mkfs.xfs "/dev/{{ extra_wwn }}"
         mkdir /mnt/data
-        mount /dev/{{ extra_wwn }}" /mnt/data
+        mount "/dev/{{ extra_wwn }}" /mnt/data
         mkdir -p /mnt/data/disk{1,2,3,4}
         chown -R minio-user: /mnt/data/disk{1,2,3,4}
 
