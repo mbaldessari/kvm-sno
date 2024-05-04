@@ -53,9 +53,9 @@ additionalTrustBundle: |
 # see https://docs.openshift.com/container-platform/4.14/networking/configuring-a-custom-pki.html
 additionalTrustBundlePolicy: Always
 {% endif %}
-#{% if notjustyethttp_proxy is defined %}
+{% if http_proxy is defined %}
 proxy:
   httpProxy: {{ http_proxy }}
   httpsProxy: {{ https_proxy }}
   noProxy: {{ no_proxy }}
-#{% endif %}
+{% endif %}

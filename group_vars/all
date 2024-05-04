@@ -25,11 +25,11 @@ bridge_interface: "br0"
 ca_folder: "/tmp/sno-ca"
 firefox_profile: "/home/michele/.mozilla/firefox/1u0ue9rm.OpenShift-1708184658172"
 mac_prefix: "52:54:00:00:01"
-http_proxy: http://192.168.66.254:3128/
-https_proxy: https://192.168.66.254:3130/
+http_proxy: http://192.168.66.254:9000/
+https_proxy: http://192.168.66.254:9000/
 no_proxy: "{{ domain }},172.16.0.0/16,10.0.0.0/8,192.168.66.0/24"
 enable_local_docker_mirror: false
-enable_disconnected: true
+enable_disconnected: false
 iib_index_image_base: registry-proxy.engineering.redhat.com/rh-osbs
 additional_trust_bundle: |
   -----BEGIN CERTIFICATE-----
