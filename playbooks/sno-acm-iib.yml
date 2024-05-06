@@ -77,6 +77,7 @@
         INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_acm }},{{ iib_index_image_base }}/iib:{{ iib_mce }}"
         HTTP_PROXY: "{{ http_proxy }}"
         HTTPS_PROXY: "{{ https_proxy }}"
+        NO_PROXY: "{{ no_proxy }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
       with_items:
@@ -107,6 +108,7 @@
         INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_acm }},{{ iib_index_image_base }}/iib:{{ iib_mce }}"
         HTTP_PROXY: "{{ http_proxy }}"
         HTTPS_PROXY: "{{ https_proxy }}"
+        NO_PROXY: "{{ no_proxy }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
       with_items:
