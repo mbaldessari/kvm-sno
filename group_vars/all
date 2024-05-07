@@ -3,13 +3,13 @@
 ocp_versions:
   - "4.12.55"
   - "4.13.40"
-  - "4.14.19"
-  - "4.15.9"
+  - "4.14.24"
+  - "4.15.12"
 
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
 #ocp_version: "4.14.19"
-ocp_version: "4.15.9"
+ocp_version: "4.15.12"
 arch: "x86_64"
 mirrorfolder: /var/lib/libvirt/ocp-mirror
 tempfolder: "/ramfs/sno-temp-folder"
@@ -25,8 +25,10 @@ bridge_interface: "br0"
 ca_folder: "/tmp/sno-ca"
 firefox_profile: "/home/michele/.mozilla/firefox/1u0ue9rm.OpenShift-1708184658172"
 mac_prefix: "52:54:00:00:01"
-http_proxy: http://192.168.66.254:9000/
-https_proxy: http://192.168.66.254:9000/
+#http_proxy: http://192.168.66.254:9000/
+#https_proxy: http://192.168.66.254:9000/
+https_proxy: http://172.16.15.254:3128/
+http_proxy: http://172.16.15.254:3128/
 no_proxy: "{{ domain }},172.16.0.0/16,10.0.0.0/8,192.168.66.0/24"
 enable_local_docker_mirror: false
 enable_disconnected: true
