@@ -61,23 +61,38 @@
     chdir: "{{ tempfolder }}"
   with_items: "{{ inventory_hostname_short }}"
 
-# - name: Inject kernel args
-#   ansible.builtin.shell: |
-#     set -e -o pipefail
-#     jq '. += {"kernelArguments": { "shouldExist": ["mitigations=off", "selinux=0"] }}' \
-#         "{{ tempfolder }}/{{ item }}/bootstrap-in-place-for-live-iso.ign" | \
-#         jq '.ignition.version="3.3.0"' > "{{ tempfolder }}/tmp-{{ item }}.ign"
-#     cp -f "{{ tempfolder }}/tmp-{{ item }}.ign" "{{ tempfolder }}/{{ item }}/bootstrap-in-place-for-live-iso.ign"
-#   with_items: "{{ inventory_hostname_short }}"
+- name: Copy original iso to the customizable one
+  ansible.builtin.shell: |
+    cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
+  args:
+    chdir: "{{ tempfolder }}"
+  with_items: "{{ inventory_hostname_short }}"
 
 - name: Run coreos ignition embedding
   ansible.builtin.shell: |
     set -e
-    cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
     podman run --privileged --pull always --rm \
         -v /dev:/dev -v /run/udev:/run/udev -v "{{ tempfolder }}/{{ item }}:/data" \
         -w /data quay.io/coreos/coreos-installer:release \
         iso ignition embed -fi bootstrap-in-place-for-live-iso.ign "rhcos-live.iso"
+  args:
+    chdir: "{{ tempfolder }}"
+  with_items: "{{ inventory_hostname_short }}"
+
+- name: Run coreos ignition embedding (kargs)
+  ansible.builtin.shell: |
+    set -e
+    podman run --privileged --pull always --rm \
+        -v /dev:/dev -v /run/udev:/run/udev -v "{{ tempfolder }}/{{ item }}:/data" \
+        -w /data quay.io/coreos/coreos-installer:release \
+        iso customize \
+        --dest-device=/dev/sda \
+        --dest-karg-append "selinux=0" \
+        --dest-karg-append "mitigations=off" \
+        --live-karg-append "selinux=0" \
+        --live-karg-append "mitigations=off" \
+        --dest-ignition bootstrap-in-place-for-live-iso.ign \
+        -f "rhcos-live.iso"
   args:
     chdir: "{{ tempfolder }}"
   with_items: "{{ inventory_hostname_short }}"
