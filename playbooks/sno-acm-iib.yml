@@ -66,10 +66,10 @@
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
-    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }} on {{ item }}"
+    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }} on hub"
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG=~/{{ item }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         make load-iib &> /tmp/iib-acm-ansible-{{ hub }}.log
       environment:
         KUBEADMINPASS: "{{ kubeadmin_pass }}"
@@ -80,8 +80,24 @@
         # NO_PROXY: "{{ no_proxy }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      with_items:
-        - "{{ hub }}"
+
+    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }} on spoke asynchronously"
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG=~/{{ spoke }}-kubeconfig
+        make load-iib &> /tmp/iib-acm-ansible-{{ spoke }}.log
+      environment:
+        KUBEADMINPASS: "{{ kubeadmin_pass }}"
+        OPERATOR: advanced-cluster-management,multicluster-engine
+        INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_acm }},{{ iib_index_image_base }}/iib:{{ iib_mce }}"
+        # HTTP_PROXY: "{{ http_proxy }}"
+        # HTTPS_PROXY: "{{ https_proxy }}"
+        # NO_PROXY: "{{ no_proxy }}"
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      async: 3600 # Wait for 1h max and do not poll, because we want to start installing mcg in the meantime
+      poll: 0
+      register: spoke_iib
 
     - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
@@ -96,23 +112,6 @@
                               --set main.extraParameters[3].name=acm.mce_operator.channel --set main.extraParameters[3].value=${MCE_CHANNEL}" install &> /tmp/acm-iib-install.log
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-
-    - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }} on {{ item }}"
-      ansible.builtin.shell: |
-        set -e
-        export KUBECONFIG=~/{{ item }}-kubeconfig
-        make load-iib &> /tmp/iib-acm-ansible-{{ spoke }}.log
-      environment:
-        KUBEADMINPASS: "{{ kubeadmin_pass }}"
-        OPERATOR: advanced-cluster-management,multicluster-engine
-        INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib_acm }},{{ iib_index_image_base }}/iib:{{ iib_mce }}"
-        # HTTP_PROXY: "{{ http_proxy }}"
-        # HTTPS_PROXY: "{{ https_proxy }}"
-        # NO_PROXY: "{{ no_proxy }}"
-      args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      with_items:
-        - "{{ spoke }}"
 
     - name: Wait for all argo apps to be green
       ansible.builtin.shell: |
@@ -135,6 +134,14 @@
       delay: 20
       register: managedcluster_api
       until: managedcluster_api is not failed
+
+    - name: Make sure IIB loading on the spoke is complete
+      ansible.builtin.async_status:
+        jid: "{{ spoke_iib.ansible_job_id }}"
+      register: job_result
+      until: job_result.finished
+      retries: 100
+      delay: 20
 
     - name: Add {{ spoke }}
       ansible.builtin.set_fact:
