@@ -104,27 +104,3 @@
       delay: 20
       register: managedcluster_api
       until: managedcluster_api is not failed
-
-    - name: Wait for multicloud-gitops-group-one project to show up on spoke
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/{{ spoke }}-kubeconfig
-        oc get projects multicloud-gitops-group-one
-      args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      retries: 100
-      delay: 20
-      register: argo
-      until: argo is not failed
-
-    - name: Wait for all argo apps to be green on spoke
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/{{ spoke }}-kubeconfig
-        make argo-healthcheck
-      args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      retries: 100
-      delay: 20
-      register: argo
-      until: argo is not failed
