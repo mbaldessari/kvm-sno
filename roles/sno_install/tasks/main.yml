@@ -231,6 +231,7 @@
   ansible.builtin.import_tasks: pki-setup.yml
   delegate_to: localhost
   become: false
+  failed_when: false
   tags:
     - pki
 

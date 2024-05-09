@@ -65,5 +65,5 @@
     - name: Write iib on to file
       ansible.builtin.copy:
         content: "{{ iib }}"
-        dest: "/tmp/{{ operator }}-iib"
+        dest: "/tmp/{{ operator }}-iib-{{ hub }}"
         mode: "0644"

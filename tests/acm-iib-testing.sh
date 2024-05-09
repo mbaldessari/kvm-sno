@@ -3,14 +3,16 @@ set -e -o pipefail
 cd /home/michele/kvm-sno
 
 TODAY=$(date +%F)
-LOGDIR="/var/log/vp-testing/${TODAY}/acm-iib"
-LOCKFILE=/var/local/lock-vp-testing-acm-iib.lock
 HUB="${HUB:-sno4}"
 SPOKE="${SPOKE:-sno5}"
+LOCKFILE=/var/local/lock-vp-testing-acm-iib-${HUB}.lock
+LOGDIR="/var/log/vp-testing/${TODAY}/acm-iib/${HUB}"
 MYSNOS="${HUB},${SPOKE}"
 GITREPO="${GITREPO:-https://github.com/validatedpatterns/multicloud-gitops}"
 GITBRANCH="${GITBRANCH:-main}"
 REUSE_SNOS="${REUSE_SNOS:-false}"
+ACM_IIB="${ACM_IIB:-}"
+MCE_IIB="${MCE_IIB:-}"
 
 if [ -e "${LOCKFILE}" ]; then
    echo "vp testing is already running" | tee -a $logfile
@@ -39,11 +41,23 @@ set +e
 # Let's do the ACM + MCE IIB dance here
 TIME=$(date -Iminutes)
 echo "${TIME}: Lookup acm + mce IIB"
-ansible-playbook -e "operator=acm" playbooks/iib-lookup.yml &> "${LOGDIR}/lookup-iib-acm.log"
-ansible-playbook -e "operator=multicluster-engine" playbooks/iib-lookup.yml &> "${LOGDIR}/lookup-iib-mce.log"
+if [ -n ${ACM_IIB} ]; then
+  echo "User ACM IIB: ${ACM_IIB}"
+  sudo rm -f /tmp/acm-iib-${HUB}
+  echo "${ACM_IIB}" > /tmp/acm-iib-${HUB}
+else
+  ansible-playbook -e "operator=acm" -e "hub=${HUB}" playbooks/iib-lookup.yml &> "${LOGDIR}/lookup-iib-acm.log"
+fi
+if [ -n ${MCE_IIB} ]; then
+  echo "User MCE IIB: ${MCE_IIB}"
+  sudo rm -f /tmp/multicluster-engine-iib-${HUB}
+  echo "${MCE_IIB}" > /tmp/multicluster-engine-iib-${HUB}
+else
+  ansible-playbook -e "operator=multicluster-engine" -e "hub=${HUB}" playbooks/iib-lookup.yml &> "${LOGDIR}/lookup-iib-mce.log"
+fi
 TIME=$(date -Iminutes)
 echo "${TIME}: Install mcg via acm IIB"
-make acm-iib EXTRA_VARS="-e iib_acm=$(cat /tmp/acm-iib) -e iib_mce=$(cat /tmp/multicluster-engine-iib) -e gitrepo=${GITREPO} -e gitbranch=${GITBRANCH} -e hub=${HUB} -e spoke=${SPOKE}" &> "${LOGDIR}/acm-iib-gitops.log"
+make acm-iib EXTRA_VARS="-e iib_acm=$(cat /tmp/acm-iib-${HUB}) -e iib_mce=$(cat /tmp/multicluster-engine-iib-${HUB}) -e gitrepo=${GITREPO} -e gitbranch=${GITBRANCH} -e hub=${HUB} -e spoke=${SPOKE}" &> "${LOGDIR}/acm-iib-gitops.log"
 ret_acm_iib=$?
 # Both tests went fine
 if [ $ret_acm_iib -eq 0 ]; then 

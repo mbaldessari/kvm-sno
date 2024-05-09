@@ -22,6 +22,10 @@
     export KUBECONFIG=/home/michele/{{ item }}-kubeconfig
     oc get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
   with_items: "{{ inventory_hostname_short }}"
+  retries: 5
+  delay: 10
+  register: pki_import
+  until: pki_import is not failed
 
 - name: Delete exiting CAs from SNOs
   ansible.builtin.shell: |
@@ -34,6 +38,10 @@
   args:
     chdir: "{{ ca_folder }}"
   with_items: "{{ inventory_hostname_short }}"
+  retries: 5
+  delay: 10
+  register: pki_import
+  until: pki_import is not failed
 
 - name: Import all CAs into my firefox profile
   ansible.builtin.shell: |
