@@ -29,7 +29,7 @@ make SNOS=sno10,sno11,sno12 sno-destroy sno &> "${LOGDIR}/mcg-test-snos.log"
 set +e
 # Let's do the ACM + MCE IIB dance here
 TIME=$(date -Iminutes)
-echo "${TIME}: Lookup gitops IIB"
+echo "${TIME}: Lookup acm + mce IIB"
 ansible-playbook -e "operator=acm" playbooks/iib-lookup.yml &> "${LOGDIR}/lookup-iib-acm.log"
 ansible-playbook -e "operator=multicluster-engine" playbooks/iib-lookup.yml &> "${LOGDIR}/lookup-iib-mce.log"
 TIME=$(date -Iminutes)
@@ -46,8 +46,14 @@ echo "${TIME}: Install mcg via gitops IIB"
 make gitops-iib EXTRA_VARS="-e iib=$(cat /tmp/openshift-gitops-1-gitops-operator-bundle-iib) -e hub=sno12" &> "${LOGDIR}/gitops-iib-gitops.log"
 ret_gitops_iib=$?
 
-echo "${TIME}: Everyting worked ok. Destroying test SNOs"
-make SNOS=sno10,sno11,sno12 sno-destroy &> "${LOGDIR}/mcg-destroy-after.log"
+# Both tests went fine
+if [ $ret_acm_iib -eq 0 ] && [ $ret_gitops_iib -eq 0 ]; then 
+	echo "${TIME}: Everyting worked ok. Destroying test SNOs"
+	make SNOS=sno10,sno11,sno12 sno-destroy &> "${LOGDIR}/mcg-destroy-after.log"
+	NEWSNOS=sno1,sno2,sno3,sno4,sno5
+else # If one of the tests failed leave the VMs there and only deploy two snos
+	NEWSNOS=sno1,sno2
+fi
 
 TIME=$(date -Iminutes)
 echo "${TIME}: Install gitea in the background"
@@ -57,7 +63,8 @@ make gitea-destroy gitea &> "${LOGDIR}/gitea-install.log" &
 # That way they can chug along while we test gitops-iib etc
 TIME=$(date -Iminutes)
 echo "${TIME}: Install fresh SNOs"
-make EXTRA_VARS="-e vm_pool=fast" sno-destroy sno &> "${LOGDIR}/mcg-fresh.log"
+make sno-destroy &> "${LOGDIR}/mcg-fresh-destroy.log"
+make SNOS=${NEWSNOS} sno &> "${LOGDIR}/mcg-fresh.log"
 
 
 END=$(date -Iminutes)
