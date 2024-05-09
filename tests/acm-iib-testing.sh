@@ -10,6 +10,7 @@ SPOKE="${SPOKE:-sno5}"
 MYSNOS="${HUB},${SPOKE}"
 GITREPO="${GITREPO:-https://github.com/validatedpatterns/multicloud-gitops}"
 GITBRANCH="${GITBRANCH:-main}"
+REUSE_SNOS="${REUSE_SNOS:-false}"
 
 if [ -e "${LOCKFILE}" ]; then
    echo "vp testing is already running" | tee -a $logfile
@@ -23,11 +24,16 @@ sudo mkdir -p "${LOGDIR}"
 sudo chown -R michele: "${LOGDIR}"
 
 START=$(date -Iminutes)
-echo "${START}: Start testing ACM IIB on ${HUB} - ${SPOKE}"
+echo "${START}: Start testing ACM IIB on ${HUB} - ${SPOKE}: ${GITREPO} - ${GITBRANCH}"
 
-TIME=$(date -Iminutes)
-echo "${TIME}: Destroying and then installing test SNOs"
-make SNOS=${MYSNOS} sno-destroy sno &> "${LOGDIR}/acm-iib-test-snos.log"
+if [ ${REUSE_SNOS} = "false" ]; then
+  echo "Recreate SNOs ${HUB} - ${SPOKE}"
+  TIME=$(date -Iminutes)
+  echo "${TIME}: Destroying and then installing test SNOs"
+  make SNOS=${MYSNOS} sno-destroy sno &> "${LOGDIR}/acm-iib-test-snos.log"
+else
+  echo "Reuse SNOs ${HUB} - ${SPOKE}"
+fi
 
 set +e
 # Let's do the ACM + MCE IIB dance here
