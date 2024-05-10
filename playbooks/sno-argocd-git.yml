@@ -6,7 +6,7 @@
   become: true
   become_user: michele
   vars:
-    argotempfolder: "/tmp/argocd-git/"
+    argotempfolder: "/home/michele/argocd-git/"
     argorepo: https://github.com/argoproj/argo-cd/
     argobranch: master
     node: sno1
@@ -45,16 +45,18 @@
         set -e -o pipefail
         git reset --hard
         git clean -dxf
-        curl https://acksyn.org/files/argocd/0001-Add-DOCKER_RUN_OPTIONAL_ARGS-variable-when-calling-d.patch | git am
-        curl https://acksyn.org/files/argocd/0002-WIP-openshift-build-fixes.patch | git am
+        curl -L https://acksyn.org/files/argocd/0001-Disable-selinux-in-podman.patch | git am
+        curl -L https://acksyn.org/files/argocd/0001-Avoid-reusing-uid-1000.patch | git am
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
 
     - name: Build and push the newly built container
       ansible.builtin.shell: |
         set -e -o pipefail
+        # This creates the ~/go tree folder
+        make build-local &> "{{ argotempfolder }}/build-local.log"
         make DOCKER_PUSH=true IMAGE_NAMESPACE="{{ registry_url }}" \
-          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" all &> "{{ argotempfolder }}/build.log"
+          DOCKER=podman all &> "{{ argotempfolder }}/build.log"
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
 
