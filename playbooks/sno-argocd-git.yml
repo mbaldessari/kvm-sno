@@ -7,8 +7,8 @@
   become_user: michele
   vars:
     argotempfolder: "/home/michele/argocd-git/"
-    argorepo: https://github.com/argoproj/argo-cd/
-    argobranch: master
+    gitrepo: https://github.com/argoproj/argo-cd/
+    gitbranch: master
     node: sno1
     registry_url: fw.int.rhx/bandini
   tasks:
@@ -34,8 +34,8 @@
 
     - name: Clone git repo
       ansible.builtin.git:
-        repo: "{{ argorepo }}"
-        version: "{{ argobranch }}"
+        repo: "{{ gitrepo }}"
+        version: "{{ gitbranch }}"
         dest: "{{ argotempfolder }}/argo-cd"
         clone: true
         force: true
