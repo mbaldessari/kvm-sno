@@ -113,5 +113,6 @@
     - name: Print secret
       ansible.builtin.debug:
         msg:
-          - "ARGO URL: argo-argocd.apps.{{ node }}.{{ domain }}"
-          - "ARGO ADMIN PASSWORD: {{ argosecret.stdout }}"
+          - "ARGO URL: https://argo-argocd.apps.{{ node }}.{{ domain }}"
+          - "ARGO USER: admin"
+          - "ARGO PASSWORD: {{ argosecret.stdout }}"
