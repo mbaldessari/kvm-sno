@@ -64,7 +64,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         make DOCKER_PUSH=true IMAGE_NAMESPACE="{{ registry_url }}" \
-          DOCKER_RUN_OPTIONAL_ARGS="--userns=keep-id --security-opt label=disable" manifests &> "{{ argotempfolder }}/manifest.log"
+          DOCKER=podman manifests &> "{{ argotempfolder }}/manifest.log"
         # Silly redis default breaks on OCP
         sed -i -e "/runAsUser: 999/d" manifests/install.yaml
       args:
