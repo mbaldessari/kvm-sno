@@ -95,7 +95,7 @@
         # NO_PROXY: "{{ no_proxy }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      async: 3600 # Wait for 1h max and do not poll, because we want to start installing mcg in the meantime
+      async: 5400 # Wait for 90min max and do not poll, because we want to start installing mcg in the meantime
       poll: 0
       register: spoke_iib
 
@@ -134,6 +134,10 @@
       delay: 20
       register: managedcluster_api
       until: managedcluster_api is not failed
+
+    - name: Debug spoke iib
+      ansible.builtin.debug:
+        msg: "{{ spoke_iib }}"
 
     - name: Make sure IIB loading on the spoke is complete
       ansible.builtin.async_status:
