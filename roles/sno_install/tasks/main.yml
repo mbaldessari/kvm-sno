@@ -253,3 +253,12 @@
     set -e -o pipefail
     rm -f "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
   with_items: "{{ inventory_hostname_short }}"
+
+- name: Add firewall as trusted source in registry
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+    REGISTRIES=$(oc get image.config.openshift.io/cluster -o jsonpath='{.spec.registrySources.allowedRegistries}')
+    NEW_REGISTRIES=$(echo $REGISTRIES | jq '. += ["fw.int.rhx"]')
+    "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch --type=json -p '[{"op": "add", "path": "/spec/registrySources/allowedRegistries", "value": '"$NEW_REGISTRIES"'}]'
+  with_items: "{{ inventory_hostname_short }}"
