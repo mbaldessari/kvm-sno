@@ -55,9 +55,9 @@ else # If one of the tests failed leave the VMs there and only deploy two snos
 	NEWSNOS=sno1,sno2
 fi
 
-TIME=$(date -Iminutes)
-echo "${TIME}: Install gitea in the background"
-make gitea-destroy gitea &> "${LOGDIR}/gitea-install.log" &
+#TIME=$(date -Iminutes)
+#echo "${TIME}: Install gitea in the background"
+#make gitea-destroy gitea &> "${LOGDIR}/gitea-install.log" &
 
 # We kick off the setting up of the work SNOs in the background
 # That way they can chug along while we test gitops-iib etc
