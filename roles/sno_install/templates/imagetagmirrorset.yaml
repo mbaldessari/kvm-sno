@@ -4,24 +4,24 @@ metadata:
   name: disconnected-lab
 spec:
   imageTagMirrors:
+    # - mirrors:
+    #   - kuemper.int.rhx/ocp/ubi8/ubi-minimal
+    #   source: registry.access.redhat.com/ubi8/ubi-minimal
+    # - mirrors:
+    #   - kuemper.int.rhx/ocp/ubi9/ubi-minimal
+    #   source: registry.access.redhat.com/ubi9/ubi-minimal
     - mirrors:
-      - fw.int.rhx/ocp/ubi8/ubi-minimal
-      source: registry.access.redhat.com/ubi8/ubi-minimal
-    - mirrors:
-      - fw.int.rhx/ocp/ubi9/ubi-minimal
-      source: registry.access.redhat.com/ubi9/ubi-minimal
-    - mirrors:
-      - fw.int.rhx:5001
+      - kuemper.int.rhx:5001
       source: quay.io
     - mirrors:
-      - fw.int.rhx:5002
+      - kuemper.int.rhx:5002
       source: ghcr.io
     - mirrors:
-      - fw.int.rhx:5003
+      - kuemper.int.rhx:5003
       source: registry.redhat.io
     - mirrors:
-      - fw.int.rhx:5004
+      - kuemper.int.rhx:5004
       source: docker.io
     - mirrors:
-      - fw.int.rhx:5005
+      - kuemper.int.rhx:5005
       source: gcr.io

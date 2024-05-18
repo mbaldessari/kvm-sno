@@ -1,6 +1,6 @@
 ---
-- name: Prepare Docker cache registry
-  hosts: fw
+- name: Mirror ocp_versions
+  hosts: kvm
   gather_facts: false
   become: true
   tasks:
@@ -9,13 +9,8 @@
         set -e -o pipefail
         ./docker-cache.sh
       args:
-        chdir: /root/docker
+        chdir: /home/michele/docker
 
-- name: Mirror ocp_versions
-  hosts: kvm
-  gather_facts: false
-  become: true
-  tasks:
     - name: Create mirror folders
       ansible.builtin.file:
         path: "{{ mirrorfolder }}/{{ item }}"

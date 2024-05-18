@@ -1,4 +1,16 @@
 ---
+- name: Restart docker-caches
+  hosts: localhost
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Restart cache
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ./docker-cache.sh
+      args:
+        chdir: /home/michele/docker
+
 - name: Install SNO clusters
   hosts: "{{ snos | default('snohosts') }}"
   gather_facts: false
