@@ -33,7 +33,7 @@
         wait_timeout: 60
       register: create_regional
       until: create_regional is not failed
-      retries: 10
+      retries: 30
       delay: 10
 
     - name: "Create regional KlusterAddonConfig"
