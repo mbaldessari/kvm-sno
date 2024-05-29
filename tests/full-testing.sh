@@ -21,7 +21,11 @@ sudo chown -R michele: "${LOGDIR}"
 START=$(date -Iminutes)
 echo "${START}: Start"
 echo "${START}: Start" > "${LOGDIR}/start.txt"
+echo "${TIME}: Install fresh SNOs"
+make sno-destroy &> "${LOGDIR}/mcg-fresh-destroy.log"
+make SNOS=${NEWSNOS} sno &> "${LOGDIR}/mcg-fresh.log"
 
+exit 0
 TIME=$(date -Iminutes)
 echo "${TIME}: Destroying and then installing test SNOs"
 make SNOS=sno10,sno11,sno12 sno-destroy sno &> "${LOGDIR}/mcg-test-snos.log"
