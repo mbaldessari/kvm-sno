@@ -82,7 +82,7 @@
         state: present
         kubeconfig: "{{ REGIONCONFIG }}"
         definition: "{{ import_crds | b64decode }}"
-      retries: 10
+      retries: 30
       delay: 20
 
     - name: "[MC] Apply ROs to new ManagedCluster"
@@ -90,5 +90,5 @@
         state: present
         kubeconfig: "{{ REGIONCONFIG }}"
         definition: "{{ import_ros | b64decode }}"
-      retries: 10
+      retries: 30
       delay: 20

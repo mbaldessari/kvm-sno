@@ -23,7 +23,7 @@ echo "${START}: Start"
 echo "${START}: Start" > "${LOGDIR}/start.txt"
 echo "${TIME}: Install fresh SNOs"
 make sno-destroy &> "${LOGDIR}/mcg-fresh-destroy.log"
-make SNOS=${NEWSNOS} sno &> "${LOGDIR}/mcg-fresh.log"
+make sno &> "${LOGDIR}/mcg-fresh.log"
 
 exit 0
 TIME=$(date -Iminutes)
