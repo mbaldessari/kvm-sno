@@ -223,8 +223,8 @@
   with_items: "{{ inventory_hostname_short }}"
   register: lvm
   until: lvm is not failed
-  retries: 10
-  delay: 2
+  retries: 50
+  delay: 20
 
 # We do something productive while we wait for the LVM bits to install
 - name: Set up PKI steps
@@ -244,7 +244,7 @@
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-cluster.yaml"
   register: lvmcluster
   retries: 50
-  delay: 20
+  delay: 30
   until: lvmcluster is not failed
   with_items: "{{ inventory_hostname_short }}"
 
