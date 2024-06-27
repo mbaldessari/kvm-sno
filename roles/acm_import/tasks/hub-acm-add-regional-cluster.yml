@@ -83,7 +83,7 @@
         kubeconfig: "{{ REGIONCONFIG }}"
         definition: "{{ import_crds | b64decode }}"
       retries: 30
-      delay: 20
+      delay: 40
 
     - name: "[MC] Apply ROs to new ManagedCluster"
       kubernetes.core.k8s:
