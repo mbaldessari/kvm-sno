@@ -8,35 +8,43 @@
   vars:
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: 0.0.45
+    upgrade_from: 0.0.51
     upgrade_to: main
-    node: sno1
+    hub: sno1
+    spoke: sno2
     from_version: 6.6.6
     to_version: 6.6.7
-    registry: fw.int.rhx/bandini
+    registry: kuemper.int.rhx/bandini
+    mcgtempfolder: "~/sno-mcg"
     mcggitrepo: https://github.com/validatedpatterns/multicloud-gitops
     mcggitbranch: main
   tasks:
     - name: Print versions
       ansible.builtin.debug:
-        msg: "Testing upgrade on {{ node }} from {{ upgrade_from }} to {{ upgrade_to }} of {{ gitrepo }}"
+        msg: "Testing upgrade on {{ hub }}-{{ spoke }} from {{ upgrade_from }} to {{ upgrade_to }} of {{ gitrepo }}"
 
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
-        path: "~/{{ node }}-kubeconfig"
-      register: kubeconfig_file
+        path: "~/{{ item }}-kubeconfig"
+      with_items:
+        - "{{ hub }}"
+        - "{{ spoke }}"
+      register: kubeconfig_files
 
-    - name: Verifying if file exists
+    - name: Verifying if files exists
       ansible.builtin.debug:
-        msg: "Kubeconfig exists"
-      failed_when: not kubeconfig_file.stat.exists
+        msg: "File {{ item.stat.path }} exist"
+      loop: "{{ kubeconfig_files.results }}"
+      loop_control:
+        label: "{{ item.stat.path }}"
+      failed_when: not item.stat.exists
 
     - name: Delete temporary folder
       ansible.builtin.file:
         path: "{{ vp_operator_tempfolder }}"
         state: absent
 
-    - name: Clone git repo
+    - name: Clone operator git repo using version "{{ upgrade_from }}"
       ansible.builtin.git:
         repo: "{{ gitrepo }}"
         version: "{{ upgrade_from }}"
@@ -45,9 +53,9 @@
       tags:
         - operator-install
 
-    - name: Build and upload operator version {{ upgrade_from }} - {{ from_version }}
+    - name: Build and upload operator version {{ upgrade_from }} - {{ from_version }} to hub
       ansible.builtin.shell: |
-        export KUBECONFIG=~/{{ node }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         make VERSION={{ from_version }} IMAGE_TAG_BASE={{ registry }}/patterns-operator \
             IMG={{ registry }}/patterns-operator:{{ from_version }} \
             CHANNELS=fast bundle generate docker-build docker-push bundle-build bundle-push catalog-build catalog-push catalog-install
@@ -58,7 +66,7 @@
 
     - name: Wait for the catalog source to show up
       ansible.builtin.shell: |
-        export KUBECONFIG=~/{{ node }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         oc get -n openshift-marketplace packagemanifests -l "catalog=test-pattern-operator" --field-selector "metadata.name=patterns-operator"
       retries: 20
       delay: 10
@@ -70,7 +78,7 @@
     - name: Install the subscription and operator
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG=~/{{ node }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         cat > /tmp/vp-sub.yaml<<EOF
         apiVersion: operators.coreos.com/v1alpha1
         kind: Subscription
@@ -93,7 +101,7 @@
 
     - name: Wait for the operator to be installed
       ansible.builtin.shell: |
-        export KUBECONFIG=~/{{ node }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         oc get -n openshift-marketplace packagemanifests -l "catalog=test-pattern-operator" --field-selector "metadata.name=patterns-operator"  &> /dev/null
       retries: 20
       delay: 10
@@ -102,45 +110,52 @@
       tags:
         - operator-install
 
-    - name: Install MCG pattern
-      ansible.builtin.shell: |
-        export KUBECONFIG=~/{{ node }}-kubeconfig
-        cat > /tmp/vp-upgrade-pattern.yaml<<EOF
-        apiVersion: gitops.hybrid-cloud-patterns.io/v1alpha1
-        kind: Pattern
-        metadata:
-          name: multicloud-gitops
-          namespace: openshift-operators
-        spec:
-          experimentalCapabilities: initcontainers
-          clusterGroupName: hub
-          multiSourceConfig:
-            enabled: true
-          gitSpec:
-            targetRepo: {{ mcggitrepo }}
-            targetRevision: {{ mcggitbranch }}
-        EOF
-        oc apply -f /tmp/vp-upgrade-pattern.yaml
-      retries: 20
-      delay: 10
-      register: patterninstall_ret
-      until: patterninstall_ret is not failed
+    - name: Clone mcg git repo
+      ansible.builtin.git:
+        repo: "{{ mcggitrepo }}"
+        version: "{{ mcggitbranch }}"
+        dest: "{{ mcgtempfolder }}/multicloud-gitops"
+        clone: true
       tags:
         - operator-install
 
-    - name: Wait for clusterwide gitops
+    - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
-        set -e
-        export KUBECONFIG=~/{{ node }}-kubeconfig
-        oc get namespace/openshift-gitops
-      retries: 50
-      delay: 10
-      register: clusterwide_gitops
-      until: clusterwide_gitops is not failed
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        ./pattern.sh make install
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
       tags:
         - operator-install
 
-    - name: Reset git repo to upgraded version
+    - name: Wait for all argo apps to be green
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        make argo-healthcheck
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argo
+      until: argo is not failed
+      tags:
+        - operator-install
+
+    - name: Wait for ManagedCluster API to show up
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        oc api-resources | grep cluster.open-cluster-management.io/v1 | grep ManagedCluster
+      retries: 80
+      delay: 20
+      register: managedcluster_api
+      until: managedcluster_api is not failed
+      tags:
+        - operator-install
+
+    - name: Reset operator git repo to upgraded version
       ansible.builtin.git:
         repo: "{{ gitrepo }}"
         version: "{{ upgrade_to }}"
@@ -165,7 +180,7 @@
           replaces: patterns-operator.v{{ from_version }}
         ---
         schema: olm.bundle
-        image: fw.int.rhx/bandini/patterns-operator-bundle:v{{ from_version }}
+        image: {{ registry }}/patterns-operator-bundle:v{{ from_version }}
         ---
         schema: olm.bundle
         image: \$BUNDLE_IMG
@@ -177,7 +192,7 @@
 
     - name: Build and upload upgraded operator version {{ upgrade_to }} - {{ to_version }}
       ansible.builtin.shell: |
-        export KUBECONFIG=~/{{ node }}-kubeconfig
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
         make VERSION={{ to_version }} IMAGE_TAG_BASE={{ registry }}/patterns-operator \
             IMG={{ registry }}/patterns-operator:{{ to_version }} \
             CHANNELS=fast bundle generate docker-build docker-push bundle-build bundle-push catalog-build catalog-push catalog-install
