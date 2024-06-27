@@ -112,6 +112,7 @@
     - name: Wait for the installplan to be completed
       ansible.builtin.shell: |
         export KUBECONFIG=~/{{ hub }}-kubeconfig
+        set -e -o pipefail
         oc get installplan -n openshift-operators $(oc get installplan -A |grep patterns-operator |awk '{ print $2 }') -o jsonpath='{.status.phase}'
       retries: 20
       delay: 10
