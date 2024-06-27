@@ -257,3 +257,12 @@
         chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
       tags:
         - operator-upgrade
+
+    - name: Patch subscription to make sure we're using the right catalog source
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        oc patch -n openshift-operators subscription.operators.coreos.com/patterns-operator --type=json -p '[{"op": "replace", "path": "/spec/source", "value": "test-pattern-operator"}]'
+      args:
+        chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
+      tags:
+        - operator-upgrade
