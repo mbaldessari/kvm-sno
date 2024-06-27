@@ -91,7 +91,6 @@
           channel: fast
           installPlanApproval: Automatic
           name: patterns-operator
-          #source: community-operators
           source: test-pattern-operator
           sourceNamespace: openshift-marketplace
         EOF
@@ -152,6 +151,55 @@
       delay: 20
       register: managedcluster_api
       until: managedcluster_api is not failed
+      tags:
+        - operator-install
+
+    - name: Add {{ spoke }}
+      ansible.builtin.set_fact:
+        HUBCONFIG: "{{ '~/{{ hub }}-kubeconfig' | expanduser }}"
+        REGIONCONFIG: "{{ '~/{{ spoke }}-kubeconfig' | expanduser }}"
+      tags:
+        - operator-install
+
+    - name: Import {{ spoke }}
+      ansible.builtin.import_role:
+        name: acm_import
+      retries: 10
+      delay: 30
+      register: acm1
+      until: acm1 is not failed
+      tags:
+        - operator-install
+
+    - name: Wait for namespaced argo on spoke
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        oc get argocds -A | grep multicloud-gitops-group-one
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argoregional
+      until: argoregional is not failed
+      with_items:
+        - "{{ spoke }}"
+      tags:
+        - operator-install
+
+    - name: Wait for all argo apps to be green on regional clusters
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        make argo-healthcheck
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argoregional
+      until: argoregional is not failed
+      with_items:
+        - "{{ spoke }}"
       tags:
         - operator-install
 
