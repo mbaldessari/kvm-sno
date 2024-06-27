@@ -109,6 +109,15 @@
       tags:
         - operator-install
 
+    - name: Wait for the installplan to be completed
+      ansible.builtin.shell: |
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        oc get installplan -n openshift-operators $(oc get installplan -A |grep patterns-operator |awk '{ print $2 }') -o jsonpath='{.status.phase}'
+      retries: 20
+      delay: 10
+      register: installplan_ret
+      until: installplan_ret.stdout == "Complete"
+
     - name: Clone mcg git repo
       ansible.builtin.git:
         repo: "{{ mcggitrepo }}"
