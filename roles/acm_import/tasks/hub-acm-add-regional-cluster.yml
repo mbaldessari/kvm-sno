@@ -54,13 +54,39 @@
   ansible.builtin.set_fact:
     ocm_mc_reported: "{{ ocm_mc_status | length == 1 and ocm_mc_status[0] == 'True' }}"
 
+- name: "[HUB] Derive import name"
+  ansible.builtin.set_fact:
+    cluster_import: "{{ region_cluster_name }}-import"
+
+- name: Wait for cluster secret import.yaml to show up
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG={{ HUBCONFIG }}
+    ret=$(oc get -n {{ region_cluster_name }} secret/{{ cluster_import }} -o jsonpath='{.data.import\.yaml}')
+    if [[ -z "${ret}" ]]; then
+      exit 1
+    fi
+  retries: 30
+  delay: 40
+  register: result
+  until: result is not failed
+
+- name: Wait for cluster secret crds.yaml ito show up
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG={{ HUBCONFIG }}
+    ret=$(oc get -n {{ region_cluster_name }} secret/{{ cluster_import }} -o jsonpath='{.data.crds\.yaml}')
+    if [[ -z "${ret}" ]]; then
+      exit 1
+    fi
+  retries: 30
+  delay: 40
+  register: result
+  until: result is not failed
+
 - name: Attach Managed Cluster
   when: not ocm_mc_reported
   block:
-    - name: "[HUB] Derive import name"
-      ansible.builtin.set_fact:
-        cluster_import: "{{ region_cluster_name }}-import"
-
     - name: "[HUB] Get CRDs from Hub for the new ManagedCluster"
       ansible.builtin.set_fact:
         import_crds: >
