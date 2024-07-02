@@ -62,7 +62,7 @@
         clone: true
 
     - name: Fetch internal registry route value (hub)
-      ansible.builtin.command:
+      ansible.builtin.shell: |
         set -e
         export KUBECONFIG=~/{{ hub }}-kubeconfig
         oc registry info --public=true
@@ -74,7 +74,7 @@
         - registry_route_raw_hub.stdout | length > 0
 
     - name: Fetch internal registry route value (spoke)
-      ansible.builtin.command:
+      ansible.builtin.shell: |
         set -e
         export KUBECONFIG=~/{{ spoke }}-kubeconfig
         oc registry info --public=true
