@@ -10,6 +10,7 @@
     gitrepo: https://github.com/validatedpatterns/multicloud-gitops
     gitbranch: main
     hub: sno1
+    spoke: sno2
   tasks:
     - name: Fail if iib is not defined
       ansible.builtin.fail:
@@ -21,6 +22,7 @@
         path: "~/{{ item }}-kubeconfig"
       with_items:
         - "{{ hub }}"
+        - "{{ spoke }}"
       register: kubeconfig_files
 
     - name: Verifying if files exists
@@ -34,9 +36,12 @@
     - name: Enable SNO internal registry
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        export KUBECONFIG=~/{{ item }}-kubeconfig
         oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
         oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+      with_items:
+        - "{{ hub }}"
+        - "{{ spoke }}"
 
     - name: Delete temporary folder
       ansible.builtin.file:
@@ -56,7 +61,36 @@
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
-    - name: Load IIB "{{ iib }}"
+    - name: Fetch internal registry route value (hub)
+      ansible.builtin.command:
+        set -e
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        oc registry info --public=true
+      register: registry_route_raw_hub
+      retries: 20
+      delay: 20
+      until:
+        - registry_route_raw_hub is not failed
+        - registry_route_raw_hub.stdout | length > 0
+
+    - name: Fetch internal registry route value (spoke)
+      ansible.builtin.command:
+        set -e
+        export KUBECONFIG=~/{{ spoke }}-kubeconfig
+        oc registry info --public=true
+      register: registry_route_raw_spoke
+      retries: 20
+      delay: 20
+      until:
+        - registry_route_raw_spoke is not failed
+        - registry_route_raw_spoke.stdout | length > 0
+
+    - name: Set registry facts for allowed registries later
+      ansible.builtin.set_fact:
+        registry_route_hub: "{{ registry_route_raw_spoke.stdout }}"
+        registry_route_spoke: "{{ registry_route_raw_spoke.stdout }}"
+
+    - name: Load IIB "{{ iib }}" on hub
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG=~/{{ hub }}-kubeconfig
@@ -68,6 +102,22 @@
         INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+
+    - name: Load IIB "{{ iib }}" on spoke asynchronously
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG=~/{{ spoke }}-kubeconfig
+        make load-iib &> /tmp/iib-ansible-{{ spoke }}.log
+      environment:
+        KUBEADMINPASS: "{{ kubeadmin_pass }}"
+        OPERATOR: openshift-gitops-operator
+        IIB: "{{ iib }}"
+        INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib }}"
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      async: 5400 # Wait for 90min max and do not poll, because we want to start installing mcg in the meantime
+      poll: 0
+      register: spoke_iib
 
     - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
@@ -83,7 +133,7 @@
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
 
-    - name: Wait for all argo apps to be green
+    - name: Wait for all argo apps to be green on the hub
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
@@ -104,3 +154,62 @@
       delay: 20
       register: managedcluster_api
       until: managedcluster_api is not failed
+
+    - name: Set registry allowedRegistries on hub and spoke
+      ansible.builtin.shell: >
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        oc patch image.config.openshift.io/cluster --patch "{\"spec\":{\"registrySources\":{\"allowedRegistries\":[ \"registry.stage.redhat.io\", \"registry.access.redhat.com\", \"registry.connect.redhat.com\", \"ghcr.io\", \"gcr.io\", \"quay.io\", \"registry.redhat.io\", \"docker.io\",
+        \"registry-proxy.engineering.redhat.com\", \"kuemper.int.rhx\", \"image-registry.openshift-image-registry.svc:5000\", \"{{ registry_route_hub }}\", \"{{ registry_route_spoke }}\"]}}}" --type=merge
+      with_items:
+        - "{{ hub }}"
+        - "{{ spoke }}"
+
+    - name: Debug spoke iib
+      ansible.builtin.debug:
+        msg: "{{ spoke_iib }}"
+
+    - name: Make sure IIB loading on the spoke is complete
+      ansible.builtin.async_status:
+        jid: "{{ spoke_iib.ansible_job_id }}"
+      register: job_result
+      until: job_result.finished
+      retries: 100
+      delay: 20
+
+    - name: Add {{ spoke }}
+      ansible.builtin.set_fact:
+        HUBCONFIG: "{{ '~/{{ hub }}-kubeconfig' | expanduser }}"
+        REGIONCONFIG: "{{ '~/{{ spoke }}-kubeconfig' | expanduser }}"
+
+    - name: Import {{ spoke }}
+      ansible.builtin.import_role:
+        name: acm_import
+      retries: 10
+      delay: 30
+      register: acm1
+      until: acm1 is not failed
+
+    - name: Wait for multicloud-gitops-group-one project to show up on spoke
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ spoke }}-kubeconfig
+        oc get projects multicloud-gitops-group-one
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argo
+      until: argo is not failed
+
+    - name: Wait for all argo apps to be green on spoke
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ spoke }}-kubeconfig
+        make argo-healthcheck
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argo
+      until: argo is not failed
