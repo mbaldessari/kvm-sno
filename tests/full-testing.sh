@@ -11,6 +11,7 @@ if [ -e "${LOCKFILE}" ]; then
    exit 1
 fi
 
+rm -rf .ansible/retries/*
 trap "sudo rm -f ${LOCKFILE}; exit" INT TERM EXIT
 sudo touch "${LOCKFILE}"
 
