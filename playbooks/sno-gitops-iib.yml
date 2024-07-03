@@ -103,6 +103,10 @@
         INDEX_IMAGES: "{{ iib_index_image_base }}/iib:{{ iib }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      register: load_iib_hub
+      retries: 3
+      delay: 10
+      until: load_iib_hub is not failed
 
     - name: Load IIB "{{ iib }}" on spoke asynchronously
       ansible.builtin.shell: |

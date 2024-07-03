@@ -110,6 +110,10 @@
         # NO_PROXY: "{{ no_proxy }}"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      register: load_iib_hub
+      retries: 3
+      delay: 10
+      until: load_iib_hub is not failed
 
     - name: Load IIBs "{{ iib_acm }} - {{ iib_mce }} on spoke asynchronously"
       ansible.builtin.shell: |
