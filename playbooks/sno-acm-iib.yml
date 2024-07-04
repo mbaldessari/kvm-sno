@@ -139,7 +139,7 @@
         export MCE_CHANNEL=$(oc get -n openshift-margetplace packagemanifests -l "catalog=iib-{{ iib_mce }}" --field-selector "metadata.name=multicluster-engine" -o jsonpath='{.items[0].status.defaultChannel}')
 
         make EXTRA_HELM_OPTS="--set main.extraParameters[0].name=clusterGroup.subscriptions.acm.source --set main.extraParameters[0].value=iib-{{ iib_acm }} \
-                              --set main.extraParameters[1].name=clusterGroup.subscriptions.acm.name --set main.extraParameters[1].value=acm \
+                              --set main.extraParameters[1].name=clusterGroup.subscriptions.acm.name --set main.extraParameters[1].value=advanced-cluster-management \
                               --set main.extraParameters[2].name=clusterGroup.subscriptions.acm.channel --set main.extraParameters[2].value=${ACM_CHANNEL} \
                               --set main.extraParameters[3].name=acm.mce_operator.source --set main.extraParameters[3].value="iib-{{ iib_mce }}" \
                               --set main.extraParameters[4].name=acm.mce_operator.channel --set main.extraParameters[4].value=${MCE_CHANNEL}" install &> /tmp/acm-iib-install.log
