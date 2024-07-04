@@ -37,9 +37,7 @@
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG=~/{{ item }}-kubeconfig
-        oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed"}}'
-        oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
-        oc patch configs.imageregistry.operator.openshift.io/cluster --patch '{"spec":{"defaultRoute":true}}' --type=merge
+        oc patch configs.imageregistry.operator.openshift.io cluster --type=json -p='[{"op": "add", "path": "/spec/managementState", "value": "Managed"}, {"op": "add", "path": "/spec/storage/emptyDir", "value": {}}, {"op": "add", "path": "/spec/defaultRoute", "value": true}]'
       with_items:
         - "{{ hub }}"
         - "{{ spoke }}"
