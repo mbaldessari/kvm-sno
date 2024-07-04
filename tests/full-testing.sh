@@ -30,7 +30,8 @@ set -e
 if [ $ret -ne 0 ]; then
 	BROKEN_SNOS=$(cat .ansible/retries/sno-install.retry | paste -sd "," -)
 	echo "Some VMs failed, retry only those: ${BROKEN_SNOS}"
-	ansible-playbook -i hosts --extra-vars='{"snos":['$BROKEN_SNOS']}' playbooks/sno-install.yml &> "${LOGDIR}/02-retry-failed-ones.log"
+	ansible-playbook -i hosts --extra-vars='{"snos":['$BROKEN_SNOS']}' playbooks/sno-destroy.yml &> "${LOGDIR}/02-retry-failed-ones-destroy.log"
+	ansible-playbook -i hosts --extra-vars='{"snos":['$BROKEN_SNOS']}' playbooks/sno-install.yml &> "${LOGDIR}/02-retry-failed-ones-create.log"
 fi
 
 set +e
