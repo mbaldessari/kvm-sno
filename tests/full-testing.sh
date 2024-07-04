@@ -28,9 +28,9 @@ make sno &> "${LOGDIR}/02-mcg-fresh.log"
 ret=$?
 set -e
 if [ $ret -ne 0 ]; then
-	echo "Some VMs failed, retry only those"
-	SNOS="sno1,sno2,sno3,sno4,sno5,sno6"
-	ansible-playbook -i hosts --extra-vars='{"snos":[$SNOS]}' --limit @./.ansible/retries/sno-install.retry playbooks/sno-install.yml &> "${LOGDIR}/02-retry-failed-ones.log"
+	BROKEN_SNOS=$(cat .ansible/retries/sno-install.retry | paste -sd "," -)
+	echo "Some VMs failed, retry only those: ${BROKEN_SNOS}"
+	ansible-playbook -i hosts --extra-vars='{"snos":[$BROKEN_SNOS]}' playbooks/sno-install.yml &> "${LOGDIR}/02-retry-failed-ones.log"
 fi
 
 set +e
