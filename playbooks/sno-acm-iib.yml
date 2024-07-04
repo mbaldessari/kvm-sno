@@ -74,7 +74,7 @@
         oc registry info --public=true
       register: registry_route_raw_hub
       retries: 20
-      delay: 20
+      delay: 60
       until:
         - registry_route_raw_hub is not failed
         - registry_route_raw_hub.stdout | length > 0
@@ -86,7 +86,7 @@
         oc registry info --public=true
       register: registry_route_raw_spoke
       retries: 20
-      delay: 20
+      delay: 30
       until:
         - registry_route_raw_spoke is not failed
         - registry_route_raw_spoke.stdout | length > 0
