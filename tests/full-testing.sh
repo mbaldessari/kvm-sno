@@ -51,7 +51,7 @@ echo "${TIME}: Lookup gitops IIB"
 ansible-playbook playbooks/iib-lookup.yml -e hub=sno3 &> "${LOGDIR}/06-lookup-gitops-iib.log"
 TIME=$(date -Iminutes)
 echo "${TIME}: Install mcg via gitops IIB"
-make gitops-iib EXTRA_VARS="-e iib=$(cat /tmp/openshift-gitops-1-gitops-operator-bundle-iib-sno3) -e hub=sno3" &> "${LOGDIR}/07-gitops-iib-gitops.log"
+make gitops-iib EXTRA_VARS="-e iib=$(cat /tmp/openshift-gitops-1-gitops-operator-bundle-iib-sno3) -e hub=sno3 -e spoke=sno4" &> "${LOGDIR}/07-gitops-iib-gitops.log"
 ret_gitops_iib=$?
 
 # Both tests went fine
