@@ -65,7 +65,7 @@ get-remote-pki: ## Get certs installed from remote node
 
 ##@ Day-2 Tasks
 .PHONY: mcg
-mcg: ## Install multicloud gitops on all three snos
+mcg: ## Install multicloud gitops on two snos (sno1 and sno2 by default)
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml
 
 .PHONY: import

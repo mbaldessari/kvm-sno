@@ -5,12 +5,12 @@ ocp_versions:
   - "4.13.40"
   - "4.14.29"
   - "4.15.17"
-  - "4.16.0"
+  - "4.16.5"
 
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
 #ocp_version: "4.14.19"
-ocp_version: "4.15.17"
+ocp_version: "4.16.5"
 arch: "x86_64"
 mirrorfolder: /var/lib/libvirt/ocp-mirror
 tempfolder: "/ramfs/sno-temp-folder"
