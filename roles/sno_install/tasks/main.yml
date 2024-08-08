@@ -179,6 +179,19 @@
   retries: 50
   delay: 30
 
+- name: Install LVM operator
+  tags:
+    - lvm
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
+  with_items: "{{ inventory_hostname_short }}"
+  register: lvm
+  until: lvm is not failed
+  retries: 50
+  delay: 20
+
 - name: Set kubeadmin password
   ansible.builtin.shell: |
     set -e -o pipefail
@@ -216,19 +229,6 @@
 #   until: imagetagmirrorset is not failed
 #   retries: 20
 #   delay: 10
-
-- name: Install LVM operator
-  tags:
-    - lvm
-  ansible.builtin.shell: |
-    set -e -o pipefail
-    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
-  with_items: "{{ inventory_hostname_short }}"
-  register: lvm
-  until: lvm is not failed
-  retries: 50
-  delay: 20
 
 # We do something productive while we wait for the LVM bits to install
 - name: Set up PKI steps
