@@ -26,5 +26,5 @@ metadata:
 spec:
   installPlanApproval: Automatic
   name: lvms-operator
-  source: redhat-operators
+  source: "cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}"
   sourceNamespace: openshift-marketplace
