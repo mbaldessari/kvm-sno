@@ -3,8 +3,6 @@
   hosts: kvm
   gather_facts: false
   become: true
-  vars:
-    local_mirror: "{{ mirrorfolder }}/mirror"
   tasks:
     - name: Restart docker registry
       ansible.builtin.shell: |

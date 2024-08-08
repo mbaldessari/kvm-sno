@@ -166,38 +166,18 @@
   with_items: "{{ inventory_hostname_short }}"
   delegate_to: localhost
 
-- name: Template out imagetagmirrorset
-  tags:
-    - imagetagmirrorset
-  ansible.builtin.template:
-    src: ./templates/imagetagmirrorset.yaml
-    dest: "{{ tempfolder }}/{{ item }}"
-    mode: "0644"
-  with_items: "{{ inventory_hostname_short }}"
-
-- name: Wait for console to be up
-  ansible.builtin.uri:
-    url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
-    validate_certs: false
-    follow_redirects: all
-  with_items: "{{ inventory_hostname_short }}"
-  register: uri
-  until: uri is not failed
-  retries: 150
-  delay: 30
-
-- name: Apply imagetagmirrorset
-  tags:
-    - imagetagmirrorset
+- name: Apply mirroring yaml files
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/imagetagmirrorset.yaml"
+    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
+    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
   with_items: "{{ inventory_hostname_short }}"
-  register: imagetagmirrorset
-  until: imagetagmirrorset is not failed
-  retries: 20
-  delay: 10
+  when: enable_disconnected
+  register: mirroring
+  until: mirroring is not failed
+  retries: 50
+  delay: 30
 
 - name: Set kubeadmin password
   ansible.builtin.shell: |
@@ -212,6 +192,30 @@
   until: kubepass is not failed
   retries: 30
   delay: 5
+
+- name: Wait for console to be up
+  ansible.builtin.uri:
+    url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+    validate_certs: false
+    follow_redirects: all
+  with_items: "{{ inventory_hostname_short }}"
+  register: uri
+  until: uri is not failed
+  retries: 150
+  delay: 30
+
+# - name: Apply imagetagmirrorset
+#   tags:
+#     - imagetagmirrorset
+#   ansible.builtin.shell: |
+#     set -e -o pipefail
+#     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+#     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/imagetagmirrorset.yaml"
+#   with_items: "{{ inventory_hostname_short }}"
+#   register: imagetagmirrorset
+#   until: imagetagmirrorset is not failed
+#   retries: 20
+#   delay: 10
 
 - name: Install LVM operator
   tags:
