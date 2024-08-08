@@ -34,6 +34,19 @@
         flat: true
       with_items: "{{ sno_certs }}"
       failed_when: false
+      register: kubeconfigs
+
+    - name: filter results
+      set_fact:
+        changed_snos: "{{ changed_snos|default([]) + [item.item] }}"
+      with_items:
+        - "{{ kubeconfigs.results }}"
+      when:
+        - item.changed == true
+
+    - name: Debug
+      ansible.builtin.debug:
+        msg: "{{ changed_snos | default([]) }}"
 
     - name: Delete exiting CAs from SNOs
       delegate_to: localhost
@@ -46,7 +59,7 @@
         done
       args:
         chdir: "{{ remote_ca_dir }}/sno-ca"
-      with_items: "{{ sno_certs }}"
+      with_items: "{{ changed_snos }}"
 
     - name: Import all CAs into my firefox profile
       delegate_to: localhost
@@ -59,7 +72,7 @@
         done
       args:
         chdir: "{{ remote_ca_dir }}/sno-ca"
-      with_items: "{{ sno_certs }}"
+      with_items: "{{ changed_snos }}"
       retries: 10
       delay: 10
       register: pki_import
