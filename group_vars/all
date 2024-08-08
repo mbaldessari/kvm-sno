@@ -16,7 +16,7 @@ mirrorfolder: /var/lib/libvirt/ocp-mirror
 tempfolder: "/ramfs/sno-temp-folder"
 openshift_mirror: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
 oc_mirror_url: "http://fw.int.rhx/oc/oc-mirror"
-oc_mirror_local_registry: "fw.int.rhx/ocp"
+oc_mirror_local_registry: "kuemper.int.rhx/ocp"
 domain: "ocplab.ocp"
 sshkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 sshkey2: "{{ lookup('file', '~/.ssh/id_ansible.pub', errors='ignore') | default('') }}"

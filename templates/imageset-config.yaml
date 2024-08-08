@@ -1,40 +1,36 @@
 kind: ImageSetConfiguration
-apiVersion: mirror.openshift.io/v1alpha2
-storageConfig:
-  registry:
-    imageURL: fw.int.rhx/ocp
-    skipTLS: false
+apiVersion: mirror.openshift.io/v2alpha1
 mirror:
   platform:
     channels:
-    - name: stable-4.15
+    - name: stable-4.16
       type: ocp
-    - name: stable-4.14
-      type: ocp
+    # - name: stable-4.15
+    #   type: ocp
     graph: true
   operators:
-  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.15
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.16
     #full: true
     packages:
       - name: lvms-operator
       - name: advanced-cluster-management
       - name: multicluster-engine
       - name: openshift-gitops-operator
-  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.14
-    #full: true
-    packages:
-      - name: lvms-operator
-      - name: advanced-cluster-management
-      - name: multicluster-engine
-      - name: openshift-gitops-operator
-  - catalog: registry.redhat.io/redhat/community-operator-index:v4.15
-    packages:
-      - name: patterns-operator
-  - catalog: registry.redhat.io/redhat/community-operator-index:v4.14
+  # - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.15
+  #   #full: true
+  #   packages:
+  #     - name: lvms-operator
+  #     - name: advanced-cluster-management
+  #     - name: multicluster-engine
+  #     - name: openshift-gitops-operator
+  - catalog: registry.redhat.io/redhat/community-operator-index:v4.16
     packages:
       - name: patterns-operator
-    #registry.redhat.io/redhat/redhat-marketplace-index:v4.14
-    #registry.redhat.io/redhat/certified-operator-index:v4.14
+  # - catalog: registry.redhat.io/redhat/community-operator-index:v4.15
+  #   packages:
+  #     - name: patterns-operator
+  #   #registry.redhat.io/redhat/redhat-marketplace-index:v4.14
+  #   #registry.redhat.io/redhat/certified-operator-index:v4.14
   additionalImages:
   - name: registry.redhat.io/ubi8/ubi:latest
   - name: registry.redhat.io/ubi9/ubi:latest

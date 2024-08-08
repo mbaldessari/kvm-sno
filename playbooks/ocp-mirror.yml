@@ -1,16 +1,4 @@
 ---
-- name: Make sure registry has been restarted
-  hosts: fw
-  gather_facts: false
-  become: true
-  tasks:
-    - name: Restart docker registry
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        ./docker-registry.sh
-      args:
-        chdir: /root/docker
-
 - name: Mirror all needed container images locally
   hosts: kvm
   gather_facts: false
@@ -18,6 +6,12 @@
   vars:
     local_mirror: "{{ mirrorfolder }}/mirror"
   tasks:
+    - name: Restart docker registry
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ./docker-registry.sh
+      args:
+        chdir: /home/michele/docker
     # This was downloaded from https://console.redhat.com/openshift/downloads#tool-oc-mirror-plugin
     - name: Create mirror folders
       ansible.builtin.get_url:
@@ -33,6 +27,7 @@
       with_items:
         - "/root/.docker/"
         - "{{ local_mirror }}"
+        - "{{ local_mirror }}/workspace"
 
     - name: Template pull secret
       ansible.builtin.template:
@@ -51,7 +46,9 @@
 
     - name: Mirror images
       ansible.builtin.shell: |
-        ./oc mirror --config={{ local_mirror }}/imageset-config.yaml \
-          docker://{{ oc_mirror_local_registry }}
+        set -e
+        #mirror --config=/var/lib/libvirt/ocp-mirror/mirror/imageset-config.yaml  --workspace file://tmp/workspace docker://nas.int.rhx  --v2
+        ./oc mirror --config={{ local_mirror }}/imageset-config.yaml --loglevel debug \
+        --workspace file://{{ local_mirror }}/workspace docker://{{ oc_mirror_local_registry }} --v2 &> /var/log/oc-mirror.log
       args:
         chdir: "{{ mirrorfolder }}/{{ ocp_version }}"
