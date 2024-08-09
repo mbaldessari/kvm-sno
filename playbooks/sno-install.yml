@@ -4,10 +4,11 @@
   gather_facts: false
   become: true
   tasks:
-    - name: Restart cache
+    - name: Restart cache and registry
       ansible.builtin.shell: |
         set -e -o pipefail
         ./docker-cache.sh
+        ./docker-registry.sh
       args:
         chdir: /home/michele/docker
 
