@@ -44,9 +44,10 @@
       when:
         - item.changed
 
-    - name: Debug
-      ansible.builtin.debug:
-        msg: "{{ changed_snos | default([]) }}"
+    - name: Set fact when empty
+      ansible.builtin.set_fact:
+        changed_snos: []
+      when: changed_snos is not defined
 
     - name: Delete exiting CAs from SNOs
       delegate_to: localhost
@@ -60,6 +61,7 @@
       args:
         chdir: "{{ remote_ca_dir }}/sno-ca"
       with_items: "{{ changed_snos }}"
+      when: changed_snos | length > 0
 
     - name: Import all CAs into my firefox profile
       delegate_to: localhost
@@ -77,3 +79,4 @@
       delay: 10
       register: pki_import
       until: pki_import is not failed
+      when: changed_snos | length > 0
