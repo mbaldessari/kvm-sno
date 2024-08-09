@@ -36,13 +36,13 @@
       failed_when: false
       register: kubeconfigs
 
-    - name: filter results
-      set_fact:
-        changed_snos: "{{ changed_snos|default([]) + [item.item] }}"
+    - name: Filter results
+      ansible.builtin.set_fact:
+        changed_snos: "{{ changed_snos | default([]) + [item.item] }}"
       with_items:
         - "{{ kubeconfigs.results }}"
       when:
-        - item.changed == true
+        - item.changed
 
     - name: Debug
       ansible.builtin.debug:
