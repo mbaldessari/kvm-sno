@@ -34,4 +34,5 @@ mirror:
   additionalImages:
   - name: registry.redhat.io/ubi8/ubi:latest
   - name: registry.redhat.io/ubi9/ubi:latest
+  - name: quay.io/ansible/creator-ee:latest
   helm: {}
