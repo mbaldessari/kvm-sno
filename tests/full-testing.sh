@@ -21,6 +21,11 @@ sudo chown -R michele: "${LOGDIR}"
 START=$(date -Iminutes)
 echo "${START}: Start"
 echo "${START}: Start" > "${LOGDIR}/start.txt"
+echo "${TIME}: New OC mirror"
+make ocp-mirror &> "${LOGDIR}/00-ocp-mirror.log"
+echo "${TIME}: Set up gitea vm"
+make gitea-destroy gitea &> "${LOGDIR}/00-gitea-vm.log"
+
 echo "${TIME}: Install fresh SNOs"
 make sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
 set +e
