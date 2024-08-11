@@ -16,6 +16,8 @@ mirror:
       - name: advanced-cluster-management
       - name: multicluster-engine
       - name: openshift-gitops-operator
+        minVersion: 1.12.4
+        #maxVersion: 1.13.1
   # - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.15
   #   #full: true
   #   packages:
