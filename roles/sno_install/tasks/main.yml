@@ -166,32 +166,6 @@
   with_items: "{{ inventory_hostname_short }}"
   delegate_to: localhost
 
-- name: Apply mirroring yaml files
-  ansible.builtin.shell: |
-    set -e -o pipefail
-    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
-  with_items: "{{ inventory_hostname_short }}"
-  when: enable_disconnected
-  register: mirroring
-  until: mirroring is not failed
-  retries: 50
-  delay: 30
-
-- name: Install LVM operator
-  tags:
-    - lvm
-  ansible.builtin.shell: |
-    set -e -o pipefail
-    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
-  with_items: "{{ inventory_hostname_short }}"
-  register: lvm
-  until: lvm is not failed
-  retries: 50
-  delay: 20
-
 - name: Set kubeadmin password
   ansible.builtin.shell: |
     set -e -o pipefail
@@ -217,6 +191,19 @@
   retries: 150
   delay: 30
 
+- name: Apply mirroring yaml files
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
+    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
+  with_items: "{{ inventory_hostname_short }}"
+  when: enable_disconnected
+  register: mirroring
+  until: mirroring is not failed
+  retries: 50
+  delay: 30
+
 - name: Disable default catalog sources
   ansible.builtin.shell: |
     set -e -o pipefail
@@ -227,6 +214,20 @@
   until: lvm is not failed
   retries: 50
   delay: 20
+
+- name: Install LVM operator
+  tags:
+    - lvm
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
+  with_items: "{{ inventory_hostname_short }}"
+  register: lvm
+  until: lvm is not failed
+  retries: 50
+  delay: 20
+
 # - name: Apply imagetagmirrorset
 #   tags:
 #     - imagetagmirrorset
