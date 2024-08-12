@@ -47,7 +47,7 @@ mirror:
   - name: quay.io/ansible/creator-ee:latest
   - name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
   helm:
-    repos:
+    repositories:
       - name: validated patterns charts
         url: https://charts.validatedpatterns.info
         charts:
