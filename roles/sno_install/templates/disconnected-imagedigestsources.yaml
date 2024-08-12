@@ -41,3 +41,9 @@ imageContentSources:
   - mirrors:
     - kuemper.int.rhx/ocp/ubi9
     source: registry.redhat.io/ubi9
+  - mirrors:
+    - kuemper.int.rhx/ocp/ansible
+    source: quay.io/ansible
+  - mirrors:
+    - kuemper.int.rhx/ocp/ansible-automation-platform-24
+    source: registry.redhat.io/ansible-automation-platform-24
