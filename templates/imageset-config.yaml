@@ -5,8 +5,8 @@ mirror:
     channels:
     - name: stable-4.16
       type: ocp
-    # - name: stable-4.15
-    #   type: ocp
+    - name: stable-4.15
+      type: ocp
     graph: true
   operators:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.16
@@ -22,19 +22,23 @@ mirror:
           - name: gitops-1.13
       #minVersion: 1.12.0
       #maxVersion: 1.13.1
-  # - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.15
-  #   #full: true
-  #   packages:
-  #     - name: lvms-operator
-  #     - name: advanced-cluster-management
-  #     - name: multicluster-engine
-  #     - name: openshift-gitops-operator
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.15
+    # All bundles of all channels of the specified catalog
+    # full: true
+    packages:
+      - name: lvms-operator
+      - name: advanced-cluster-management
+      - name: multicluster-engine
+      - name: openshift-gitops-operator
+        channels:
+          - name: gitops-1.12
+          - name: gitops-1.13
   - catalog: registry.redhat.io/redhat/community-operator-index:v4.16
     packages:
       - name: patterns-operator
-  # - catalog: registry.redhat.io/redhat/community-operator-index:v4.15
-  #   packages:
-  #     - name: patterns-operator
+  - catalog: registry.redhat.io/redhat/community-operator-index:v4.15
+    packages:
+      - name: patterns-operator
   #   #registry.redhat.io/redhat/redhat-marketplace-index:v4.14
   #   #registry.redhat.io/redhat/certified-operator-index:v4.14
   additionalImages:
@@ -42,4 +46,5 @@ mirror:
   - name: registry.redhat.io/ubi9/ubi:latest
   - name: quay.io/ansible/creator-ee:latest
   - name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
+  #- name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9@sha256:49450a646b19c4f23e4fe7563bfdb88d76b94ad4f11465176e5e36d1e5000137
   helm: {}

@@ -4,13 +4,6 @@
   gather_facts: false
   become: true
   tasks:
-    # - name: Restart docker registry
-    #   ansible.builtin.shell: |
-    #     set -e -o pipefail
-    #     ./docker-registry.sh
-    #   args:
-    #     chdir: /home/michele/docker
-    # This was downloaded from https://console.redhat.com/openshift/downloads#tool-oc-mirror-plugin
     - name: Create mirror folders
       ansible.builtin.get_url:
         url: "{{ oc_mirror_url }}"
