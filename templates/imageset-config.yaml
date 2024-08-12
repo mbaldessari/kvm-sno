@@ -46,5 +46,21 @@ mirror:
   - name: registry.redhat.io/ubi9/ubi:latest
   - name: quay.io/ansible/creator-ee:latest
   - name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
-  #- name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9@sha256:49450a646b19c4f23e4fe7563bfdb88d76b94ad4f11465176e5e36d1e5000137
-  helm: {}
+  helm:
+    repos:
+      - name: validated patterns charts
+        url: https://charts.validatedpatterns.info
+        charts:
+          - name: acm
+            version: 0.1.0
+          - name: clustergroup
+            version: 0.8.10
+          - name: gitea
+            version: 0.0.2
+          - name: golang-external-secrets
+            version: 0.1.0
+          - name: hashicorp-vault
+            version: 0.1.0
+          - name: openshift-data-foundations
+            version: 0.1.0
+
