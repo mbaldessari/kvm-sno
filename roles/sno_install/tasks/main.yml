@@ -166,6 +166,17 @@
   with_items: "{{ inventory_hostname_short }}"
   delegate_to: localhost
 
+- name: Wait for bootstrap to complete
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+    "{{ mirrorfolder }}/{{ ocp_version }}"/openshift-install wait-for bootstrap-complete
+  with_items: "{{ inventory_hostname_short }}"
+  register: cluster_info
+  until: cluster_info is not failed
+  retries: 100
+  delay: 20
+
 - name: Set kubeadmin password
   ansible.builtin.shell: |
     set -e -o pipefail
@@ -179,17 +190,6 @@
   until: kubepass is not failed
   retries: 30
   delay: 5
-
-- name: Wait for console to be up
-  ansible.builtin.uri:
-    url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
-    validate_certs: false
-    follow_redirects: all
-  with_items: "{{ inventory_hostname_short }}"
-  register: uri
-  until: uri is not failed
-  retries: 150
-  delay: 30
 
 - name: Apply mirroring yaml files
   ansible.builtin.shell: |
@@ -263,6 +263,17 @@
   until: lvmcluster is not failed
   with_items: "{{ inventory_hostname_short }}"
 
+
+- name: Wait for console to be up
+  ansible.builtin.uri:
+    url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+    validate_certs: false
+    follow_redirects: all
+  with_items: "{{ inventory_hostname_short }}"
+  register: uri
+  until: uri is not failed
+  retries: 150
+  delay: 30
 - name: Remove isos from /ramfs to free up ramfs
   ansible.builtin.shell: |
     set -e -o pipefail

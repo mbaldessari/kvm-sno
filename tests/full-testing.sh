@@ -39,6 +39,8 @@ if [ $ret -ne 0 ]; then
 	ansible-playbook -i hosts --extra-vars='{"snos":['$BROKEN_SNOS']}' playbooks/sno-install.yml &> "${LOGDIR}/02-retry-failed-ones-create.log"
 fi
 
+# For now we stop. IIB testing is not yet set up for disconnected
+exit 0
 set +e
 # Let's do the ACM + MCE IIB dance here
 TIME=$(date -Iminutes)
