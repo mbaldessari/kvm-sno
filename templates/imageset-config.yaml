@@ -18,6 +18,8 @@ mirror:
         channels:
           - name: release-2.10
       - name: multicluster-engine
+        channels:
+          - name: stable-2.5
       - name: openshift-gitops-operator
         channels:
           - name: gitops-1.12
