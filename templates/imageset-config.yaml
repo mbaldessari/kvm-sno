@@ -49,4 +49,7 @@ mirror:
   - name: registry.redhat.io/ubi8/ubi:latest
   - name: registry.redhat.io/ubi9/ubi:latest
   - name: quay.io/ansible/creator-ee:latest
+  - name: registry.connect.redhat.com/hashicorp/vault:1.17.2-ubi
+  - name: registry.access.redhat.com/ubi8/httpd-24:1-226
+  - name: ghcr.io/external-secrets/external-secrets:v0.9.20-ubi
   - name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
