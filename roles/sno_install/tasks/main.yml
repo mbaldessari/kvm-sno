@@ -179,6 +179,22 @@
   retries: 100
   delay: 20
 
+- name: Wait for console to be up
+  ansible.builtin.uri:
+    url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+    validate_certs: false
+    follow_redirects: all
+  with_items: "{{ inventory_hostname_short }}"
+  register: uri
+  until: uri is not failed
+  retries: 150
+  delay: 30
+- name: Remove isos from /ramfs to free up ramfs
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    rm -f "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
+  with_items: "{{ inventory_hostname_short }}"
+
 - name: Set kubeadmin password
   ansible.builtin.shell: |
     set -e -o pipefail
@@ -192,6 +208,15 @@
   until: kubepass is not failed
   retries: 30
   delay: 5
+
+# We do something productive while we wait for the LVM bits to install
+- name: Set up PKI steps
+  ansible.builtin.import_tasks: pki-setup.yml
+  delegate_to: localhost
+  become: false
+  failed_when: false
+  tags:
+    - pki
 
 - name: Apply mirroring yaml files
   ansible.builtin.shell: |
@@ -229,29 +254,6 @@
   until: lvm is not failed
   retries: 50
   delay: 20
-
-# - name: Apply imagetagmirrorset
-#   tags:
-#     - imagetagmirrorset
-#   ansible.builtin.shell: |
-#     set -e -o pipefail
-#     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-#     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/imagetagmirrorset.yaml"
-#   with_items: "{{ inventory_hostname_short }}"
-#   register: imagetagmirrorset
-#   until: imagetagmirrorset is not failed
-#   retries: 20
-#   delay: 10
-
-# We do something productive while we wait for the LVM bits to install
-- name: Set up PKI steps
-  ansible.builtin.import_tasks: pki-setup.yml
-  delegate_to: localhost
-  become: false
-  failed_when: false
-  tags:
-    - pki
-
 - name: Install LVM Cluster
   tags:
     - lvm
@@ -263,21 +265,4 @@
   retries: 50
   delay: 30
   until: lvmcluster is not failed
-  with_items: "{{ inventory_hostname_short }}"
-
-
-- name: Wait for console to be up
-  ansible.builtin.uri:
-    url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
-    validate_certs: false
-    follow_redirects: all
-  with_items: "{{ inventory_hostname_short }}"
-  register: uri
-  until: uri is not failed
-  retries: 150
-  delay: 30
-- name: Remove isos from /ramfs to free up ramfs
-  ansible.builtin.shell: |
-    set -e -o pipefail
-    rm -f "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
   with_items: "{{ inventory_hostname_short }}"
