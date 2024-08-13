@@ -170,7 +170,9 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/openshift-install wait-for bootstrap-complete
+    "{{ mirrorfolder }}/{{ ocp_version }}"/openshift-install --dir={{ item }} wait-for bootstrap-complete &> /tmp/bootstrap-{{ item }}.log
+  args:
+    chdir: "{{ tempfolder }}"
   with_items: "{{ inventory_hostname_short }}"
   register: cluster_info
   until: cluster_info is not failed
