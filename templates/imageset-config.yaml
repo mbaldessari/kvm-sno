@@ -62,3 +62,4 @@ mirror:
   - name: quay.io/hybridcloudpatterns/gitea:0.0.2
   - name: quay.io/hybridcloudpatterns/golang-external-secrets:0.1.0
   - name: quay.io/hybridcloudpatterns/hashicorp-vault:0.1.0
+  - name: docker.io/gitea/gitea:1.21.11-rootless
