@@ -56,3 +56,9 @@ mirror:
   - name: registry.access.redhat.com/ubi8/httpd-24:1-226
   - name: ghcr.io/external-secrets/external-secrets:v0.9.20-ubi
   - name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
+  # VP charts
+  - name: quay.io/hybridcloudpatterns/acm:0.1.0
+  - name: quay.io/hybridcloudpatterns/clustergroup:0.8.10
+  - name: quay.io/hybridcloudpatterns/gitea:0.0.2
+  - name: quay.io/hybridcloudpatterns/golang-external-secrets:0.1.0
+  - name: quay.io/hybridcloudpatterns/hashicorp-vault:0.1.0
