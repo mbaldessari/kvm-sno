@@ -1,4 +1,36 @@
 ---
+- name: Set firewall rules
+  hosts: fw
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Set rules to REJECT for SNOS
+      ansible.builtin.lineinfile:
+        path: /etc/shorewall/rules
+        regexp: '^.*lab:{{ clusters[item].ip }}.*web$'
+        line: "REJECT         lab:{{ clusters[item].ip }}              web"
+        owner: root
+        group: root
+        mode: 0600
+      when: enable_disconnected
+      with_items: "{{ snos | default('snohosts') }}"
+
+    - name: Set rules to ALLOW for SNOS
+      ansible.builtin.lineinfile:
+        path: /etc/shorewall/rules
+        regexp: '^.*lab:{{ clusters[item].ip }}.*web$'
+        line: "ALLOW         lab:{{ clusters[item].ip }}              web"
+        owner: root
+        group: root
+        mode: 0600
+      when: not enable_disconnected
+      with_items: "{{ snos | default('snohosts') }}"
+
+    - name: Restart shorewall
+      ansible.builtin.systemd:
+        name: shorewall
+        state: restarted
+
 - name: Install SNO clusters
   hosts: "{{ snos | default('snohosts') }}"
   gather_facts: false

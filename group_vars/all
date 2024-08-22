@@ -65,223 +65,222 @@ clusters:
     cpus: 12
     ram: 64768
     mac_nr: 66
+    ip: 192.168.66.110
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71aa"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea71bb"
-    network: 192.168.66.0/24
   sno2:
     cpus: 12
     ram: 40960
     mac_nr: 67
+    ip: 192.168.66.111
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71cc"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea71dd"
-    network: 192.168.66.0/24
   sno3:
     cpus: 12
     ram: 40960
     mac_nr: 68
+    ip: 192.168.66.112
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71ee"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea71ff"
-    network: 192.168.66.0/24
   sno4:
     cpus: 12
     ram: 40960
     mac_nr: 69
+    ip: 192.168.66.113
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea72aa"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea72bb"
-    network: 192.168.66.0/24
   sno5:
     cpus: 12
     ram: 40960
     mac_nr: 70
+    ip: 192.168.66.114
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea72cc"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea72dd"
-    network: 192.168.66.0/24
   sno6:
     cpus: 12
     ram: 40960
     mac_nr: 71
+    ip: 192.168.66.115
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea72ee"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea72ff"
-    network: 192.168.66.0/24
   sno7:
     cpus: 12
     ram: 40960
     mac_nr: 72
+    ip: 192.168.66.116
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7311"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea7322"
-    network: 192.168.66.0/24
   sno8:
     cpus: 12
     ram: 40960
     mac_nr: 73
+    ip: 192.168.66.117
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7333"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea7344"
-    network: 192.168.66.0/24
   sno9:
     cpus: 12
     ram: 40960
     mac_nr: 74
+    ip: 192.168.66.118
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7355"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea7366"
-    network: 192.168.66.0/24
   sno10:
     cpus: 12
     ram: 40960
     mac_nr: 75
+    ip: 192.168.66.119
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7377"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea7388"
-    network: 192.168.66.0/24
-
   sno11:
     cpus: 12
     ram: 64768
     mac_nr: 76
+    ip: 192.168.66.120
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7399"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea73aa"
-    network: 192.168.66.0/24
   sno12:
     cpus: 12
     ram: 64768
     mac_nr: 77
+    ip: 192.168.66.121
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea73bb"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea73cc"
-    network: 192.168.66.0/24
   sno13:
     cpus: 12
     ram: 64768
     mac_nr: 78
+    ip: 192.168.66.122
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea73dd"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea73ee"
-    network: 192.168.66.0/24
   sno14:
     cpus: 12
     ram: 64768
     mac_nr: 79
+    ip: 192.168.66.123
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7400"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea7411"
-    network: 192.168.66.0/24
   sno15:
     cpus: 12
     ram: 64768
     mac_nr: 80
+    ip: 192.168.66.124
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7422"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea7433"
-    network: 192.168.66.0/24
   sno16:
     cpus: 12
     ram: 64768
     mac_nr: 81
+    ip: 192.168.66.125
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7444"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea7455"
-    network: 192.168.66.0/24
   sno17:
     cpus: 12
     ram: 64768
     mac_nr: 82
+    ip: 192.168.66.126
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7466"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea7477"
-    network: 192.168.66.0/24
   sno18:
     cpus: 12
     ram: 64768
     mac_nr: 83
+    ip: 192.168.66.127
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7488"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea7499"
-    network: 192.168.66.0/24
   sno19:
     cpus: 12
     ram: 64768
     mac_nr: 84
+    ip: 192.168.66.128
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea74aa"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea74bb"
-    network: 192.168.66.0/24
   sno20:
     cpus: 12
     ram: 64768
     mac_nr: 85
+    ip: 192.168.66.129
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea74cc"
     disk2: 30
     cache2: unsafe
     wwn2: "0x5000c50015ea74dd"
-    network: 192.168.66.0/24
 
 rhel_isos:
   "9.4": "/var/lib/libvirt/images/rhel-9.4-x86_64-dvd.iso"
