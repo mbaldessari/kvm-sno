@@ -22,7 +22,9 @@ platform:
 bootstrapInPlace:
   installationDisk: /dev/disk/by-id/wwn-{{ clusters[item].wwn }}
 pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
-{% if enable_local_docker_mirror %}
+{% if enable_disconnected %}
+{% include "disconnected-imagedigestsources.yaml" %}
+{% else %}
 imageDigestSources:
 - mirrors:
   - kuemper.int.rhx:5001
@@ -39,9 +41,6 @@ imageDigestSources:
 - mirrors:
   - kuemper.int.rhx:5005
   source: gcr.io
-{% endif %}
-{% if enable_disconnected %}
-{% include "disconnected-imagedigestsources.yaml" %}
 {% endif %}
 
 sshKey: |

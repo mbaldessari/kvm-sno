@@ -30,5 +30,5 @@ spec:
   source: "cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}"
 {% else %}
   source: "redhat-operators"
-{% end %}
+{% endif %}
   sourceNamespace: openshift-marketplace

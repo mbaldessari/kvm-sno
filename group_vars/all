@@ -34,7 +34,6 @@ mac_prefix: "52:54:00:00:01"
 https_proxy: http://172.16.15.254:3128/
 http_proxy: http://172.16.15.254:3128/
 no_proxy: "{{ domain }},172.16.0.0/16,10.0.0.0/8,192.168.66.0/24"
-enable_local_docker_mirror: false
 enable_disconnected: false
 iib_index_image_base: registry-proxy.engineering.redhat.com/rh-osbs
 additional_trust_bundle: |
