@@ -237,6 +237,7 @@
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
   with_items: "{{ inventory_hostname_short }}"
+  when: enable_disconnected
   register: lvm
   until: lvm is not failed
   retries: 50

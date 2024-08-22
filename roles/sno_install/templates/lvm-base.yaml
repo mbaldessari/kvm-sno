@@ -26,5 +26,9 @@ metadata:
 spec:
   installPlanApproval: Automatic
   name: lvms-operator
+{% if enable_disconnected %}
   source: "cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}"
+{% else %}
+  source: "redhat-operators"
+{% end %}
   sourceNamespace: openshift-marketplace

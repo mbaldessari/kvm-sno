@@ -11,7 +11,7 @@
         line: "REJECT         lab:{{ clusters[item].ip }}              web"
         owner: root
         group: root
-        mode: 0600
+        mode: "0600"
       when: enable_disconnected
       with_items: "{{ snos | default('snohosts') }}"
 
@@ -19,10 +19,10 @@
       ansible.builtin.lineinfile:
         path: /etc/shorewall/rules
         regexp: '^.*lab:{{ clusters[item].ip }}.*web$'
-        line: "ALLOW         lab:{{ clusters[item].ip }}              web"
+        line: "ACCEPT         lab:{{ clusters[item].ip }}              web"
         owner: root
         group: root
-        mode: 0600
+        mode: "0600"
       when: not enable_disconnected
       with_items: "{{ snos | default('snohosts') }}"
 
