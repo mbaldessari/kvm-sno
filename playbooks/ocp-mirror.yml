@@ -53,27 +53,6 @@
         dest: "{{ local_mirror }}/helm/helm-imageset-config.yaml"
         mode: "0644"
 
-    # - name: Mirror images manually
-    #   tags:
-    #     - helm
-    #   ansible.builtin.shell: |
-    #     set -e
-    #     rm -rf /tmp/helm-repo-tmp ; mkdir /tmp/helm-repo-tmp
-    #     cd /tmp/helm-repo-tmp
-    #     helm repo add vp https://charts.validatedpatterns.io || /bin/true
-    #     helm repo update
-    #     helm pull vp/clustergroup --version 0.8.10
-    #     helm push clustergroup-0.8.10.tgz oci://kuemper.int.rhx/helm/
-    #     helm pull vp/acm --version 0.1.0
-    #     helm push acm-0.1.0.tgz oci://kuemper.int.rhx/helm/
-    #     helm pull vp/gitea --version 0.0.2
-    #     helm push gitea-0.0.2.tgz oci://kuemper.int.rhx/helm/
-    #     helm pull vp/golang-external-secrets --version 0.1.0
-    #     helm push golang-external-secrets-0.1.0.tgz oci://kuemper.int.rhx/helm/
-    #     helm pull vp/hashicorp-vault --version 0.1.0
-    #     helm push hashicorp-vault-0.1.0.tgz oci://kuemper.int.rhx/helm/
-    #   args:
-    #     chdir: "{{ mirrorfolder }}/{{ ocp_version }}"
     - name: Mirror images
       tags:
         - helm
