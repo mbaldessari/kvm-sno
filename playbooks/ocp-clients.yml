@@ -4,13 +4,6 @@
   gather_facts: false
   become: true
   tasks:
-    - name: Restart docker caches
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        ./docker-cache.sh
-      args:
-        chdir: /home/michele/docker
-
     - name: Create mirror folders
       ansible.builtin.file:
         path: "{{ mirrorfolder }}/{{ item }}"
