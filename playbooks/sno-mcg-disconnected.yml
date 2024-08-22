@@ -46,12 +46,11 @@
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
+        #--set main.patternsOperator.source=cs-community-operator-index-v{{ ocp_maj_min_version_dashed }} --set main.gitops.operatorSource=cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}"
     - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        # Assumes the following are in some values file
-        # --set main.patternsOperator.source=cs-community-operator-index-v{{ ocp_maj_min_version_dashed }} --set main.gitops.operatorSource=cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}"
         export EXTRA_HELM_OPTS="--set main.git.repoURL=https://gitea.ocplab.ocp/bandini/mcg"
         ./pattern.sh make install
       args:
