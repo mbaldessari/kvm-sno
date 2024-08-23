@@ -44,21 +44,3 @@
         --workspace file://{{ local_mirror }}/workspace docker://{{ oc_mirror_local_registry }} --v2 &> /var/log/oc-mirror.log
       args:
         chdir: "{{ mirrorfolder }}/{{ ocp_version }}"
-
-    - name: Create helm-imageset-config
-      tags:
-        - helm
-      ansible.builtin.template:
-        src: ../templates/helm-imageset-config-v1.yaml
-        dest: "{{ local_mirror }}/helm/helm-imageset-config.yaml"
-        mode: "0644"
-
-    - name: Mirror images
-      tags:
-        - helm
-      ansible.builtin.shell: |
-        set -e
-        ./oc mirror --verbose 7 --config={{ local_mirror }}/helm/helm-imageset-config.yaml \
-          docker://{{ oc_mirror_local_registry }} &> /var/log/helm-mirror.log
-      args:
-        chdir: "{{ mirrorfolder }}/{{ ocp_version }}"
