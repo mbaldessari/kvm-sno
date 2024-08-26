@@ -15,6 +15,7 @@ mirror:
       - name: advanced-cluster-management
         channels:
           - name: release-2.10
+          - name: release-2.11
       - name: multicluster-engine
         channels:
           - name: stable-2.5
