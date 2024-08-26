@@ -31,6 +31,10 @@ ocp-mirror: ## Reads ocp_versions list and makes a mirror
 sno: ## Install an SNO vm on kuemper host
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-install.yml
 
+.PHONY: sno-direct
+sno-direct: ## Install an SNO vm on kuemper host and force a non-disconnected install
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' --extra-vars='{enable_disconnected: False}' $(EXTRA_VARS) playbooks/sno-install.yml
+
 .PHONY: ssl
 ssl: ## Install my SSL certs on the SNO nodes
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-ssl.yml
