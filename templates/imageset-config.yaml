@@ -36,9 +36,9 @@ mirror:
   - name: registry.redhat.io/ubi9/ubi:latest
   - name: registry.redhat.io/ubi9/ubi-minimal:latest
   - name: quay.io/ansible/creator-ee:latest
-  - name: registry.connect.redhat.com/hashicorp/vault:1.17.2-ubi
+  - name: registry.connect.redhat.com/hashicorp/vault:1.17.3-ubi
   - name: registry.access.redhat.com/ubi8/httpd-24:1-226
-  - name: ghcr.io/external-secrets/external-secrets:v0.9.20-ubi
+  - name: ghcr.io/external-secrets/external-secrets:v0.10.0-ubi
   - name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
   # VP charts
   - name: quay.io/hybridcloudpatterns/acm:0.1.1
