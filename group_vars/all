@@ -68,7 +68,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71aa"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea71bb"
   sno2:
@@ -79,7 +79,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71cc"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea71dd"
   sno3:
@@ -90,7 +90,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71ee"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea71ff"
   sno4:
@@ -101,7 +101,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea72aa"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea72bb"
   sno5:
@@ -112,7 +112,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea72cc"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea72dd"
   sno6:
@@ -123,7 +123,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea72ee"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea72ff"
   sno7:
@@ -134,7 +134,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7311"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7322"
   sno8:
@@ -145,7 +145,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7333"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7344"
   sno9:
@@ -156,7 +156,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7355"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7366"
   sno10:
@@ -167,7 +167,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7377"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7388"
   sno11:
@@ -178,7 +178,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7399"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea73aa"
   sno12:
@@ -189,7 +189,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea73bb"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea73cc"
   sno13:
@@ -200,7 +200,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea73dd"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea73ee"
   sno14:
@@ -211,7 +211,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7400"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7411"
   sno15:
@@ -222,7 +222,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7422"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7433"
   sno16:
@@ -233,7 +233,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7444"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7455"
   sno17:
@@ -244,7 +244,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7466"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7477"
   sno18:
@@ -255,7 +255,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7488"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7499"
   sno19:
@@ -266,7 +266,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea74aa"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea74bb"
   sno20:
@@ -277,7 +277,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea74cc"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea74dd"
 
@@ -331,7 +331,7 @@ giteas:
     disk: 64
     cache: unsafe
     wwn: "0x5000c50015eb81aa"
-    disk2: 30
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015eb81ab"
     network: 192.168.66.0/24

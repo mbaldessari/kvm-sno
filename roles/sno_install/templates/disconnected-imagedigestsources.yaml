@@ -1,4 +1,4 @@
-imageContentSources:
+imageDigestSources:
   - mirrors:
     - kuemper.int.rhx/ocp/openshift-release-dev
     source: quay.io/openshift-release-dev
