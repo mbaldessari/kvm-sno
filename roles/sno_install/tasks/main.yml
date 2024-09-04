@@ -152,7 +152,6 @@
     dest: "{{ tempfolder }}/{{ item }}"
     mode: "0644"
   with_items: "{{ inventory_hostname_short }}"
-
 - name: Fetch kubeconfig file
   ansible.posix.synchronize:
     mode: pull
@@ -189,6 +188,7 @@
   until: uri is not failed
   retries: 150
   delay: 30
+
 - name: Remove isos from /ramfs to free up ramfs
   ansible.builtin.shell: |
     set -e -o pipefail
@@ -217,6 +217,37 @@
   failed_when: false
   tags:
     - pki
+
+- name: Template out caching files 1
+  tags:
+    - lvm
+  ansible.builtin.template:
+    src: ./templates/cache-mirrorset-digest.yaml
+    dest: "{{ tempfolder }}/{{ item }}"
+    mode: "0644"
+  with_items: "{{ inventory_hostname_short }}"
+
+- name: Template out caching files 2
+  tags:
+    - lvm
+  ansible.builtin.template:
+    src: ./templates/cache-mirrorset-tag.yaml
+    dest: "{{ tempfolder }}/{{ item }}"
+    mode: "0644"
+  with_items: "{{ inventory_hostname_short }}"
+
+- name: Apply caching yaml files
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/cache-mirrorset-digest.yaml"
+    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/cache-mirrorset-tag.yaml"
+  with_items: "{{ inventory_hostname_short }}"
+  when: not enable_disconnected
+  register: caching
+  until: caching is not failed
+  retries: 50
+  delay: 30
 
 - name: Apply mirroring yaml files
   ansible.builtin.shell: |

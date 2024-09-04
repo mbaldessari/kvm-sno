@@ -68,7 +68,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71aa"
-    disk2: 50
+    disk2: 100
     cache2: unsafe
     wwn2: "0x5000c50015ea71bb"
   sno2:
@@ -79,7 +79,7 @@ clusters:
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71cc"
-    disk2: 50
+    disk2: 100
     cache2: unsafe
     wwn2: "0x5000c50015ea71dd"
   sno3:
