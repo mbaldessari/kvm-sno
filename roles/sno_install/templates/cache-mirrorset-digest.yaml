@@ -4,7 +4,6 @@ kind: ImageDigestMirrorSet
 metadata:
   name: lab-digest
 imageDigestSources:
-  # cache pull through fallbacks
   - mirrors:
     - kuemper.int.rhx:5001
     source: quay.io
