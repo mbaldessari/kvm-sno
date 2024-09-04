@@ -29,19 +29,17 @@ make gitea-destroy gitea &> "${LOGDIR}/00-gitea-vm.log"
 echo "${TIME}: Install fresh SNOs"
 make sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
 set +e
-make sno &> "${LOGDIR}/02-mcg-fresh.log"
+make sno-direct &> "${LOGDIR}/02-mcg-fresh.log"
 ret=$?
 set -e
 if [ $ret -ne 0 ]; then
 	BROKEN_SNOS=$(cat .ansible/retries/sno-install.retry | paste -sd "," -)
 	echo "Some VMs failed, retry only those: ${BROKEN_SNOS}"
 	ansible-playbook -i hosts --extra-vars='{"snos":['$BROKEN_SNOS']}' playbooks/sno-destroy.yml &> "${LOGDIR}/02-retry-failed-ones-destroy.log"
-	ansible-playbook -i hosts --extra-vars='{"snos":['$BROKEN_SNOS']}' playbooks/sno-install.yml &> "${LOGDIR}/02-retry-failed-ones-create.log"
+	ansible-playbook -i hosts --extra-vars='{"snos":['$BROKEN_SNOS']}' --extra-vars='{enable_disconnected: False}' playbooks/sno-install.yml &> "${LOGDIR}/02-retry-failed-ones-create.log"
 fi
-
-# For now we stop. IIB testing is not yet set up for disconnected
-exit 0
 set +e
+
 # Let's do the ACM + MCE IIB dance here
 TIME=$(date -Iminutes)
 echo "${TIME}: Lookup acm + mce IIB"
@@ -65,7 +63,7 @@ ret_gitops_iib=$?
 if [ $ret_acm_iib -eq 0 ] && [ $ret_gitops_iib -eq 0 ]; then 
 	echo "${TIME}: Everyting worked ok. Destroying test SNOs"
 	make SNOS=sno3,sno4,sno5,sno6 sno-destroy &> "${LOGDIR}/08-mcg-destroy-after.log"
-	make SNOS=sno3,sno4,sno5,sno6 sno &> "${LOGDIR}/09-mcg-recreate-after.log"
+	make SNOS=sno3,sno4,sno5,sno6 sno-direct &> "${LOGDIR}/09-mcg-recreate-after.log"
 fi
 
 
