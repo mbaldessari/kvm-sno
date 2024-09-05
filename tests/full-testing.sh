@@ -27,9 +27,9 @@ echo "${TIME}: Set up gitea vm"
 make gitea-destroy gitea &> "${LOGDIR}/00-gitea-vm.log"
 
 echo "${TIME}: Install fresh SNOs"
-make sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
+make SNOS=sno1,sno2,sno3,sno4 sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
 set +e
-make sno-direct &> "${LOGDIR}/02-mcg-fresh.log"
+make SNOS=sno1,sno2,sno3,sno4 sno-direct &> "${LOGDIR}/02-mcg-fresh.log"
 ret=$?
 set -e
 if [ $ret -ne 0 ]; then
@@ -43,11 +43,11 @@ set +e
 # Let's do the ACM + MCE IIB dance here
 TIME=$(date -Iminutes)
 echo "${TIME}: Lookup acm + mce IIB"
-ansible-playbook -e "operator=acm" -e "hub=sno5" playbooks/iib-lookup.yml &> "${LOGDIR}/03-lookup-iib-acm.log"
-ansible-playbook -e "operator=multicluster-engine" -e "hub=sno5" playbooks/iib-lookup.yml &> "${LOGDIR}/04-lookup-iib-mce.log"
+ansible-playbook -e "operator=acm" -e "hub=sno1" playbooks/iib-lookup.yml &> "${LOGDIR}/03-lookup-iib-acm.log"
+ansible-playbook -e "operator=multicluster-engine" -e "hub=sno1" playbooks/iib-lookup.yml &> "${LOGDIR}/04-lookup-iib-mce.log"
 TIME=$(date -Iminutes)
 echo "${TIME}: Install mcg via acm IIB"
-make acm-iib EXTRA_VARS="-e iib_acm=$(cat /tmp/acm-iib-sno5) -e iib_mce=$(cat /tmp/multicluster-engine-iib-sno5) -e hub=sno5 -e spoke=sno6" &> "${LOGDIR}/05-acm-iib-gitops.log"
+make acm-iib EXTRA_VARS="-e iib_acm=$(cat /tmp/acm-iib-sno1) -e iib_mce=$(cat /tmp/multicluster-engine-iib-sno1) -e hub=sno1 -e spoke=sno2" &> "${LOGDIR}/05-acm-iib-gitops.log"
 ret_acm_iib=$?
 
 # This gets the latest IIB for gitops and writes it to /tmp/gitops-iib
@@ -62,8 +62,8 @@ ret_gitops_iib=$?
 # Both tests went fine
 if [ $ret_acm_iib -eq 0 ] && [ $ret_gitops_iib -eq 0 ]; then 
 	echo "${TIME}: Everyting worked ok. Destroying test SNOs"
-	make SNOS=sno3,sno4,sno5,sno6 sno-destroy &> "${LOGDIR}/08-mcg-destroy-after.log"
-	make SNOS=sno3,sno4,sno5,sno6 sno-direct &> "${LOGDIR}/09-mcg-recreate-after.log"
+	make SNOS=sno1,sno2,sno3,sno4 sno-destroy &> "${LOGDIR}/08-mcg-destroy-after.log"
+	make SNOS=sno1,sno2,sno3,sno4 sno-direct &> "${LOGDIR}/09-mcg-recreate-after.log"
 fi
 
 
