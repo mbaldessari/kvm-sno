@@ -84,3 +84,4 @@
         serole: object_r
         setype: httpd_config_t
         seuser: system_u
+        mode: "0640"
