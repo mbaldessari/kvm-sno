@@ -1,0 +1,96 @@
+%include /tmp/uefi
+%include /tmp/legacy
+
+%pre --logfile /tmp/kickstart.install.pre.log
+
+
+if [ -d /sys/firmware/efi ] ; then
+    touch /tmp/legacy
+    cat > /tmp/uefi <<END
+clearpart --all --initlabel --drives=sda
+part /boot --fstype="ext4" --size=512 --ondisk={{ root_wwn | default('sda') }}
+part /boot/efi --fstype="vfat" --size=1024 --ondisk={{ root_wwn | default('sda') }}
+part swap  --size=100  --fstype=swap --ondisk={{ root_wwn | default('sda') }}
+part pv.13 --size=1 --grow --ondisk={{ root_wwn | default('sda') }}
+volgroup VolGroup00 pv.13
+logvol / --fstype xfs --name=rootsys --percent=100 --vgname=VolGroup00
+END
+else
+    touch /tmp/uefi
+    cat > /tmp/legacy <<END
+clearpart --all --initlabel --drives=sda,sdb
+part /boot  --fstype=ext4 --size=300
+part pv.6 --size=1000 --grow --ondisk={{ root_wwn | default('sda') }}
+part swap  --size=100  --fstype=swap
+part pv.13 --size=1 --grow
+volgroup VolGroup00 pv.13
+logvol / --fstype xfs --name=rootsys --percent=100 --vgname=VolGroup00
+END
+fi
+
+chvt 1
+
+%end
+
+# Use network installation
+cdrom
+firewall --disabled
+network --onboot=yes --bootproto=dhcp
+keyboard us
+# Configure Language During Installation
+lang en_US
+skipx
+
+# Services to enable/disable
+services --disabled=mlocate-updatedb,mlocate-updatedb.timer,geoclue,avahi-daemon
+
+timezone Europe/Rome
+user --name=michele --shell=/bin/zsh --groups=wheel --iscrypted --password="{{ passwd }}"
+sshkey --username=michele "{{ ssh_pubkey }}"
+sshkey --username=michele "{{ sshkey2 }}"
+text
+
+%packages
+@core
+openssh-server
+zsh
+strace
+-amd-gpu-firmware
+-intel-gpu-firmware
+-nvidia-gpu-firmware
+-pcsc-lite
+-firewalld
+-iwl6000g2a-firmware
+-iwl3160-firmware
+-iwl105-firmware
+-linux-firmware
+-iwl6050-firmware
+-iwl6000-firmware
+-iwl5000-firmware
+-iwl2030-firmware
+-iwl135-firmware
+-iwl1000-firmware
+-iwl7260-firmware
+-iwl5150-firmware
+-iwl2000-firmware
+-iwl100-firmware
+rsync
+git
+vim
+nginx
+%end
+
+# Post-installation Script
+%post --logfile /root/post-kickstart.log
+echo "michele ALL=(ALL)    NOPASSWD: ALL" >> /etc/sudoers.d/michele
+systemctl disable raid-check.timer
+subscription-manager syspurpose role --set "Red Hat Enterprise Linux Server"
+subscription-manager syspurpose service-level --set Self-Support 
+subscription-manager syspurpose usage --set "Development/Test"
+subscription-manager register --org "{{ rhn_org }}" --activationkey "{{ activation_key }}" --force
+dnf update -y
+curl -L -o /etc/pki/ca-trust/source/anchors/rhx-ca.crt http://fw.int.rhx/ca-bundle.crt
+update-ca-trust
+%end
+
+reboot --eject

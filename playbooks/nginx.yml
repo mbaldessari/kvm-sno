@@ -1,0 +1,78 @@
+---
+- name: Install nginx vm
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Set root_wwn to be sure sda is the right disk
+      ansible.builtin.set_fact:
+        root_wwn: "disk/by-id/wwn-{{ full_cluster['nginx'].wwn }}"
+
+    - name: Template kickstart file to the firewall where it is hosted
+      ansible.builtin.template:
+        src: ../templates/rhel-nginx-ks.yaml.j2
+        dest: "/var/www/html/rhel-nginx.ks"
+        mode: "0644"
+      delegate_to: fw
+
+    - name: Set bootloader fact
+      ansible.builtin.set_fact:
+        bootlines: "{{ bootlines | default({}) | combine({item: '--boot menu=on,useserial=on,uefi'}) }}"
+      with_items:
+        - nginx
+
+    - name: Create Nginx VM
+      ansible.builtin.command: >-
+        virt-install
+        --name {{ item }}
+        --hvm
+        --virt-type kvm
+        --arch {{ arch }}
+        --location {{ rhel_isos[rhel_version] }}
+        --os-variant {{ rhel_variants[rhel_version] }}
+        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
+        --vcpus {{ full_cluster[item].cpus }}
+        --ram {{ full_cluster[item].ram }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }}
+        --check disk_size=off
+        --graphics spice,listen=127.0.0.1
+        --noautoconsole
+        --extra-args "inst.ks=http://fw.int.rhx/rhel-nginx.ks"
+        {{ bootlines[item] }}
+      with_items:
+        - "nginx"
+      retries: 2
+      delay: 10
+      register: vm_creation
+      until: vm_creation is not failed
+
+    - name: Wait for vm to be stopped
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        virsh list --all | grep -w "{{ item }}" | grep -v running
+      register: running
+      retries: 100
+      delay: 20
+      until: running is not failed
+      with_items:
+        - "nginx"
+
+    - name: Start "{{ item }}"
+      ansible.builtin.command: |
+        virsh start "{{ item }}"
+      with_items:
+        - "nginx"
+      retries: 3
+      delay: 10
+      register: restart
+      until: restart is not failed
+
+- name: Wait for nginx boxes
+  hosts: nginx
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Wait for boxes
+      ansible.builtin.wait_for_connection:
+
