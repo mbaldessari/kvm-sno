@@ -31,15 +31,6 @@
         name: shorewall
         state: restarted
 
-- name: Setup nginx on kuemper
-  hosts: kvm:
-  gather_facts: false
-  become: true
-  tasks:
-    ansible.builtin.template:
-      src: "templates/nginx_conf.j2"
-      dest: /tmp/nginx.conf
-
 - name: Install full cluster
   hosts: "{{ snos | default('snohosts') }}"
   gather_facts: false
