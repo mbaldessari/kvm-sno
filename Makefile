@@ -27,6 +27,10 @@ ocp-clients: ## Reads ocp_versions list and makes sure client tools are download
 ocp-mirror: ## Reads ocp_versions list and makes a mirror
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/ocp-mirror.yml
 
+.PHONY: full-cluster
+full-cluster: ## Installs a full OCP cluster on multiple VMs
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/full-cluster.yml
+
 .PHONY: sno
 sno: ## Install an SNO vm on kuemper host
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-install.yml

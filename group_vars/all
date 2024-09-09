@@ -281,6 +281,107 @@ clusters:
     cache2: unsafe
     wwn2: "0x5000c50015ea74dd"
 
+full_cluster:
+  nginx:
+    cpus: 2
+    ram: 8768
+    mac_nr: 98
+    ip: 192.168.66.148
+    disk: 20
+    cache: unsafe
+    wwn: "0x5000c50015ea7500"
+    disk2: 2
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7511"
+  bootstrap-0:
+    cpus: 12
+    ram: 64768
+    mac_nr: 99
+    ip: 192.168.66.149
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea7522"
+    disk2: 50
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7533"
+  master-0:
+    cpus: 12
+    ram: 64768
+    mac_nr: a0
+    ip: 192.168.66.150
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea7544"
+    disk2: 50
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7555"
+  master-1:
+    cpus: 12
+    ram: 64768
+    mac_nr: a1
+    ip: 192.168.66.151
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea7544"
+    disk2: 50
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7555"
+  master-2:
+    cpus: 12
+    ram: 64768
+    mac_nr: a2
+    ip: 192.168.66.152
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea7566"
+    disk2: 50
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7577"
+  worker-0:
+    cpus: 12
+    ram: 64768
+    mac_nr: a3
+    ip: 192.168.66.153
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea7588"
+    disk2: 50
+    cache2: unsafe
+    wwn2: "0x5000c50015ea7599"
+  worker-1:
+    cpus: 12
+    ram: 64768
+    mac_nr: a4
+    ip: 192.168.66.154
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea75aa"
+    disk2: 50
+    cache2: unsafe
+    wwn2: "0x5000c50015ea75bb"
+  worker-2:
+    cpus: 12
+    ram: 64768
+    mac_nr: a5
+    ip: 192.168.66.155
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea75cc"
+    disk2: 50
+    cache2: unsafe
+    wwn2: "0x5000c50015ea75dd"
+  worker-3:
+    cpus: 12
+    ram: 64768
+    mac_nr: a6
+    ip: 192.168.66.156
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea75ee"
+    disk2: 50
+    cache2: unsafe
+    wwn2: "0x5000c50015ea75ff"
+
 rhel_isos:
   "9.4": "/var/lib/libvirt/images/rhel-9.4-x86_64-dvd.iso"
   "9.3": "/var/lib/libvirt/images/rhel-9.3-x86_64-dvd.iso"
