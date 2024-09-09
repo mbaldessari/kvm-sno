@@ -6,7 +6,7 @@
   vars:
     rh_url: "https://datagrepper.engineering.redhat.com/raw?topic=/topic/VirtualTopic.eng.ci.redhat-container-image.index.built&delta=15780000&contains=%s"
     operator: "openshift-gitops-1-gitops-operator-bundle"
-    used_version: "v4.15"
+    used_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"
     output_ocp_versions: {}
   tasks:
     - name: Set url fact
