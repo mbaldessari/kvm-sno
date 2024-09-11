@@ -43,8 +43,8 @@ set +e
 # Let's do the ACM + MCE IIB dance here
 TIME=$(date -Iminutes)
 echo "${TIME}: Lookup acm + mce IIB"
-ansible-playbook -e "operator=acm" -e "hub=sno1" playbooks/iib-lookup.yml &> "${LOGDIR}/03-lookup-iib-acm.log"
-ansible-playbook -e "operator=multicluster-engine" -e "hub=sno1" playbooks/iib-lookup.yml &> "${LOGDIR}/04-lookup-iib-mce.log"
+ansible-playbook -i hosts -e "operator=acm" -e "hub=sno1" playbooks/iib-lookup.yml &> "${LOGDIR}/03-lookup-iib-acm.log"
+ansible-playbook -i hosts -e "operator=multicluster-engine" -e "hub=sno1" playbooks/iib-lookup.yml &> "${LOGDIR}/04-lookup-iib-mce.log"
 TIME=$(date -Iminutes)
 echo "${TIME}: Install mcg via acm IIB"
 make acm-iib EXTRA_VARS="-e iib_acm=$(cat /tmp/acm-iib-sno1) -e iib_mce=$(cat /tmp/multicluster-engine-iib-sno1) -e hub=sno1 -e spoke=sno2" &> "${LOGDIR}/05-acm-iib-gitops.log"
@@ -53,7 +53,7 @@ ret_acm_iib=$?
 # This gets the latest IIB for gitops and writes it to /tmp/gitops-iib
 TIME=$(date -Iminutes)
 echo "${TIME}: Lookup gitops IIB"
-ansible-playbook playbooks/iib-lookup.yml -e hub=sno3 &> "${LOGDIR}/06-lookup-gitops-iib.log"
+ansible-playbook playbooks/iib-lookup.yml -i hosts -e hub=sno3 &> "${LOGDIR}/06-lookup-gitops-iib.log"
 TIME=$(date -Iminutes)
 echo "${TIME}: Install mcg via gitops IIB"
 make gitops-iib EXTRA_VARS="-e iib=$(cat /tmp/openshift-gitops-1-gitops-operator-bundle-iib-sno3) -e hub=sno3 -e spoke=sno4" &> "${LOGDIR}/07-gitops-iib-gitops.log"
