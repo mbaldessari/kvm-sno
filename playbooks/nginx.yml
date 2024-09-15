@@ -76,12 +76,50 @@
     - name: Wait for boxes
       ansible.builtin.wait_for_connection:
 
+    - name: allow nginx(http_port_t) to listen on extra tcp ports
+      tags:
+        - zozzo
+      seport:
+        ports: "{{ item }}"
+        proto: tcp
+        setype: http_port_t
+        state: present
+      with_items:
+          - "6443"
+          - "8000"
+          - "22623"
+    
+    - name: set seboolean flag on and keep it persistent across reboots
+      tags:
+        - zozzo
+      seboolean:
+        name: "{{ item }}"
+        state: yes
+        persistent: yes
+        ignore_selinux_state: yes
+      with_items:
+          - "httpd_can_network_connect"
+          - "httpd_graceful_shutdown"
+          - "httpd_can_network_relay"
+          - "nis_enabled"
+          - "daemons_dump_core"
+
     - name: Setup nginx config file
+      tags:
+        - zozzo
       ansible.builtin.template:
-        src: "templates/nginx_conf.j2"
+        src: "../templates/nginx_conf.j2"
         dest: /etc/nginx/nginx.conf
         selevel: s0
         serole: object_r
         setype: httpd_config_t
         seuser: system_u
         mode: "0640"
+
+    - name: Start and enable nginx
+      tags:
+        - zozzo
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: started
+        enabled: true
