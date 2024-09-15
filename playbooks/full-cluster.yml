@@ -128,3 +128,26 @@
         "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for bootstrap-complete --log-level=info
       args:
         chdir: "{{ fullclusterfolder }}"
+
+    - name: Check if vms already exists
+      community.libvirt.virt:
+        command: list_vms
+      register: all_vms
+
+    - name: Destroy {{ item }}
+      ansible.builtin.shell: |
+        virsh destroy {{ item }}
+        virsh undefine --nvram --remove-all-storage {{ item }}
+      when: 'item in all_vms.list_vms'
+      with_items:
+       - bootstrap
+
+    - name: Approve all machines
+      ansible.builtin.shell: |
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs --no-run-if-empty oc adm certificate approve
+
+    - name: Wait for installation completion
+      ansible.builtin.shell: |
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
