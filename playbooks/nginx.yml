@@ -154,6 +154,8 @@
         setype: httpd_sys_content_t
         seuser: system_u
         mode: "0644"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
       register: download
       until: download is succeeded
       retries: 3
