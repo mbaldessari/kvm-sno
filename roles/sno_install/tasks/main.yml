@@ -158,6 +158,7 @@
     dest: "{{ tempfolder }}/{{ item }}"
     mode: "0644"
   with_items: "{{ inventory_hostname_short }}"
+
 - name: Fetch kubeconfig file
   ansible.posix.synchronize:
     mode: pull

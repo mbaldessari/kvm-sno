@@ -170,6 +170,17 @@
       with_items:
        - bootstrap
 
+    - name: Fetch kubeconfig file
+      ansible.posix.synchronize:
+        mode: pull
+        src: "{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        dest: "~/fullcluster-kubeconfig"
+
+    - name: Fix permissions
+      ansible.builtin.shell: |
+        chmod 0600 "/home/michele/fullcluster-kubeconfig"
+      delegate_to: localhost
+
     - name: Approve all machines
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -185,3 +196,68 @@
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
         "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
+
+    - name: Reset ca folder
+      ansible.builtin.shell: |
+        mkdir -p "{{ ca_folder }}"
+        rm -f "{{ ca_folder }}/{{ item }}-ca-kube"
+      with_items:
+        - fullcluster
+
+    - name: Does the firefox profile exist
+      ansible.builtin.stat:
+        path: "{{ firefox_profile }}"
+      register: profile_path
+
+    - name: Init firefox profile path
+      ansible.builtin.shell: |
+        mkdir -p "{{ firefox_profile }}"
+      when: not profile_path.stat.exists
+
+    # KUBECONFIG certificate-authority-data has the CA only for the API endpoint, we want all of them
+    # /home/michele/Bin/yq '.clusters[0].cluster.certificate-authority-data' {{ item }}-kubeconfig | base64 -d > "{{ ca_folder }}/{{ item }}-ca-api"
+    - name: Fetch all CAs for each cluster
+      ansible.builtin.shell: |
+        set -x -e -o pipefail
+        export KUBECONFIG=/home/michele/{{ item }}-kubeconfig
+        oc get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
+      with_items:
+        - fullcluster
+      retries: 5
+      delay: 10
+      register: pki_import
+      until: pki_import is not failed
+
+    - name: Delete exiting CAs from SNOs
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -f {{ ca_folder }}/{{ item }}-cert*pem
+        awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
+        for i in {{ item }}-cert*; do
+          certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" || true
+        done
+      args:
+        chdir: "{{ ca_folder }}"
+      with_items:
+        - fullcluster
+      retries: 5
+      delay: 10
+      register: pki_import
+      until: pki_import is not failed
+
+    - name: Import all CAs into my firefox profile
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -f {{ ca_folder }}/cert*
+        awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
+        for i in {{ item }}-cert*; do
+          certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
+        done
+      args:
+        chdir: "{{ ca_folder }}"
+      with_items:
+        - fullcluster
+      retries: 10
+      delay: 10
+      register: pki_import
+      until: pki_import is not failed
