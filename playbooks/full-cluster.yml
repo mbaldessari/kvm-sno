@@ -186,16 +186,19 @@
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
         "{{ mirrorfolder }}/{{ ocp_version }}"/oc get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty oc adm certificate approve
+        sleep 10
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty oc adm certificate approve
       register: csr
       until: csr is not failed
-      retries: 15
+      retries: 5
       delay: 10
 
     - name: Wait for installation completion
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
         "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
+      args:
+        chdir: "{{ fullclusterfolder }}"
 
     - name: Reset ca folder
       ansible.builtin.shell: |
