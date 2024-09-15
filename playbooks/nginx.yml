@@ -69,55 +69,41 @@
       until: restart is not failed
 
     - name: Remove full cluster folder
-      tags:
-        - zozzo
       ansible.builtin.file:
         path: "{{ fullclusterfolder }}"
         state: absent
 
     - name: Create full cluster config folder
-      tags:
-        - zozzo
       ansible.builtin.file:
         path: "{{ fullclusterfolder }}"
         state: directory
         recurse: true
 
     - name: Prepare install-config.yaml for full cluster debugging
-      tags:
-        - zozzo
       ansible.builtin.template:
         src: ../templates/full-cluster-install-config.j2.yaml
         dest: "{{ tempfolder }}/full-cluster-install-config.yaml"
         mode: "0640"
 
     - name: Prepare install-config.yaml for full cluster
-      tags:
-        - zozzo
       ansible.builtin.template:
         src: ../templates/full-cluster-install-config.j2.yaml
         dest: "{{ fullclusterfolder }}/install-config.yaml"
         mode: "0640"
 
     - name: Create full cluster manifests
-      tags:
-        - zozzo
       ansible.builtin.command: |
         "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" create manifests --dir=.
       args:
         chdir: "{{ fullclusterfolder }}"
 
     - name: Create full cluster ignition configs
-      tags:
-        - zozzo
       ansible.builtin.command: |
         "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" create ignition-configs --dir=.
       args:
         chdir: "{{ fullclusterfolder }}"
 
     - name: Make all files readable
-      tags:
-        - zozzo
       ansible.builtin.file:
         path: "{{ fullclusterfolder }}"
         mode: u=rwX,g=rX,o=rX
