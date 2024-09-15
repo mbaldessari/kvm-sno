@@ -124,6 +124,12 @@
     virsh start "{{ item }}"
   with_items: "{{ inventory_hostname_short }}"
 
+- name: Remove isos from /ramfs to free up ramfs
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    rm -f "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
+  with_items: "{{ inventory_hostname_short }}"
+
 - name: Wait for node to be Ready
   ansible.builtin.shell: |
     set -e -o pipefail
@@ -165,11 +171,11 @@
   with_items: "{{ inventory_hostname_short }}"
   delegate_to: localhost
 
-- name: Wait for bootstrap to complete
+- name: Wait for install to complete
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/openshift-install --dir={{ item }} wait-for bootstrap-complete &> /tmp/bootstrap-{{ item }}.log
+    "{{ mirrorfolder }}/{{ ocp_version }}"/openshift-install --dir={{ item }} wait-for install-complete &> /tmp/install-{{ item }}.log
   args:
     chdir: "{{ tempfolder }}"
   with_items: "{{ inventory_hostname_short }}"
@@ -177,23 +183,6 @@
   until: cluster_info is not failed
   retries: 100
   delay: 20
-
-- name: Wait for console to be up
-  ansible.builtin.uri:
-    url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
-    validate_certs: false
-    follow_redirects: all
-  with_items: "{{ inventory_hostname_short }}"
-  register: uri
-  until: uri is not failed
-  retries: 150
-  delay: 30
-
-- name: Remove isos from /ramfs to free up ramfs
-  ansible.builtin.shell: |
-    set -e -o pipefail
-    rm -f "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
-  with_items: "{{ inventory_hostname_short }}"
 
 - name: Set kubeadmin password
   ansible.builtin.shell: |
@@ -298,3 +287,14 @@
   delay: 30
   until: lvmcluster is not failed
   with_items: "{{ inventory_hostname_short }}"
+
+- name: Wait for console to be up
+  ansible.builtin.uri:
+    url: https://console-openshift-console.apps.{{ item }}.{{ domain }}/
+    validate_certs: false
+    follow_redirects: all
+  with_items: "{{ inventory_hostname_short }}"
+  register: uri
+  until: uri is not failed
+  retries: 150
+  delay: 30
