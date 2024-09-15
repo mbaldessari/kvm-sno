@@ -37,10 +37,6 @@
         - worker-2
         - worker-3
 
-    - name: debug
-      ansible.builtin.debug:
-        msg: "{{ test }}"
-
     - name: "Create bootstrap VM"
       ansible.builtin.command: >-
         virt-install
@@ -144,10 +140,12 @@
 
     - name: Approve all machines
       ansible.builtin.shell: |
+        set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc get csr -o go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}' | xargs --no-run-if-empty oc adm certificate approve
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty oc adm certificate approve
 
     - name: Wait for installation completion
       ansible.builtin.shell: |
+        set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
         "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
