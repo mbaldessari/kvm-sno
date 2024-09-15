@@ -18,7 +18,7 @@ log_format basic '$remote_addr [$time_local] '
 
     upstream apib {
             least_conn;
-            server bootstrap-0.{{ domain }}:6443;
+            server bootstrap.{{ domain }}:6443;
             server master-0.{{ domain }}:6443;
             server master-1.{{ domain }}:6443;
             server master-2.{{ domain }}:6443;
@@ -35,7 +35,7 @@ log_format basic '$remote_addr [$time_local] '
 
     upstream configureb {
             least_conn;
-            server bootstrap-0.{{ domain }}:22623;
+            server bootstrap.{{ domain }}:22623;
 	    server master-0.{{ domain }}:22623;
 	    server master-1.{{ domain }}:22623;
 	    server master-2.{{ domain }}:22623;

@@ -293,7 +293,7 @@ full_cluster:
     disk2: 2
     cache2: unsafe
     wwn2: "0x5000c50015ea7511"
-  bootstrap-0:
+  bootstrap:
     cpus: 12
     ram: 64768
     mac_nr: 99
