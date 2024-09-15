@@ -17,6 +17,7 @@ arch: "x86_64"
 mirrorfolder: /var/lib/libvirt/ocp-mirror
 local_mirror: "{{ mirrorfolder }}/mirror"
 tempfolder: "/ramfs/sno-temp-folder"
+fullclusterfolder: "{{ tempfolder }}/fullcluster"
 openshift_mirror: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
 oc_mirror_url: "http://fw.int.rhx/oc/oc-mirror"
 oc_mirror_local_registry: "kuemper.int.rhx/ocp"

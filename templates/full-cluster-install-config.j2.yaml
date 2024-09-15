@@ -1,0 +1,106 @@
+apiVersion: v1
+baseDomain: "{{ domain }}"
+compute:
+- name: worker
+  replicas: 4
+controlPlane:
+  name: master
+  replicas: 3 
+metadata:
+  name: cluster
+networking: 
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  machineNetwork:
+  - cidr: 10.0.0.0/16 
+  networkType: OVNKubernetes
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  none: {}
+pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
+{% if enable_disconnected %}
+imageDigestSources:
+  - mirrors:
+    - kuemper.int.rhx/ocp/openshift-release-dev
+    source: quay.io/openshift-release-dev
+  - mirrors:
+    - kuemper.int.rhx/ocp/lvms4
+    source: registry.redhat.io/lvms4
+  - mirrors:
+    - kuemper.int.rhx/ocp/openshift4
+    source: registry.redhat.io/openshift4
+  - mirrors:
+    - kuemper.int.rhx/ocp/rhel8
+    source: registry.redhat.io/rhel8
+  - mirrors:
+    - kuemper.int.rhx/ocp/openshift-gitops-1
+    source: registry.redhat.io/openshift-gitops-1
+  - mirrors:
+    - kuemper.int.rhx/ocp/rh-sso-7
+    source: registry.redhat.io/rh-sso-7
+  - mirrors:
+    - kuemper.int.rhx/ocp/rhacm2
+    source: registry.redhat.io/rhacm2
+  - mirrors:
+    - kuemper.int.rhx/ocp/rhel9
+    source: registry.redhat.io/rhel9
+  - mirrors:
+    - kuemper.int.rhx/ocp/multicluster-engine
+    source: registry.redhat.io/multicluster-engine
+  - mirrors:
+    - kuemper.int.rhx/ocp/community-operator-pipeline-prod
+    source: quay.io/community-operator-pipeline-prod
+  - mirrors:
+    - kuemper.int.rhx/ocp/kubebuilder
+    source: gcr.io/kubebuilder
+  - mirrors:
+    - kuemper.int.rhx/ocp/hybridcloudpatterns
+    source: quay.io/hybridcloudpatterns
+  - mirrors:
+    - kuemper.int.rhx/ocp/ubi8
+    source: registry.redhat.io/ubi8
+  - mirrors:
+    - kuemper.int.rhx/ocp/ubi9
+    source: registry.redhat.io/ubi9
+  - mirrors:
+    - kuemper.int.rhx/ocp/ansible
+    source: quay.io/ansible
+  - mirrors:
+    - kuemper.int.rhx/ocp/ansible-automation-platform-24
+    source: registry.redhat.io/ansible-automation-platform-24
+{% else %}
+imageDigestSources:
+- mirrors:
+  - kuemper.int.rhx:5001
+  source: quay.io
+- mirrors:
+  - kuemper.int.rhx:5002
+  source: ghcr.io
+- mirrors:
+  - kuemper.int.rhx:5003
+  source: registry.redhat.io
+- mirrors:
+  - kuemper.int.rhx:5004
+  source: docker.io
+- mirrors:
+  - kuemper.int.rhx:5005
+  source: gcr.io
+{% endif %}
+
+sshKey: |
+  {{ sshkey | regex_replace('"', '') }}
+  {{ sshkey2 | regex_replace('"', '') | default('') }}
+{% if additional_trust_bundle is defined %}
+additionalTrustBundle: |
+{{ additional_trust_bundle | indent(2, True) }}
+# see https://docs.openshift.com/container-platform/4.14/networking/configuring-a-custom-pki.html
+additionalTrustBundlePolicy: Always
+{% endif %}
+{% if sdfsdfhttp_proxy is defined %}
+proxy:
+  httpProxy: {{ http_proxy }}
+  httpsProxy: {{ https_proxy }}
+  noProxy: {{ no_proxy }}
+{% endif %}

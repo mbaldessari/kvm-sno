@@ -29,7 +29,7 @@ fw.int.rhx ansible_user=michele
 [giteas]
 gitea.ocplab.ocp ansible_user=michele ansible_host=192.168.66.140 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 [nginx]
-nginx.ocplab.ocp ansible_user=michele ansible_host=192.168.66.148 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+nginx.cluster.ocplab.ocp ansible_user=michele ansible_host=192.168.66.148 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
 [rhels]
 rhel1.ocplab.ocp ansible_user=michele ansible_host=192.168.66.130 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
