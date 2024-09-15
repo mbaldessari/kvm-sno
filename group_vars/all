@@ -11,7 +11,7 @@ ocp_versions:
 #ocp_version: "4.13.33"
 #ocp_version: "4.14.19"
 ocp_version: "4.16.8"
-ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}-{{ ocp_version.split('.')[1] }}"
+ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"
 ocp_maj_min_version_dashed: "{{ ocp_maj_min_version | replace('.', '-') }}"
 arch: "x86_64"
 mirrorfolder: /var/lib/libvirt/ocp-mirror
@@ -381,6 +381,13 @@ full_cluster:
     disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea75ff"
+
+coreos:
+  base_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{ ocp_maj_min_version }}/latest"
+  kernel: "rhcos-live-kernel-x86_64"
+  initramfs: "rhcos-live-initramfs.x86_64.img"
+  rootfs: "rhcos-live-rootfs.x86_64.img"
+  bios: "rhcos-metal.x86_64.raw.gz"
 
 rhel_isos:
   "9.4": "/var/lib/libvirt/images/rhel-9.4-x86_64-dvd.iso"

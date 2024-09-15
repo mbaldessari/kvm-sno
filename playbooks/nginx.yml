@@ -78,7 +78,7 @@
 
     - name: allow nginx(http_port_t) to listen on extra tcp ports
       tags:
-        - zozzo
+        - nginx-setup
       seport:
         ports: "{{ item }}"
         proto: tcp
@@ -91,7 +91,7 @@
     
     - name: set seboolean flag on and keep it persistent across reboots
       tags:
-        - zozzo
+        - nginx-setup
       seboolean:
         name: "{{ item }}"
         state: yes
@@ -106,7 +106,7 @@
 
     - name: Setup nginx config file
       tags:
-        - zozzo
+        - nginx-setup
       ansible.builtin.template:
         src: "../templates/nginx_conf.j2"
         dest: /etc/nginx/nginx.conf
@@ -116,9 +116,56 @@
         seuser: system_u
         mode: "0640"
 
+    - name: make nginx ipxe dir
+      tags:
+        - nginx-setup
+      file:
+        path: /usr/share/nginx/html/ipxe
+        state: directory
+        recurse: yes
+        selevel: s0
+        serole: object_r
+        setype: httpd_sys_content_t
+        seuser: system_u
+        mode: 0755
+    
+    - name: make nginx ignitions dir
+      tags:
+        - nginx-setup
+      file:
+        path: /usr/share/nginx/html/openshift/coreos/ignitions
+        state: directory
+        recurse: yes
+        selevel: s0
+        serole: object_r
+        setype: httpd_sys_content_t
+        seuser: system_u
+        mode: 0755
+
+    - name: Download coreos files
+      tags:
+        - nginx-setup
+      ansible.builtin.get_url:
+        url: "{{ item }}"
+        dest: "/usr/share/nginx/html/ipxe"
+        checksum: "sha256:{{ coreos.base_url }}/sha256sum.txt"
+        selevel: s0
+        serole: object_r
+        setype: httpd_sys_content_t
+        seuser: system_u
+        mode: 0644
+      register: download
+      until: download is succeeded
+      retries: 3
+      with_items:
+        - "{{ coreos.base_url }}/{{ coreos.kernel }}"
+        - "{{ coreos.base_url }}/{{ coreos.initramfs }}"
+        - "{{ coreos.base_url }}/{{ coreos.rootfs }}"
+        - "{{ coreos.base_url }}/{{ coreos.bios }}"
+
     - name: Start and enable nginx
       tags:
-        - zozzo
+        - nginx-setup
       ansible.builtin.systemd_service:
         name: nginx
         state: started
