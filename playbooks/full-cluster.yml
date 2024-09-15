@@ -15,16 +15,31 @@
 
     - name: Run coreos ignition embedding for bootstrap node
       ansible.builtin.shell: |
-        set -e
-        cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ fullclusterfolder }}/bootstrap-rhcos-live.iso"
+        set -xe -o pipefail
+        cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ fullclusterfolder }}/{{ item }}-rhcos-live.iso"
+        export IGNITION=$(echo "{{ item }}" | sed -e 's/-.*$//')
+        echo "${IGNITION}"
         podman run --privileged --pull always --rm \
             -v /dev:/dev -v /run/udev:/run/udev -v "{{ fullclusterfolder }}:/data" \
             -w /data quay.io/coreos/coreos-installer:release \
-            iso customize "bootstrap-rhcos-live.iso" --dest-ignition bootstrap.ign \
-            --dest-device "/dev/disk/by-id/wwn-{{ full_cluster['bootstrap'].wwn }}"
+            iso customize "{{ item }}-rhcos-live.iso" --dest-ignition "${IGNITION}".ign \
+            --dest-device "/dev/disk/by-id/wwn-{{ full_cluster[item].wwn }}"
       args:
         chdir: "{{ tempfolder }}"
-      with_items: "{{ inventory_hostname_short }}"
+      register: test
+      with_items:
+        - bootstrap
+        - master-0
+        - master-1
+        - master-2
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
+
+    - name: debug
+      ansible.builtin.debug:
+        msg: "{{ test }}"
 
     - name: "Create bootstrap VM"
       ansible.builtin.command: >-
@@ -33,7 +48,7 @@
         --hvm
         --virt-type kvm
         --arch {{ arch }}
-        --cdrom {{ fullclusterfolder }}/bootstrap-rhcos-live.iso
+        --cdrom {{ fullclusterfolder }}/{{ item }}-rhcos-live.iso
         --os-variant rhel8.0
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
         --vcpus {{ full_cluster[item].cpus }}
@@ -44,11 +59,34 @@
         --graphics spice,listen=127.0.0.1
         --noautoconsole
       with_items:
-        - "bootstrap"
+        - bootstrap
+        - master-0
+        - master-1
+        - master-2
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
       retries: 0
       delay: 10
       register: vm_creation
       until: vm_creation is not failed
+
+    - name: Remove ISOs
+      ansible.builtin.shell: |
+        set -e
+        rm -f "{{ item }}-live.iso"
+      args:
+        chdir: "{{ tempfolder }}"
+      with_items:
+        - bootstrap
+        - master-0
+        - master-1
+        - master-2
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
 
     - name: Wait for vm to be stopped
       ansible.builtin.shell: |
@@ -59,14 +97,34 @@
       delay: 20
       until: running is not failed
       with_items:
-        - "bootstrap"
+        - bootstrap
+        - master-0
+        - master-1
+        - master-2
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
 
     - name: Start "{{ item }}"
       ansible.builtin.command: |
         virsh start "{{ item }}"
       with_items:
-        - "bootstrap"
+        - bootstrap
+        - master-0
+        - master-1
+        - master-2
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
       retries: 3
       delay: 10
       register: restart
       until: restart is not failed
+
+    - name: Wait for bootstrap process to complete
+      ansible.builtin.command: |
+        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for bootstrap-complete --log-level=info
+      args:
+        chdir: "{{ fullclusterfolder }}"

@@ -323,10 +323,10 @@ full_cluster:
     ip: 192.168.66.151
     disk: 100
     cache: unsafe
-    wwn: "0x5000c50015ea7544"
+    wwn: "0x5000c50015ea7644"
     disk2: 50
     cache2: unsafe
-    wwn2: "0x5000c50015ea7555"
+    wwn2: "0x5000c50015ea7655"
   master-2:
     cpus: 12
     ram: 64768

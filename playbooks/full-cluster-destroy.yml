@@ -15,4 +15,28 @@
         virsh undefine --nvram --remove-all-storage {{ item }}
       when: 'item in all_vms.list_vms'
       with_items:
-      - bootstrap
+       - bootstrap
+       - master-0
+       - master-1
+       - master-2
+       - worker-0
+       - worker-1
+       - worker-2
+       - worker-3
+
+    - name: Remove ISOs
+      ansible.builtin.shell: |
+        set -e
+        rm -f "{{ item }}-live.iso"
+      args:
+        chdir: "{{ tempfolder }}"
+      when: 'item in all_vms.list_vms'
+      with_items:
+        - bootstrap
+        - master-0
+        - master-1
+        - master-2
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
