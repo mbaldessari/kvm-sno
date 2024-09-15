@@ -76,10 +76,10 @@
     - name: Wait for boxes
       ansible.builtin.wait_for_connection:
 
-    - name: allow nginx(http_port_t) to listen on extra tcp ports
+    - name: Allow nginx(http_port_t) to listen on extra tcp ports
       tags:
         - nginx-setup
-      seport:
+      community.general.seport:
         ports: "{{ item }}"
         proto: tcp
         setype: http_port_t
@@ -88,15 +88,15 @@
           - "6443"
           - "8000"
           - "22623"
-    
-    - name: set seboolean flag on and keep it persistent across reboots
+
+    - name: Set seboolean flag on and keep it persistent across reboots
       tags:
         - nginx-setup
-      seboolean:
+      ansible.posix.seboolean:
         name: "{{ item }}"
-        state: yes
-        persistent: yes
-        ignore_selinux_state: yes
+        state: true
+        persistent: true
+        ignore_selinux_state: true
       with_items:
           - "httpd_can_network_connect"
           - "httpd_graceful_shutdown"
@@ -116,31 +116,31 @@
         seuser: system_u
         mode: "0640"
 
-    - name: make nginx ipxe dir
+    - name: Make nginx ipxe dir
       tags:
         - nginx-setup
-      file:
+      ansible.builtin.file:
         path: /usr/share/nginx/html/ipxe
         state: directory
-        recurse: yes
+        recurse: true
         selevel: s0
         serole: object_r
         setype: httpd_sys_content_t
         seuser: system_u
-        mode: 0755
-    
-    - name: make nginx ignitions dir
+        mode: "0755"
+
+    - name: Make nginx ignitions dir
       tags:
         - nginx-setup
-      file:
+      ansible.builtin.file:
         path: /usr/share/nginx/html/openshift/coreos/ignitions
         state: directory
-        recurse: yes
+        recurse: true
         selevel: s0
         serole: object_r
         setype: httpd_sys_content_t
         seuser: system_u
-        mode: 0755
+        mode: "0755"
 
     - name: Download coreos files
       tags:
@@ -153,7 +153,7 @@
         serole: object_r
         setype: httpd_sys_content_t
         seuser: system_u
-        mode: 0644
+        mode: "0644"
       register: download
       until: download is succeeded
       retries: 3
