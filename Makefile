@@ -31,6 +31,10 @@ ocp-mirror: ## Reads ocp_versions list and makes a mirror
 full-cluster: ## Installs a full OCP cluster on multiple VMs
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/full-cluster.yml
 
+.PHONY: full-cluster-destroy
+full-cluster-destroy: ## Destroys the full cluster
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/full-cluster-destroy.yml
+
 .PHONY: sno
 sno: ## Install an SNO vm on kuemper host
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-install.yml

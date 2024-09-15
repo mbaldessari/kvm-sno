@@ -1,40 +1,50 @@
 ---
-- name: Set firewall rules
-  hosts: fw
-  gather_facts: false
-  become: true
-  tasks:
-    - name: Set rules to REJECT for SNOS
-      ansible.builtin.lineinfile:
-        path: /etc/shorewall/rules
-        regexp: '^.*lab:{{ clusters[item].ip }}.*web$'
-        line: "REJECT         lab:{{ clusters[item].ip }}              web"
-        owner: root
-        group: root
-        mode: "0600"
-      when: enable_disconnected
-      with_items: "{{ snos | default('snohosts') }}"
-
-    - name: Set rules to ALLOW for SNOS
-      ansible.builtin.lineinfile:
-        path: /etc/shorewall/rules
-        regexp: '^.*lab:{{ clusters[item].ip }}.*web$'
-        line: "ACCEPT         lab:{{ clusters[item].ip }}              web"
-        owner: root
-        group: root
-        mode: "0600"
-      when: not enable_disconnected
-      with_items: "{{ snos | default('snohosts') }}"
-
-    - name: Restart shorewall
-      ansible.builtin.systemd:
-        name: shorewall
-        state: restarted
-
 - name: Install full cluster
-  hosts: "{{ snos | default('snohosts') }}"
+  hosts: kvm
   gather_facts: false
   become: true
-  strategy: ansible.builtin.free
-  roles:
-    - full_cluster
+  # strategy: ansible.builtin.free
+  # roles:
+  #   - full_cluster
+  tasks:
+    - name: Set bootloader fact
+      ansible.builtin.set_fact:
+        bootlines: "{{ bootlines | default({}) | combine({item: '--boot menu=on,useserial=on,uefi'}) }}"
+      with_items:
+        - "bootstrap"
+
+    - name: Run coreos ignition embedding for bootstrap node
+      ansible.builtin.shell: |
+        set -e
+        cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ fullclusterfolder }}/bootstrap-rhcos-live.iso"
+        podman run --privileged --pull always --rm \
+            -v /dev:/dev -v /run/udev:/run/udev -v "{{ fullclusterfolder }}:/data" \
+            -w /data quay.io/coreos/coreos-installer:release \
+            iso ignition embed -fi bootstrap.ign "bootstrap-rhcos-live.iso"
+      args:
+        chdir: "{{ tempfolder }}"
+      with_items: "{{ inventory_hostname_short }}"
+
+    - name: "Create bootstrap VM"
+      ansible.builtin.command: >-
+        virt-install
+        --name {{ item }}
+        --hvm
+        --virt-type kvm
+        --arch {{ arch }}
+        --cdrom {{ fullclusterfolder }}/bootstrap-rhcos-live.iso
+        --os-variant rhel8.0
+        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
+        --vcpus {{ full_cluster[item].cpus }}
+        --ram {{ full_cluster[item].ram }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }}
+        --check disk_size=off
+        --graphics spice,listen=127.0.0.1
+        --noautoconsole
+      with_items:
+        - "bootstrap"
+      retries: 0
+      delay: 10
+      register: vm_creation
+      until: vm_creation is not failed
