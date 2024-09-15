@@ -68,47 +68,6 @@
       register: restart
       until: restart is not failed
 
-    - name: Remove full cluster folder
-      ansible.builtin.file:
-        path: "{{ fullclusterfolder }}"
-        state: absent
-
-    - name: Create full cluster config folder
-      ansible.builtin.file:
-        path: "{{ fullclusterfolder }}"
-        state: directory
-        recurse: true
-
-    - name: Prepare install-config.yaml for full cluster debugging
-      ansible.builtin.template:
-        src: ../templates/full-cluster-install-config.j2.yaml
-        dest: "{{ tempfolder }}/full-cluster-install-config.yaml"
-        mode: "0640"
-
-    - name: Prepare install-config.yaml for full cluster
-      ansible.builtin.template:
-        src: ../templates/full-cluster-install-config.j2.yaml
-        dest: "{{ fullclusterfolder }}/install-config.yaml"
-        mode: "0640"
-
-    - name: Create full cluster manifests
-      ansible.builtin.command: |
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" create manifests --dir=.
-      args:
-        chdir: "{{ fullclusterfolder }}"
-
-    - name: Create full cluster ignition configs
-      ansible.builtin.command: |
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" create ignition-configs --dir=.
-      args:
-        chdir: "{{ fullclusterfolder }}"
-
-    - name: Make all files readable
-      ansible.builtin.file:
-        path: "{{ fullclusterfolder }}"
-        mode: u=rwX,g=rX,o=rX
-        recurse: true
-
 - name: Wait for nginx boxes
   hosts: nginx
   gather_facts: false
@@ -156,67 +115,6 @@
         setype: httpd_config_t
         seuser: system_u
         mode: "0640"
-
-    - name: Make nginx ipxe dir
-      tags:
-        - nginx-setup
-      ansible.builtin.file:
-        path: /usr/share/nginx/html/ipxe
-        state: directory
-        recurse: true
-        selevel: s0
-        serole: object_r
-        setype: httpd_sys_content_t
-        seuser: system_u
-        mode: "0755"
-
-    - name: Make nginx ignitions dir
-      tags:
-        - nginx-setup
-      ansible.builtin.file:
-        path: /usr/share/nginx/html/openshift/coreos/ignitions
-        state: directory
-        recurse: true
-        selevel: s0
-        serole: object_r
-        setype: httpd_sys_content_t
-        seuser: system_u
-        mode: "0755"
-
-    - name: Download coreos files
-      tags:
-        - nginx-setup
-      ansible.builtin.get_url:
-        url: "{{ item }}"
-        dest: "/usr/share/nginx/html/ipxe"
-        checksum: "sha256:{{ coreos.base_url }}/sha256sum.txt"
-        selevel: s0
-        serole: object_r
-        setype: httpd_sys_content_t
-        seuser: system_u
-        mode: "0644"
-      environment:
-        https_proxy: "{{ https_proxy | default('') }}"
-      register: download
-      until: download is succeeded
-      retries: 3
-      with_items:
-        - "{{ coreos.base_url }}/{{ coreos.kernel }}"
-        - "{{ coreos.base_url }}/{{ coreos.initramfs }}"
-        - "{{ coreos.base_url }}/{{ coreos.rootfs }}"
-        - "{{ coreos.base_url }}/{{ coreos.bios }}"
-
-    - name: Copy ignition files to nginx
-      tags:
-        - nginx-setup
-      ansible.builtin.copy:
-        src: "{{ fullclusterfolder }}/"
-        dest: /usr/share/nginx/html/openshift/coreos/ignitions
-        mode: "0644"
-        selevel: s0
-        serole: object_r
-        setype: httpd_sys_content_t
-        seuser: system_u
 
     - name: Start and enable nginx
       tags:
