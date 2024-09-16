@@ -1,0 +1,19 @@
+apiVersion: lvm.topolvm.io/v1alpha1
+kind: LVMCluster
+metadata:
+ name: my-lvmcluster
+ namespace: openshift-storage
+spec:
+ storage:
+   deviceClasses:
+   - name: vg1
+     default: true
+     deviceSelector:
+       paths:
+       - /dev/disk/by-id/wwn-{{ full_cluster[item].wwn2 }}
+       # forceWipeDevicesAndDestroyAllData: true # tried it with 4.15 but did not solve my issues
+     thinPoolConfig:
+       name: thin-pool-1
+       sizePercent: 90
+       overprovisionRatio: 10
+
