@@ -281,6 +281,20 @@
       with_items:
         - worker-0
 
+    - name: Set kubeadmin password
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch secret -n kube-system kubeadmin --type json \
+          -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
+      with_items: "{{ inventory_hostname_short }}"
+      when: kubeadmin_pass is defined
+      register: kubepass
+      until: kubepass is not failed
+      retries: 30
+      delay: 5
+
     - name: Reset ca folder
       ansible.builtin.shell: |
         mkdir -p "{{ ca_folder }}"
