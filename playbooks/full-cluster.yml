@@ -181,7 +181,28 @@
         chmod 0600 "/home/michele/fullcluster-kubeconfig"
       delegate_to: localhost
 
-    - name: Approve all machines
+    - name: Approve all machines until we have four workers
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        COUNT=$(oc get nodes -l "node-role.kubernetes.io/worker" --no-headers)
+        if [ ${COUNT} -eq 4 ]; then
+            exit 0
+        fi
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty oc adm certificate approve
+      register: csr
+      until: csr is not failed
+      retries: 25
+      delay: 10
+
+    - name: Wait for installation completion
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
+      args:
+        chdir: "{{ fullclusterfolder }}"
+
+    - name: Approve all machines again
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
@@ -192,13 +213,6 @@
       until: csr is not failed
       retries: 5
       delay: 10
-
-    - name: Wait for installation completion
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
-      args:
-        chdir: "{{ fullclusterfolder }}"
 
     - name: Reset ca folder
       ansible.builtin.shell: |
