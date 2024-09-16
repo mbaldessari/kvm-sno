@@ -285,7 +285,7 @@ clusters:
 full_cluster:
   nginx:
     cpus: 2
-    ram: 6768
+    ram: 2768
     mac_nr: 98
     ip: 192.168.66.148
     disk: 20
