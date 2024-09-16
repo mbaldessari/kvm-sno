@@ -281,15 +281,29 @@
       with_items:
         - worker-0
 
-    - name: Set minio-s3 backend for image registry
+    - name: Set minio-s3 secret for image registry
+      tags:
+        - s3
       ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch configs.imageregistry.operator.openshift.io cluster --type=json \
-          -p='[{"op": "add", "path": "/spec/managementState", "value": "Managed"}, \
-               {"op": "add", "path": "/spec/storage/s3/bucket", "value": "{{ minio.bucket}}"}, \
-               {"op": "add", "path": "/spec/storage/s3/region", "value": "notneeded"}, \
-               {"op": "add", "path": "/spec/storage/s3/regionEndpoint", "value": "https://{{ minio.fqdn }}:{{ minio.port }}"}]'
+        set -e
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc create secret generic image-registry-private-configuration-user \
+              --from-literal=REGISTRY_STORAGE_S3_ACCESSKEY="{{ minio.admin_access_key }}" \
+              --from-literal=REGISTRY_STORAGE_S3_SECRETKEY="{{ minio.admin_secret_key }}" --namespace openshift-image-registry
+      register: miniosetup
+      until: miniosetup is not failed
+      retries: 3
+      delay: 5
+
+    - name: Set minio-s3 backend for image registry
+      tags:
+        - s3
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch configs.imageregistry.operator.openshift.io cluster -n openshift-image-registry \
+              --type merge --patch '{"spec": { "storage": { "s3": { "region": "notneeded", "regionEndpoint": "https://{{ minio.fqdn }}:{{ minio.port }}", "bucket": "{{ minio.bucket}}"}}}}'
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch configs.imageregistry.operator.openshift.io cluster --type=json -p='[{"op": "add", "path": "/spec/managementState", "value": "Managed"}]'
       register: miniosetup
       until: miniosetup is not failed
       retries: 3
