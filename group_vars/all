@@ -414,6 +414,7 @@ activation_key: "{{ lookup('file', '~/.rhn_activation_key') }}"
 rhel_version: "9.4"
 minio:
   fqdn: "gitea.{{ domain }}"
+  port: "9000"
   admin_user: "{{ lookup('ansible.builtin.ini', 'ADMIN_USER', section='secrets', file='~/.miniosecrets.ini') }}"
   admin_pass: "{{ lookup('ansible.builtin.ini', 'ADMIN_PASS', section='secrets', file='~/.miniosecrets.ini') }}"
   admin_access_key: "{{ lookup('ansible.builtin.ini', 'ADMIN_ACCESS_KEY', section='secrets', file='~/.miniosecrets.ini') }}"

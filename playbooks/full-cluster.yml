@@ -281,6 +281,20 @@
       with_items:
         - worker-0
 
+    - name: Set minio-s3 backend for image registry
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch configs.imageregistry.operator.openshift.io cluster --type=json \
+          -p='[{"op": "add", "path": "/spec/managementState", "value": "Managed"}, \
+               {"op": "add", "path": "/spec/storage/s3/bucket", "value": "{{ minio.bucket}}"}, \
+               {"op": "add", "path": "/spec/storage/s3/region", "value": "notneeded"}, \
+               {"op": "add", "path": "/spec/storage/s3/regionEndpoint", "value": "https://{{ minio.fqdn }}:{{ minio.port }}"}]'
+      register: miniosetup
+      until: miniosetup is not failed
+      retries: 3
+      delay: 5
+
     - name: Set kubeadmin password
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -288,7 +302,6 @@
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
         "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch secret -n kube-system kubeadmin --type json \
           -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
-      with_items: "{{ inventory_hostname_short }}"
       when: kubeadmin_pass is defined
       register: kubepass
       until: kubepass is not failed
