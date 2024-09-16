@@ -214,6 +214,50 @@
       retries: 5
       delay: 10
 
+    - name: Template out lvm bits
+      tags:
+        - lvm
+      ansible.builtin.template:
+        src: ../templates/lvm-base.yaml
+        dest: "{{ tempfolder }}/fullcluster/lvm-base.yaml"
+        mode: "0644"
+    
+    - name: Template out lvm cluster
+      tags:
+        - lvm
+      ansible.builtin.template:
+        src: ../templates/lvm-cluster.yaml
+        dest: "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
+        mode: "0644"
+      with_items:
+        - worker-0
+
+    - name: Install LVM operator
+      tags:
+        - lvm
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/lvm-base.yaml"
+      register: lvm
+      until: lvm is not failed
+      retries: 50
+      delay: 20
+
+    - name: Install LVM Cluster
+      tags:
+        - lvm
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
+      register: lvmcluster
+      retries: 50
+      delay: 30
+      until: lvmcluster is not failed
+      with_items:
+        - worker-0
+
     - name: Reset ca folder
       ansible.builtin.shell: |
         mkdir -p "{{ ca_folder }}"
