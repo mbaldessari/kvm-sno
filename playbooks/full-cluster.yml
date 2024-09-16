@@ -232,54 +232,54 @@
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
         "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
       when: enable_disconnected
-      register: lvm
-      until: lvm is not failed
+      register: catalog_sources
+      until: catalog_sources is not failed
       retries: 50
       delay: 20
 
-    - name: Template out lvm bits
-      tags:
-        - lvm
-      ansible.builtin.template:
-        src: ../templates/lvm-base.yaml
-        dest: "{{ tempfolder }}/fullcluster/lvm-base.yaml"
-        mode: "0644"
-
-    - name: Template out lvm cluster
-      tags:
-        - lvm
-      ansible.builtin.template:
-        src: ../templates/lvm-cluster.yaml
-        dest: "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
-        mode: "0644"
-      with_items:
-        - worker-0
-
-    - name: Install LVM operator
-      tags:
-        - lvm
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/lvm-base.yaml"
-      register: lvm
-      until: lvm is not failed
-      retries: 50
-      delay: 20
-
-    - name: Install LVM Cluster
-      tags:
-        - lvm
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
-      register: lvmcluster
-      retries: 50
-      delay: 30
-      until: lvmcluster is not failed
-      with_items:
-        - worker-0
+    # - name: Template out lvm bits
+    #   tags:
+    #     - lvm
+    #   ansible.builtin.template:
+    #     src: ../templates/lvm-base.yaml
+    #     dest: "{{ tempfolder }}/fullcluster/lvm-base.yaml"
+    #     mode: "0644"
+    #
+    # - name: Template out lvm cluster
+    #   tags:
+    #     - lvm
+    #   ansible.builtin.template:
+    #     src: ../templates/lvm-cluster.yaml
+    #     dest: "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
+    #     mode: "0644"
+    #   with_items:
+    #     - worker-0
+    #
+    # - name: Install LVM operator
+    #   tags:
+    #     - lvm
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/lvm-base.yaml"
+    #   register: lvm
+    #   until: lvm is not failed
+    #   retries: 50
+    #   delay: 20
+    #
+    # - name: Install LVM Cluster
+    #   tags:
+    #     - lvm
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
+    #   register: lvmcluster
+    #   retries: 50
+    #   delay: 30
+    #   until: lvmcluster is not failed
+    #   with_items:
+    #     - worker-0
 
     - name: Set minio-s3 secret for image registry
       tags:
