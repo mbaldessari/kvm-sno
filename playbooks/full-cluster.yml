@@ -214,6 +214,29 @@
       retries: 5
       delay: 10
 
+    - name: Apply mirroring yaml files
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
+      when: enable_disconnected
+      register: mirroring
+      until: mirroring is not failed
+      retries: 50
+      delay: 30
+    
+    - name: Disable default catalog sources
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+      when: enable_disconnected
+      register: lvm
+      until: lvm is not failed
+      retries: 50
+      delay: 20
+
     - name: Template out lvm bits
       tags:
         - lvm
