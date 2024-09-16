@@ -33,7 +33,7 @@ full-cluster: ## Installs a full OCP cluster on multiple VMs in disconnected mod
 
 .PHONY: full-cluster-direct
 full-cluster-direct: ## Installs a full OCP cluster on multiple VMs not in disconnected
-	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) --extra-vars='{enable_disconnected: False} 'playbooks/full-cluster.yml
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) --extra-vars='{enable_disconnected: False}' playbooks/full-cluster.yml
 
 .PHONY: full-cluster-destroy
 full-cluster-destroy: ## Destroys the full cluster
