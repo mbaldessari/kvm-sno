@@ -247,7 +247,7 @@
       with_items:
         - local-storage-base.yaml
         - local-storage-cr.yaml
-        
+
     - name: Install local storage operator
       tags:
         - localstorage
