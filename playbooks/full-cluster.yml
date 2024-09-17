@@ -241,11 +241,26 @@
       tags:
         - localstorage
       ansible.builtin.template:
-        src: ../templates/local-storage-base.yaml
-        dest: "{{ tempfolder }}/fullcluster/local-storage-base.yaml"
+        src: "../templates/{{ item }}"
+        dest: "{{ tempfolder }}/fullcluster/{{ item }}"
         mode: "0644"
+      with_items:
+        - local-storage-base.yaml
+        - local-storage-cr.yaml
         
     - name: Install local storage operator
+      tags:
+        - localstorage
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/local-storage-base.yaml"
+      register: localstorage
+      until: localstorage is not failed
+      retries: 50
+      delay: 20
+
+    - name: Install local storage cr
       tags:
         - localstorage
       ansible.builtin.shell: |
