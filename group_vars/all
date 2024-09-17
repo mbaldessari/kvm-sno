@@ -10,7 +10,7 @@ ocp_versions:
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
 #ocp_version: "4.14.19"
-ocp_version: "4.16.8"
+ocp_version: "4.16.10"
 ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"
 ocp_maj_min_version_dashed: "{{ ocp_maj_min_version | replace('.', '-') }}"
 arch: "x86_64"
