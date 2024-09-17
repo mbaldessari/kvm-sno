@@ -237,6 +237,26 @@
       retries: 50
       delay: 20
 
+    - name: Template out localstorage bits
+      tags:
+        - localstorage
+      ansible.builtin.template:
+        src: ../templates/local-storage-base.yaml
+        dest: "{{ tempfolder }}/fullcluster/local-storage-base.yaml"
+        mode: "0644"
+        
+    - name: Install local storage operator
+      tags:
+        - localstorage
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/local-storage-base.yaml"
+      register: localstorage
+      until: localstorage is not failed
+      retries: 50
+      delay: 20
+
     # - name: Template out lvm bits
     #   tags:
     #     - lvm
