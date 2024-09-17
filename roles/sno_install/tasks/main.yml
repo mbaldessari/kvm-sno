@@ -96,7 +96,7 @@
     --vcpus {{ clusters[item].cpus }}
     --ram {{ clusters[item].ram }}
     --disk pool={{ vm_pool }},size={{ clusters[item].disk }},format=qcow2,bus=scsi,cache={{ clusters[item].cache }},wwn={{ clusters[item].wwn }}
-    --disk pool={{ vm_pool }},size={{ clusters[item].disk2 }},format=qcow2,bus=scsi,cache={{ clusters[item].cache2 }},wwn={{ clusters[item].wwn2 }}
+    --disk pool={{ vm_pool }},size={{ clusters[item].disk2 }},format=qcow2,bus=scsi,cache={{ clusters[item].cache2 }},wwn={{ clusters[item].wwn2 }},serial={{ diskserial }}
     --check disk_size=off
     --graphics spice,listen=127.0.0.1
     --noautoconsole

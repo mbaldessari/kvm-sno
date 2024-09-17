@@ -59,6 +59,7 @@ additional_trust_bundle: |
   U8LwiGLfCl7vTrz+27FHTCx0IBxU
   -----END CERTIFICATE-----
 
+diskserial: "seconddisk"
 vm_pool: "default"
 clusters:
   sno1:
