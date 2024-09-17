@@ -82,7 +82,7 @@
         --vcpus {{ full_cluster[item].cpus }}
         --ram {{ full_cluster[item].ram }}
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }}
-        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }},serial=seconddisk
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
