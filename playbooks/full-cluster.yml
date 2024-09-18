@@ -337,7 +337,7 @@
         set -e
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
         "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch configs.imageregistry.operator.openshift.io cluster -n openshift-image-registry \
-              --type merge --patch '{"spec": { "storage": { "s3": { "region": "notneeded", "regionEndpoint": "https://{{ minio.fqdn }}:{{ minio.port }}", "bucket": "{{ minio.bucket}}"}}}}'
+              --type merge --patch '{"spec": { "storage": { "s3": { "region": "notneeded", "regionEndpoint": "https://{{ minio.fqdn }}:{{ minio.port }}", "bucket": "{{ minio.bucket }}"}}}}'
         "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch configs.imageregistry.operator.openshift.io cluster --type=json -p='[{"op": "add", "path": "/spec/managementState", "value": "Managed"}]'
       register: miniosetup
       until: miniosetup is not failed
