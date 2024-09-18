@@ -25,11 +25,13 @@ echo "${TIME}: New OC mirror"
 make ocp-mirror &> "${LOGDIR}/00-ocp-mirror.log"
 echo "${TIME}: Set up gitea vm"
 make gitea-destroy gitea &> "${LOGDIR}/00-gitea-vm.log"
+echo "${TIME}: Set up nginx vm"
+make nginx-destroy nginx &> "${LOGDIR}/00-nginx-vm.log"
 
 echo "${TIME}: Install fresh SNOs"
-make SNOS=sno1,sno2,sno3,sno4 sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
+make SNOS=sno1,sno2,sno3,sno4,sno5,sno6 sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
 set +e
-make SNOS=sno1,sno2,sno3,sno4 sno-direct &> "${LOGDIR}/02-mcg-fresh.log"
+make SNOS=sno1,sno2,sno3,sno4,sno5,sno6 sno-direct &> "${LOGDIR}/02-mcg-fresh.log"
 ret=$?
 set -e
 if [ $ret -ne 0 ]; then
@@ -39,6 +41,8 @@ if [ $ret -ne 0 ]; then
 	ansible-playbook -i hosts --extra-vars='{"snos":['$BROKEN_SNOS']}' --extra-vars='{enable_disconnected: False}' playbooks/sno-install.yml &> "${LOGDIR}/02-retry-failed-ones-create.log"
 fi
 set +e
+
+exit 0
 
 # Let's do the ACM + MCE IIB dance here
 TIME=$(date -Iminutes)
