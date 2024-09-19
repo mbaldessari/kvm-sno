@@ -238,41 +238,68 @@
       retries: 50
       delay: 20
 
-    - name: Template out localstorage bits
+    - name: Template out nfs bits
       tags:
-        - localstorage
+        - nfs
       ansible.builtin.template:
         src: "../templates/{{ item }}"
         dest: "{{ tempfolder }}/fullcluster/{{ item }}"
         mode: "0644"
       with_items:
-        - local-storage-base.yaml
-        - local-storage-cr.yaml
-
-    - name: Install local storage operator
+        - nfs1.yaml
+        - nfs2.yaml
+        - nfs3.yaml
+        
+    - name: Install nfs
       tags:
-        - localstorage
+        - nfs 
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/local-storage-base.yaml"
-      register: localstorage
-      until: localstorage is not failed
-      retries: 50
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs1.yaml"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc adm policy add-scc-to-user hostmount-anyuid system:serviceaccount:default:nfs-client-provisioner
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs2.yaml"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs3.yaml"
+      register: nfsstorage
+      until: nfsstorage is not failed
+      retries: 10
       delay: 20
 
-    - name: Install local storage cr
-      tags:
-        - localstorage
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/local-storage-cr.yaml"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch storageclass localfs-sc -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
-      register: localstorage
-      until: localstorage is not failed
-      retries: 5
-      delay: 20
+    # - name: Template out localstorage bits
+    #   tags:
+    #     - localstorage
+    #   ansible.builtin.template:
+    #     src: "../templates/{{ item }}"
+    #     dest: "{{ tempfolder }}/fullcluster/{{ item }}"
+    #     mode: "0644"
+    #   with_items:
+    #     - local-storage-base.yaml
+    #     - local-storage-cr.yaml
+    #
+    # - name: Install local storage operator
+    #   tags:
+    #     - localstorage
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/local-storage-base.yaml"
+    #   register: localstorage
+    #   until: localstorage is not failed
+    #   retries: 50
+    #   delay: 20
+    #
+    # - name: Install local storage cr
+    #   tags:
+    #     - localstorage
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/local-storage-cr.yaml"
+    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch storageclass localfs-sc -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+    #   register: localstorage
+    #   until: localstorage is not failed
+    #   retries: 5
+    #   delay: 20
 
     # - name: Template out lvm bits
     #   tags:
