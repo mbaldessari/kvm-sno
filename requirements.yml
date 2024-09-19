@@ -1,5 +1,5 @@
 ---
 collections:
   - community.libvirt
-  - community.general.seport
+  - community.general
   - ansible.posix
