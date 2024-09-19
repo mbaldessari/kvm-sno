@@ -181,6 +181,13 @@
         chmod 0600 "/home/michele/fullcluster-kubeconfig"
       delegate_to: localhost
 
+    - name: Wait for installation completion
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
+      args:
+        chdir: "{{ fullclusterfolder }}"
+
     - name: Approve all machines until we have four workers
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -195,12 +202,6 @@
       retries: 25
       delay: 10
 
-    - name: Wait for installation completion
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
-      args:
-        chdir: "{{ fullclusterfolder }}"
 
     - name: Approve all machines again
       ansible.builtin.shell: |
