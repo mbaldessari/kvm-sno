@@ -267,10 +267,10 @@
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
         "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/local-storage-cr.yaml"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch storageclass localblock-sc -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch storageclass localfs-sc -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
       register: localstorage
       until: localstorage is not failed
-      retries: 50
+      retries: 5
       delay: 20
 
     # - name: Template out lvm bits

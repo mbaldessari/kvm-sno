@@ -16,7 +16,8 @@ spec:
           - worker-2.cluster.ocplab.ocp
           - worker-3.cluster.ocplab.ocp
   storageClassDevices:
-    - storageClassName: "localblock-sc"
-      volumeMode: Block 
+    - storageClassName: "localfs-sc"
+      volumeMode: Filesystem
+      fsType: xfs
       devicePaths:
         - /dev/disk/by-id/scsi-SQEMU_QEMU_HARDDISK_seconddisk
