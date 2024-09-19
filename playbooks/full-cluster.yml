@@ -96,7 +96,7 @@
         - worker-2
         - worker-3
 
-    - name: "Create bootstrap VM"
+    - name: "Create bootstrap VM and masters"
       ansible.builtin.command: >-
         virt-install
         --name {{ item }}
@@ -118,30 +118,10 @@
         - master-0
         - master-1
         - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
       retries: 0
       delay: 10
       register: vm_creation
       until: vm_creation is not failed
-
-    - name: Remove ISOs
-      ansible.builtin.shell: |
-        set -e
-        rm -f "{{ item }}-live.iso"
-      args:
-        chdir: "{{ tempfolder }}"
-      with_items:
-        - bootstrap
-        - master-0
-        - master-1
-        - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
 
     - name: Wait for vm to be stopped
       ansible.builtin.shell: |
@@ -156,10 +136,6 @@
         - master-0
         - master-1
         - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
 
     - name: Start "{{ item }}"
       ansible.builtin.command: |
@@ -169,10 +145,6 @@
         - master-0
         - master-1
         - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
       retries: 3
       delay: 10
       register: restart
@@ -181,24 +153,6 @@
     - name: Wait for bootstrap process to complete
       ansible.builtin.command: |
         "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for bootstrap-complete --log-level=info
-      args:
-        chdir: "{{ fullclusterfolder }}"
-
-    - name: Fetch kubeconfig file
-      ansible.posix.synchronize:
-        mode: pull
-        src: "{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        dest: "~/fullcluster-kubeconfig"
-
-    - name: Fix permissions
-      ansible.builtin.shell: |
-        chmod 0600 "/home/michele/fullcluster-kubeconfig"
-      delegate_to: localhost
-
-    - name: Wait for installation completion
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
       args:
         chdir: "{{ fullclusterfolder }}"
 
@@ -247,6 +201,94 @@
   gather_facts: false
   become: true
   tasks:
+    - name: "Create workers"
+      ansible.builtin.command: >-
+        virt-install
+        --name {{ item }}
+        --hvm
+        --virt-type kvm
+        --arch {{ arch }}
+        --cdrom {{ fullclusterfolder }}/{{ item }}-rhcos-live.iso
+        --os-variant rhel8.0
+        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
+        --vcpus {{ full_cluster[item].cpus }}
+        --ram {{ full_cluster[item].ram }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }},serial={{ diskserial }}
+        --check disk_size=off
+        --graphics spice,listen=127.0.0.1
+        --noautoconsole
+      with_items:
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
+      retries: 0
+      delay: 10
+      register: vm_creation
+      until: vm_creation is not failed
+
+    - name: Wait for vm to be stopped
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        virsh list --all | grep -w "{{ item }}" | grep -v running
+      register: running
+      retries: 100
+      delay: 20
+      until: running is not failed
+      with_items:
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
+
+    - name: Start "{{ item }}"
+      ansible.builtin.command: |
+        virsh start "{{ item }}"
+      with_items:
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
+      retries: 3
+      delay: 10
+      register: restart
+      until: restart is not failed
+
+    - name: Remove ISOs
+      ansible.builtin.shell: |
+        set -e
+        rm -f "{{ item }}-live.iso"
+      args:
+        chdir: "{{ tempfolder }}"
+      with_items:
+        - bootstrap
+        - master-0
+        - master-1
+        - master-2
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
+
+    - name: Fetch kubeconfig file
+      ansible.posix.synchronize:
+        mode: pull
+        src: "{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        dest: "~/fullcluster-kubeconfig"
+
+    - name: Fix permissions
+      ansible.builtin.shell: |
+        chmod 0600 "/home/michele/fullcluster-kubeconfig"
+      delegate_to: localhost
+
+    - name: Wait for installation completion
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
+      args:
+        chdir: "{{ fullclusterfolder }}"
+
     - name: Approve all machines until we have four workers
       ansible.builtin.shell: |
         set -e -o pipefail
