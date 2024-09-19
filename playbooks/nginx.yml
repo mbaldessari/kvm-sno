@@ -115,6 +115,8 @@
         setype: httpd_config_t
         seuser: system_u
         mode: "0640"
+      vars:
+        bootstrap: true
 
     - name: Start and enable nginx
       tags:

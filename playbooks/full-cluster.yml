@@ -1,4 +1,31 @@
 ---
+- name: Wait for nginx reload
+  hosts: nginx
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Setup nginx config file
+      tags:
+        - nginx-setup
+      ansible.builtin.template:
+        src: "../templates/nginx_conf.j2"
+        dest: /etc/nginx/nginx.conf
+        selevel: s0
+        serole: object_r
+        setype: httpd_config_t
+        seuser: system_u
+        mode: "0640"
+      vars:
+        bootstrap: true
+
+    - name: Start and enable nginx
+      tags:
+        - nginx-setup
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: restarted
+        enabled: true
+
 - name: Install full cluster
   hosts: kvm
   gather_facts: false
@@ -157,19 +184,6 @@
       args:
         chdir: "{{ fullclusterfolder }}"
 
-    - name: Check if vms already exists
-      community.libvirt.virt:
-        command: list_vms
-      register: all_vms
-
-    - name: Destroy {{ item }}
-      ansible.builtin.shell: |
-        virsh destroy {{ item }}
-        virsh undefine --nvram --remove-all-storage {{ item }}
-      when: 'item in all_vms.list_vms'
-      with_items:
-       - bootstrap
-
     - name: Fetch kubeconfig file
       ansible.posix.synchronize:
         mode: pull
@@ -188,6 +202,51 @@
       args:
         chdir: "{{ fullclusterfolder }}"
 
+    - name: Check if vms already exists
+      community.libvirt.virt:
+        command: list_vms
+      register: all_vms
+
+    - name: Destroy {{ item }}
+      ansible.builtin.shell: |
+        virsh destroy {{ item }}
+        virsh undefine --nvram --remove-all-storage {{ item }}
+      when: 'item in all_vms.list_vms'
+      with_items:
+       - bootstrap
+
+- name: Wait for nginx reload
+  hosts: nginx
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Setup nginx config file
+      tags:
+        - nginx-setup
+      ansible.builtin.template:
+        src: "../templates/nginx_conf.j2"
+        dest: /etc/nginx/nginx.conf
+        selevel: s0
+        serole: object_r
+        setype: httpd_config_t
+        seuser: system_u
+        mode: "0640"
+      vars:
+        bootstrap: false
+
+    - name: Restart and enable nginx
+      tags:
+        - nginx-setup
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: restarted
+        enabled: true
+
+- name: Install full cluster
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
     - name: Approve all machines until we have four workers
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -249,10 +308,10 @@
         - nfs1.yaml
         - nfs2.yaml
         - nfs3.yaml
-        
+
     - name: Install nfs
       tags:
-        - nfs 
+        - nfs
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"

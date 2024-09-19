@@ -18,7 +18,9 @@ log_format basic '$remote_addr [$time_local] '
 
     upstream apib {
             least_conn;
+	    {% if bootstrap %}
             server bootstrap.cluster.{{ domain }}:6443;
+	    {% endif %}
             server master-0.cluster.{{ domain }}:6443;
             server master-1.cluster.{{ domain }}:6443;
             server master-2.cluster.{{ domain }}:6443;
@@ -35,7 +37,9 @@ log_format basic '$remote_addr [$time_local] '
 
     upstream configureb {
             least_conn;
+	    {% if bootstrap %}
             server bootstrap.cluster.{{ domain }}:22623;
+	    {% endif %}
 	    server master-0.cluster.{{ domain }}:22623;
 	    server master-1.cluster.{{ domain }}:22623;
 	    server master-2.cluster.{{ domain }}:22623;
