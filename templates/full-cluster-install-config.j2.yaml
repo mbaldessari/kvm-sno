@@ -70,7 +70,8 @@ imageDigestSources:
   - mirrors:
     - kuemper.int.rhx/ocp/ansible-automation-platform-24
     source: registry.redhat.io/ansible-automation-platform-24
-{% else %}
+{% end %}
+{% if enable_caching %}
 imageDigestSources:
 - mirrors:
   - kuemper.int.rhx:5001
