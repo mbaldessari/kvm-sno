@@ -1,6 +1,9 @@
 - name: Reset ca folder
+  tags:
+    - pki
   ansible.builtin.shell: |
     mkdir -p "{{ ca_folder }}"
+    sudo chmod 1777 "{{ ca_folder }}"
     rm -f "{{ ca_folder }}/{{ item }}-ca-kube"
   with_items: "{{ inventory_hostname_short }}"
 
@@ -10,6 +13,8 @@
   register: profile_path
 
 - name: Init firefox profile path
+  tags:
+    - pki
   ansible.builtin.shell: |
     mkdir -p "{{ firefox_profile }}"
   when: not profile_path.stat.exists
@@ -17,8 +22,11 @@
 # KUBECONFIG certificate-authority-data has the CA only for the API endpoint, we want all of them
 # /home/michele/Bin/yq '.clusters[0].cluster.certificate-authority-data' {{ item }}-kubeconfig | base64 -d > "{{ ca_folder }}/{{ item }}-ca-api"
 - name: Fetch all CAs for each cluster
+  tags:
+    - pki
   ansible.builtin.shell: |
     set -x -e -o pipefail
+    sudo rm -f "{{ ca_folder }}/{{ item }}-ca-kube"
     export KUBECONFIG=/home/michele/{{ item }}-kubeconfig
     oc get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
   with_items: "{{ inventory_hostname_short }}"
@@ -28,6 +36,8 @@
   until: pki_import is not failed
 
 - name: Delete exiting CAs from SNOs
+  tags:
+    - pki
   ansible.builtin.shell: |
     set -e -o pipefail
     rm -f {{ ca_folder }}/{{ item }}-cert*pem
@@ -44,6 +54,8 @@
   until: pki_import is not failed
 
 - name: Import all CAs into my firefox profile
+  tags:
+    - pki
   ansible.builtin.shell: |
     set -e -o pipefail
     rm -f {{ ca_folder }}/cert*
