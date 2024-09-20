@@ -48,7 +48,7 @@
         dest: "{{ tempfolder }}/full-cluster-install-config.yaml"
         mode: "0640"
       vars:
-        enable_caching: false
+        enable_caching: true
 
     - name: Prepare install-config.yaml for full cluster
       ansible.builtin.template:
@@ -56,7 +56,7 @@
         dest: "{{ fullclusterfolder }}/install-config.yaml"
         mode: "0640"
       vars:
-        enable_caching: false
+        enable_caching: true
 
     - name: Create full cluster manifests
       ansible.builtin.command: |
