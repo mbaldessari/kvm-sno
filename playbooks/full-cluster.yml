@@ -308,9 +308,7 @@
         dest: "{{ tempfolder }}/fullcluster/{{ item }}"
         mode: "0644"
       with_items:
-        - nfs1.yaml
-        - nfs2.yaml
-        - nfs3.yaml
+        - nfs.yaml
 
     - name: Install nfs
       tags:
@@ -318,10 +316,9 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs1.yaml"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc adm policy add-scc-to-user hostmount-anyuid system:serviceaccount:default:nfs-client-provisioner
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs2.yaml"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs3.yaml"
+        helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts || /bin/true
+        helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --version v4.9.0
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs.yaml"
       register: nfsstorage
       until: nfsstorage is not failed
       retries: 10
