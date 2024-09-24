@@ -69,9 +69,11 @@ mirror:
   # VP charts
   - name: quay.io/hybridcloudpatterns/acm:0.1.2
   - name: quay.io/hybridcloudpatterns/clustergroup:0.8.14
+  - name: quay.io/hybridcloudpatterns/clustergroup:0.9.2
   - name: quay.io/hybridcloudpatterns/gitea:0.0.2
   - name: quay.io/hybridcloudpatterns/golang-external-secrets:0.1.2
   - name: quay.io/hybridcloudpatterns/hashicorp-vault:0.1.2
   - name: quay.io/hybridcloudpatterns/utility-container:latest
   - name: quay.io/hybridcloudpatterns/utility-container:v1
+  - name: quay.io/hybridcloudpatterns/imperative-container:v1
   - name: docker.io/gitea/gitea:1.21.11-rootless
