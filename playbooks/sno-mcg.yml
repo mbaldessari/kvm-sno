@@ -50,7 +50,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        ./pattern.sh make install
+        ./pattern.sh make install &> "/tmp/mcg-install-{{ hub }}.log"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
 
