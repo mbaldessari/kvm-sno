@@ -176,7 +176,7 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    timeout 2m "{{ mirrorfolder }}/{{ ocp_version }}"/openshift-install --dir={{ item }} wait-for install-complete &> /tmp/install-{{ item }}.log
+    timeout 30s "{{ mirrorfolder }}/{{ ocp_version }}"/openshift-install --dir={{ item }} wait-for install-complete &> /tmp/install-{{ item }}.log
   args:
     chdir: "{{ tempfolder }}"
   with_items: "{{ inventory_hostname_short }}"
