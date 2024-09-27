@@ -43,7 +43,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ node }}-kubeconfig
-        ./pattern.sh make install &> /tmp/connected1.log
+        ./pattern.sh make install &> /tmp/connectedvehicle-{{ node }}.log
       args:
         chdir: "{{ vehicletempfolder }}/connected-vehicle-architecture"
 
