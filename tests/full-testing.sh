@@ -28,6 +28,8 @@ make gitea-destroy gitea &> "${LOGDIR}/00-gitea-vm.log"
 echo "${TIME}: Set up nginx vm"
 make nginx-destroy nginx &> "${LOGDIR}/00-nginx-vm.log"
 
+exit 0
+
 echo "${TIME}: Install fresh SNOs"
 make SNOS=sno1,sno2,sno3,sno4,sno5,sno6 sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
 set +e

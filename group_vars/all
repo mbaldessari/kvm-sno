@@ -4,7 +4,7 @@ ocp_versions:
   - "4.14.29"
   - "4.15.17"
   - "4.16.11"
-  - "4.17.0"
+  - "4.17.1"
 
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
@@ -60,6 +60,7 @@ additional_trust_bundle: |
 
 diskserial: "seconddisk"
 vm_pool: "default"
+second_disk_pool: "default"
 clusters:
   sno1:
     cpus: 12
@@ -404,7 +405,7 @@ rhel_variants:
   "8.9": "rhel8.9"
   "7.9": "rhel7.9"
 
-rhel_pool: "fast"
+rhel_pool: "default"
 fast_pool: "fast"
 passwd: "{{ lookup('file', '~/.fwpass') }}"
 ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3YhhpKweKeyW+iCK michele@oshie"
