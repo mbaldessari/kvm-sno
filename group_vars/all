@@ -3,13 +3,13 @@
 ocp_versions:
   - "4.14.29"
   - "4.15.17"
-  - "4.16.11"
-  - "4.17.1"
+  - "4.16.18"
+  - "4.17.2"
 
 #ocp_version: "4.12.49"
 #ocp_version: "4.13.33"
 #ocp_version: "4.14.19"
-ocp_version: "4.16.11"
+ocp_version: "4.16.18"
 ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"
 ocp_maj_min_version_dashed: "{{ ocp_maj_min_version | replace('.', '-') }}"
 arch: "x86_64"
@@ -59,7 +59,7 @@ additional_trust_bundle: |
   -----END CERTIFICATE-----
 
 diskserial: "seconddisk"
-vm_pool: "default"
+vm_pool: "fast"
 second_disk_pool: "default"
 clusters:
   sno1:
