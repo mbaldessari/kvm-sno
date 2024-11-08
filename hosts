@@ -32,14 +32,9 @@ gitea.ocplab.ocp ansible_user=michele ansible_host=192.168.66.140 ansible_ssh_co
 nginx.cluster.ocplab.ocp ansible_user=michele ansible_host=192.168.66.148 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
 [rhels]
-rhel1.ocplab.ocp ansible_user=michele ansible_host=192.168.66.130 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-rhel2.ocplab.ocp ansible_user=michele ansible_host=192.168.66.131 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+rhel1 ansible_ssh_private_key_file=~/.ssh/id_ansible ansible_user=michele ansible_host=192.168.66.130 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+rhel2 ansible_ssh_private_key_file=~/.ssh/id_ansible ansible_user=michele ansible_host=192.168.66.131 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
-[rhel1]
-rhel1.ocplab.ocp ansible_user=michele ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
-
-[rhel2]
-rhel2.ocplab.ocp ansible_user=michele ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 
 [build_control]
 localhost ansible_user=michele
