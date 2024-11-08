@@ -102,7 +102,7 @@ mcg-disconnected: ## Install multicloud gitops on all three snos using an intern
 
 .PHONY: agof
 agof: ## Install AGOF on the two RHEL boxes
-	ansible-playbook -i hosts $(TAGS_STRING) -e automation_hub_token_vault=`cat ~/.ansible-hub-token` $(EXTRA_VARS) playbooks/agof.yml
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/agof.yml
 
 .PHONY: vehicle
 vehicle: ## Install Connected Vehicle Architecture on SNO1

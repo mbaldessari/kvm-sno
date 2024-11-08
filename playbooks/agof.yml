@@ -29,6 +29,11 @@
         dest: "{{ agoftempfolder }}/agof"
         clone: true
 
+    - name: Template agof inventory
+      ansible.builtin.template:
+        src: ../templates/inventory_agof.j2
+        dest: ~/inventory_agof
+
     - name: Install AGOF
       ansible.builtin.shell: |
         set -e -o pipefail
