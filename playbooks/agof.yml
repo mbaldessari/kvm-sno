@@ -9,7 +9,7 @@
     agoftempfolder: "~/agof"
     gitrepo: https://github.com/validatedpatterns/agof
     gitbranch: main
-    inventory: ~/kvm-sno/hosts
+    inventory: ~/inventory_agof
   tasks:
     - name: Delete temporary folder
       ansible.builtin.file:
