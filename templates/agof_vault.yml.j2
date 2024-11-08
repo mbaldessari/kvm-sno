@@ -1,0 +1,34 @@
+---
+#aws_account_nbr_vault: 'Your AWS account number - needed to share composer images with'
+#aws_access_key_vault: 'Your AWS access key'
+#aws_secret_key_vault: 'Your AWS secret key'
+
+#pattern_prefix: 'A name to distinguish this pattern from other patterns installed on the same infrastructure'
+#pattern_dns_zone: 'A public DNS zone managed by AWS Route53'
+
+#ec2_name_prefix: 'A unique prefix to distinguish instances in AWS. Used as the pattern name and in public DNS entries'
+#ec2_region: 'An AWS region that your account has access to'
+
+#offline_token: 'A Red Hat offline token used to build the RHEL image on console.redhat.com'
+
+#redhat_username: 'Red Hat Subscription username, used to login to registry.redhat.io'
+#redhat_password: 'Red Hat Subscription password, used to login to registry.redhat.io'
+
+admin_password: "{{ lookup('file', '~/.kubeadminpass') }}"
+
+#manifest_content: "Content for a manifest file to entitle AAP Controller. See below for an example of how to point to a local file"
+#manifest_content: "{{ lookup('file', '~/Downloads/manifest_AVP_20230510T202608Z.zip') | b64encode }}"
+
+org_number_vault: "{{ lookup('file', '~/.rhn_org') }}"
+activation_key_vault: "{{ lookup('file', '~/.rhn_activation_key') }}"
+
+# Set these variables to provide your own AMI, or to re-use an AMI previously generated with this process
+#skip_imagebuilder_build: 'boolean: skips imagebuilder build process'
+#imagebuilder_ami: 'The ID of an AWS AMI image, preferably one that was built with this toolkit'
+
+automation_hub_token_vault: "{{ lookup('file', '~/.ansible-hub-token') }}"
+
+# These variables can be set but are optional. The previous (before AAP 2.4) conncept of sync-list was private
+# to an account.
+#automation_hub_url_certified_vault: 'The private automation hub URL for certified content'
+#automation_hub_url_validated_vault: 'The private automation hub URL for validated content'

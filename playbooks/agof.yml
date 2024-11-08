@@ -34,6 +34,11 @@
         src: ../templates/inventory_agof.j2
         dest: ~/inventory_agof
 
+    - name: Template agof vault
+      ansible.builtin.template:
+        src: ../templates/agof_vault.yml.j2
+        dest: ~/agof_vault.yml
+
     - name: Install AGOF
       ansible.builtin.shell: |
         set -e -o pipefail
