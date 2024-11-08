@@ -7,7 +7,7 @@
     - name: Template kickstart file to the firewall where it is hosted
       ansible.builtin.template:
         src: ../templates/rhel-ks.yaml.j2
-        dest: "/data/html/rhel.ks"
+        dest: "/var/www/html/rhel.ks"
         mode: "0644"
       delegate_to: fw
 
