@@ -22,18 +22,16 @@ START=$(date -Iminutes)
 echo "${START}: Start"
 echo "${START}: Start" > "${LOGDIR}/start.txt"
 echo "${TIME}: New OC mirror"
-make ocp-mirror &> "${LOGDIR}/00-ocp-mirror.log"
+#make ocp-mirror &> "${LOGDIR}/00-ocp-mirror.log"
 echo "${TIME}: Set up gitea vm"
-make gitea-destroy gitea &> "${LOGDIR}/00-gitea-vm.log"
+#make gitea-destroy gitea &> "${LOGDIR}/00-gitea-vm.log"
 echo "${TIME}: Set up nginx vm"
-make nginx-destroy nginx &> "${LOGDIR}/00-nginx-vm.log"
-
-exit 0
+#make nginx-destroy nginx &> "${LOGDIR}/00-nginx-vm.log"
 
 echo "${TIME}: Install fresh SNOs"
-make SNOS=sno1,sno2,sno3,sno4,sno5,sno6 sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
+make SNOS=sno1,sno2,sno3,sno4 sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
 set +e
-make SNOS=sno1,sno2,sno3,sno4,sno5,sno6 sno-direct &> "${LOGDIR}/02-mcg-fresh.log"
+make SNOS=sno1,sno2,sno3,sno4 sno-direct &> "${LOGDIR}/02-mcg-fresh.log"
 ret=$?
 set -e
 if [ $ret -ne 0 ]; then

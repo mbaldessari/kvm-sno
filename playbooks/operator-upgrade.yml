@@ -7,9 +7,9 @@
   become_user: michele
   vars:
     vp_operator_tempfolder: "~/sno-vp-operator"
-    gitrepo: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: 0.0.51
-    upgrade_to: main
+    gitrepo: https://github.com/mbaldessari/patterns-operator
+    upgrade_from: 0.0.59
+    upgrade_to: helm-update
     hub: sno1
     spoke: sno2
     from_version: 6.6.6
