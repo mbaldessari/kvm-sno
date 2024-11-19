@@ -7,8 +7,8 @@
   become_user: michele
   vars:
     agoftempfolder: "~/agof"
-    gitrepo: https://github.com/validatedpatterns/agof
-    gitbranch: main
+    gitrepo: https://github.com/mbaldessari/agof
+    gitbranch: bandini1
     inventory: ~/inventory_agof
   tasks:
     - name: Delete temporary folder
@@ -42,6 +42,6 @@
     - name: Install AGOF
       ansible.builtin.shell: |
         set -e -o pipefail
-        ./pattern.sh make from_os_install INVENTORY="{{ inventory }}"
+        ./pattern.sh make from_os_install INVENTORY="{{ inventory }}" &> /tmp/agof-install.log
       args:
         chdir: "{{ agoftempfolder }}/agof"
