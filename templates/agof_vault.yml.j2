@@ -17,7 +17,8 @@ offline_token: "{{ lookup('file', '~/.ansible-offline-token') }}"
 
 admin_password: "{{ lookup('file', '~/.kubeadminpass') }}"
 
-#manifest_content: "Content for a manifest file to entitle AAP Controller. See below for an example of how to point to a local file"
+manifest_content: "{{ lookup('file', '~/manifest_bandini-agof-test_20241119T185946Z.zip') | b64encode }}"
+
 
 org_number_vault: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key_vault: "{{ lookup('file', '~/.rhn_activation_key') }}"
@@ -27,6 +28,8 @@ activation_key_vault: "{{ lookup('file', '~/.rhn_activation_key') }}"
 #imagebuilder_ami: 'The ID of an AWS AMI image, preferably one that was built with this toolkit'
 
 automation_hub_token_vault: "{{ lookup('file', '~/.ansible-hub-token') }}"
+
+db_password: "{{ lookup('file', '~/.dbpassword') }}"
 
 # These variables can be set but are optional. The previous (before AAP 2.4) conncept of sync-list was private
 # to an account.
