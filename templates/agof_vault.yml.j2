@@ -12,8 +12,8 @@
 # 
 offline_token: "{{ lookup('file', '~/.ansible-offline-token') }}"
 
-#redhat_username: 'Red Hat Subscription username, used to login to registry.redhat.io'
-#redhat_password: 'Red Hat Subscription password, used to login to registry.redhat.io'
+redhat_username: "{{ lookup('file', '~/.redhatregistry-user') }}"
+redhat_password: "{{ lookup('file', '~/.redhatregistry-pass') }}"
 
 admin_password: "{{ lookup('file', '~/.kubeadminpass') }}"
 
