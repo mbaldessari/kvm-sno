@@ -29,6 +29,9 @@ activation_key_vault: "{{ lookup('file', '~/.rhn_activation_key') }}"
 
 automation_hub_token_vault: "{{ lookup('file', '~/.ansible-hub-token') }}"
 
+automation_hub: true
+eda: true
+
 db_password: "{{ lookup('file', '~/.dbpassword') }}"
 
 # These variables can be set but are optional. The previous (before AAP 2.4) conncept of sync-list was private
