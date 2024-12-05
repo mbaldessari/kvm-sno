@@ -16,6 +16,7 @@
     - name: Fetch URI
       ansible.builtin.uri:
         url: "{{ url }}"
+        validate_certs: false
         return_content: true
       register: jsoncontent
 
