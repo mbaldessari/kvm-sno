@@ -394,17 +394,13 @@ coreos:
 
 rhel_isos:
   "9.4": "/var/lib/libvirt/images/rhel-9.4-x86_64-dvd.iso"
-  "9.3": "/var/lib/libvirt/images/rhel-9.3-x86_64-dvd.iso"
-  "9.2": "/var/lib/libvirt/images/rhel-9.2-x86_64-dvd.iso"
+  "9.5": "/var/lib/libvirt/images/rhel-9.5-x86_64-dvd.iso"
   "8.9": "/var/lib/libvirt/images/rhel-8.9-x86_64-dvd.iso"
-  "7.9": "/var/lib/libvirt/images/rhel-7.9-x86_64-dvd.iso"
 
 rhel_variants:
+  "9.5": "rhel9.5"
   "9.4": "rhel9.4"
-  "9.3": "rhel9.3"
-  "9.2": "rhel9.2"
   "8.9": "rhel8.9"
-  "7.9": "rhel7.9"
 
 rhel_pool: "default"
 fast_pool: "fast"
@@ -413,7 +409,7 @@ ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3Yh
 rhn_org: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key: "{{ lookup('file', '~/.rhn_activation_key') }}"
     
-rhel_version: "9.4"
+rhel_version: "9.5"
 minio:
   fqdn: "gitea.{{ domain }}"
   port: "9000"
