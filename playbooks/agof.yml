@@ -33,11 +33,13 @@
       ansible.builtin.template:
         src: ../templates/inventory_agof.j2
         dest: ~/inventory_agof
+        mode: "0640"
 
     - name: Template agof vault
       ansible.builtin.template:
         src: ../templates/agof_vault.yml.j2
         dest: ~/agof_vault.yml
+        mode: "0640"
 
     - name: Install AGOF
       ansible.builtin.shell: |
