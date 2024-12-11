@@ -11,24 +11,10 @@
         mode: "0644"
       delegate_to: fw
 
-    - name: Copy non-secure boot vars on rhel7
-      ansible.builtin.command: |
-        cp -f /usr/share/edk2/ovmf/OVMF_VARS.fd "/var/lib/libvirt/qemu/nvram/{{ item }}.fd"
-      with_items: "{{ rhels }}"
-      when: rhel_version is match("7.*")
-
     - name: Set bootloader fact
       ansible.builtin.set_fact:
         bootlines: "{{ bootlines | default({}) | combine({item: '--boot menu=on,useserial=on,uefi'}) }}"
-      when: rhel_version is not match("7.*")
       with_items: "{{ rhels }}"
-
-    - name: Set bootloader fact on rhel7
-      ansible.builtin.set_fact:
-        bootlines: "{{ bootlines | default({}) | combine({item: '--boot loader=/usr/share/edk2/ovmf/OVMF_CODE.secboot.fd,loader.readonly=yes,loader.secure=no,loader.type=pflash,nvram=/var/lib/libvirt/qemu/nvram/.fd'}) }}"
-      when: rhel_version is match("7.*")
-      with_items: "{{ rhels }}"
-
 
     - name: Create RHEL VMs
       ansible.builtin.command: >-
