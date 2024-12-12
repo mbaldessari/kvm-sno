@@ -1,6 +1,7 @@
 ---
 # ocp_versions is only used by the ocp-mirror target to mirror locally all the versions and uncompress them *once*
 ocp_versions:
+  - "4.12.70"
   - "4.14.42"
   - "4.15.41"
   - "4.16.26"

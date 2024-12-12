@@ -233,7 +233,9 @@
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/cache-mirrorset-digest.yaml"
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/cache-mirrorset-tag.yaml"
   with_items: "{{ inventory_hostname_short }}"
-  when: not enable_disconnected
+  when: 
+    - not enable_disconnected
+    - ocp_version is not match("4.12.*")
   register: caching
   until: caching is not failed
   retries: 50
@@ -246,7 +248,9 @@
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
   with_items: "{{ inventory_hostname_short }}"
-  when: enable_disconnected
+  when: 
+    - enable_disconnected
+    - ocp_version is not match("4.12.*")
   register: mirroring
   until: mirroring is not failed
   retries: 50
