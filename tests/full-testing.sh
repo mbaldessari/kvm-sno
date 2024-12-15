@@ -42,10 +42,10 @@ if [ $ret -ne 0 ]; then
 fi
 set +e
 
-exit 0
+#exit 0
 
 #make full-cluster-destroy full-cluster-direct &> "${LOGDIR}/00-fullcluster.log"
-exit 0
+#exit 0
 
 # Let's do the ACM + MCE IIB dance here
 TIME=$(date -Iminutes)
