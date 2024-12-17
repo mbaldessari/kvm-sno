@@ -68,7 +68,7 @@ ret_gitops_iib=$?
 
 # Both tests went fine
 if [ $ret_acm_iib -eq 0 ] && [ $ret_gitops_iib -eq 0 ]; then 
-	echo "${TIME}: Everyting worked ok. Destroying test SNOs"
+	echo "${TIME}: Everyting worked ok. Destroying test SNOs and reinstalling"
 	make SNOS=sno1,sno2,sno3,sno4 sno-destroy &> "${LOGDIR}/08-mcg-destroy-after.log"
 	make SNOS=sno1,sno2,sno3,sno4 sno-direct &> "${LOGDIR}/09-mcg-recreate-after.log"
 fi
