@@ -28,6 +28,52 @@ sshkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 sshkey2: "{{ lookup('file', '~/.ssh/id_ansible.pub', errors='ignore') | default('') }}"
 pullsecret: "{{ lookup('file', '~/.pullsecret.json') }}"
 kubeadmin_pass: "{{ lookup('file', '~/.kubeadminpass') }}"
+iscsi_mco_pool: "worker"
+iscsi_target_ip: 192.168.66.100
+iscsi_iqn: iqn.2024-02.com.example
+iscsi_login_script: |
+  #!/bin/bash
+  TARGET_IP={{ iscsi_target_ip }}
+  TARGET_IQN={{ iscsi_iqn }}
+  check_target() {
+  ACTIVE_SESSIONS=$(iscsiadm -m session 2>&1)
+  if [[ 0$(echo ${ACTIVE_SESSIONS} | grep -c "${TARGET_IQN}") -ge 01 ]]
+  then
+    echo "Target found"
+    return 0
+  else
+    echo "Target not found"
+    return 1
+  fi
+  }
+  main(){
+    check_target
+    TARGET_FOUND=$?
+    if [[ 0${TARGET_FOUND} -eq 00 ]]
+    then
+      echo "iSCSI already configured"
+      exit 0
+    else
+      echo "iSCSI not configured, configuring"
+      iscsiadm -m discovery -t st -p ${TARGET_IP}
+      sleep 3
+      iscsiadm --mode  node --target ${TARGET_IQN} --portal ${TARGET_IP} -l
+      sleep 3
+      check_target
+      TARGET_FOUND=$?
+      if [[ 0${TARGET_FOUND} -eq 00 ]]
+      then
+        echo "iSCSI configured correctly"
+        exit 0
+      else
+        echo "Failed to configure iSCSI"
+        exit 1
+      fi
+    fi
+  }
+  main
+  exit $?
+
 bridge_interface: "br0"
 ca_folder: "/tmp/sno-ca"
 firefox_profile: "/home/michele/.mozilla/firefox/1u0ue9rm.OpenShift-1708184658172"

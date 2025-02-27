@@ -277,51 +277,71 @@
       args:
         chdir: "{{ fullclusterfolder }}"
 
-    - name: Apply mirroring yaml files
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
-      when: enable_disconnected
-      register: mirroring
-      until: mirroring is not failed
-      retries: 50
-      delay: 30
+    # - name: Apply mirroring yaml files
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
+    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
+    #   when: enable_disconnected
+    #   register: mirroring
+    #   until: mirroring is not failed
+    #   retries: 50
+    #   delay: 30
+    #
+    # - name: Disable default catalog sources
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+    #   when: enable_disconnected
+    #   register: catalog_sources
+    #   until: catalog_sources is not failed
+    #   retries: 50
+    #   delay: 20
 
-    - name: Disable default catalog sources
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
-      when: enable_disconnected
-      register: catalog_sources
-      until: catalog_sources is not failed
-      retries: 50
-      delay: 20
+    # - name: Template out nfs bits
+    #   tags:
+    #     - nfs
+    #   ansible.builtin.template:
+    #     src: "../templates/{{ item }}"
+    #     dest: "{{ tempfolder }}/fullcluster/{{ item }}"
+    #     mode: "0644"
+    #   with_items:
+    #     - nfs.yaml
+    #
+    # - name: Install nfs
+    #   tags:
+    #     - nfs
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+    #     helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts || /bin/true
+    #     helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --version v4.9.0
+    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs.yaml"
+    #   register: nfsstorage
+    #   until: nfsstorage is not failed
+    #   retries: 10
+    #   delay: 20
 
-    - name: Template out nfs bits
+    - name: Template out iscsi MCP for workers
       tags:
-        - nfs
+        - iscsi
       ansible.builtin.template:
-        src: "../templates/{{ item }}"
-        dest: "{{ tempfolder }}/fullcluster/{{ item }}"
+        src: "../templates/mcp-workers-iscsi.yaml"
+        dest: "{{ tempfolder }}/fullcluster/mcp-workers-iscsi.yaml"
         mode: "0644"
-      with_items:
-        - nfs.yaml
 
-    - name: Install nfs
+    - name: Install local storage operator
       tags:
-        - nfs
+        - iscsi
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts || /bin/true
-        helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --version v4.9.0
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs.yaml"
-      register: nfsstorage
-      until: nfsstorage is not failed
-      retries: 10
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/mcp-workers-iscsi.yaml"
+      register: mcg_iscsi
+      until: mcg_iscsi is not failed
+      retries: 50
       delay: 20
 
     # - name: Template out localstorage bits
