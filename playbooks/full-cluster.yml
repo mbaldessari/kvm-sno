@@ -236,8 +236,10 @@
 
     - name: Remove ISOs
       ansible.builtin.shell: |
-        set -e
-        rm -f "{{ item }}-live.iso"
+        set -ex
+        pwd
+        rm -vf "{{ item }}-live.iso"
+      register: iso_rm
       args:
         chdir: "{{ tempfolder }}"
       with_items:
@@ -249,6 +251,10 @@
         - worker-1
         - worker-2
         - worker-3
+
+    - name: Debug Remove ISOs
+      ansible.builtin.debug:
+        msg: "{{ iso_rm.stdout }}"
 
     - name: Wait for bootstrap process to complete
       ansible.builtin.command: |
