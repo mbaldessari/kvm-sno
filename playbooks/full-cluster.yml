@@ -352,6 +352,10 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         "{{ oc_dir }}/openshift-install" --dir=. wait-for install-complete --log-level=debug
+      retries: 1
+      delay: 5
+      register: wait_for_install
+      until: wait_for_install is not failed
       args:
         chdir: "{{ fullclusterfolder }}"
 
