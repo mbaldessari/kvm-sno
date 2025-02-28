@@ -42,7 +42,7 @@
         ./oc mirror version --v2 --output=yaml
       register: oc_mirror_version
       args:
-        chdir: "{{ mirrorfolder }}/{{ ocp_version }}"
+        chdir: "{{ oc_dir }}"
 
     - name: Print version
       ansible.builtin.debug:
@@ -55,4 +55,4 @@
         ./oc mirror --config={{ local_mirror }}/imageset-config.yaml --loglevel debug \
         --workspace file://{{ local_mirror }}/workspace docker://{{ oc_mirror_local_registry }} --v2 &> /var/log/oc-mirror.log
       args:
-        chdir: "{{ mirrorfolder }}/{{ ocp_version }}"
+        chdir: "{{ oc_dir }}"
