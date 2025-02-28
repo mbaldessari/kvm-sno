@@ -338,7 +338,7 @@
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
         {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
         sleep 10
-        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ ob_bin }} adm certificate approve
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
       register: csr
       until: csr is not failed
       retries: 5
