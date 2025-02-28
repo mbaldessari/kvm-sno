@@ -320,7 +320,7 @@
         if [ ${COUNT} -eq 4 ]; then
             exit 0
         fi
-        "{{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
       register: csr
       until: csr is not failed
       retries: 25
@@ -330,9 +330,9 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
         sleep 10
-        "{{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ ob_bin }} adm certificate approve
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ ob_bin }} adm certificate approve
       register: csr
       until: csr is not failed
       retries: 5
@@ -341,7 +341,7 @@
     - name: Wait for installation completion
       ansible.builtin.shell: |
         set -e -o pipefail
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=debug
+        "{{ oc_dir }}/openshift-install" --dir=. wait-for install-complete --log-level=debug
       args:
         chdir: "{{ fullclusterfolder }}"
 
@@ -350,7 +350,7 @@
         set -e -o pipefail
         PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ oc_bin }} patch secret -n kube-system kubeadmin --type json \
+        {{ oc_bin }} patch secret -n kube-system kubeadmin --type json \
           -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
       when: kubeadmin_pass is defined
       register: kubepass
@@ -374,7 +374,7 @@
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
     #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+    #     "{{ oc_bin }} patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
     #   when: enable_disconnected
     #   register: catalog_sources
     #   until: catalog_sources is not failed
@@ -399,7 +399,7 @@
     #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
     #     helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts || /bin/true
     #     helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --version v4.9.0
-    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/nfs.yaml"
+    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/nfs.yaml"
     #   register: nfsstorage
     #   until: nfsstorage is not failed
     #   retries: 10
@@ -460,7 +460,7 @@
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
     #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/local-storage-base.yaml"
+    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/local-storage-base.yaml"
     #   register: localstorage
     #   until: localstorage is not failed
     #   retries: 50
@@ -472,8 +472,8 @@
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
     #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/local-storage-cr.yaml"
-    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch storageclass localfs-sc -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
+    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/local-storage-cr.yaml"
+    #     "{{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
     #   register: localstorage
     #   until: localstorage is not failed
     #   retries: 5
@@ -503,7 +503,7 @@
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
     #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/lvm-base.yaml"
+    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/lvm-base.yaml"
     #   register: lvm
     #   until: lvm is not failed
     #   retries: 50
@@ -515,7 +515,7 @@
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
     #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-    #     "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
+    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
     #   register: lvmcluster
     #   retries: 50
     #   delay: 30
@@ -529,7 +529,7 @@
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc create secret generic image-registry-private-configuration-user \
+        {{ oc_bin }} create secret generic image-registry-private-configuration-user \
               --from-literal=REGISTRY_STORAGE_S3_ACCESSKEY="{{ minio.admin_access_key }}" \
               --from-literal=REGISTRY_STORAGE_S3_SECRETKEY="{{ minio.admin_secret_key }}" --namespace openshift-image-registry
       register: miniosetup
@@ -543,9 +543,9 @@
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch configs.imageregistry.operator.openshift.io cluster -n openshift-image-registry \
+        {{ oc_bin }} patch configs.imageregistry.operator.openshift.io cluster -n openshift-image-registry \
               --type merge --patch '{"spec": { "storage": { "s3": { "region": "notneeded", "regionEndpoint": "https://{{ minio.fqdn }}:{{ minio.port }}", "bucket": "{{ minio.bucket }}"}}}}'
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch configs.imageregistry.operator.openshift.io cluster --type=json -p='[{"op": "add", "path": "/spec/managementState", "value": "Managed"}]'
+        {{ oc_bin }} patch configs.imageregistry.operator.openshift.io cluster --type=json -p='[{"op": "add", "path": "/spec/managementState", "value": "Managed"}]'
       register: miniosetup
       until: miniosetup is not failed
       retries: 3
@@ -620,4 +620,4 @@
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
-        "{{ oc_bin }} adm wait-for-stable-cluster --minimum-stable-period=5s
+        {{ oc_bin }} adm wait-for-stable-cluster --minimum-stable-period=5s
