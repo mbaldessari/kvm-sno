@@ -54,6 +54,7 @@
 
     - name: Download RHCOS iso
       ansible.builtin.get_url:
+        tmp_dest: /tmp/
         url: "{{ item.stdout }}"
         dest: "{{ mirrorfolder }}/{{ item.item }}/rhcos-live.iso"
         mode: "0664"
