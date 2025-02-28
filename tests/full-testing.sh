@@ -23,7 +23,7 @@ echo "${START}: Start"
 echo "${START}: Start" > "${LOGDIR}/start.txt"
 echo "${TIME}: New OC mirror"
 make ocp-mirror &> "${LOGDIR}/00-ocp-mirror.log"
-make nginx-destroy nginx full-cluster-destroy full-cluster-direct &> "${LOGDIR}/full-cluster.log"
+make nginx-destroy nginx full-cluster-destroy full-cluster &> "${LOGDIR}/01-full-cluster.log"
 exit 0
 echo "${TIME}: Set up gitea vm"
 #make gitea-destroy gitea &> "${LOGDIR}/00-gitea-vm.log"
