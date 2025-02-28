@@ -17,6 +17,8 @@ ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[
 ocp_maj_min_version_dashed: "{{ ocp_maj_min_version | replace('.', '-') }}"
 arch: "x86_64"
 mirrorfolder: /var/lib/libvirt/ocp-mirror
+oc_dir: "{{ mirrorfolder }}/{{ ocp_version }}"
+oc_bin: "{{ mirrorfolder }}/{{ ocp_version }}/oc"
 local_mirror: "{{ mirrorfolder }}/mirror"
 tempfolder: "/ramfs/sno-temp-folder"
 fullclusterfolder: "{{ tempfolder }}/fullcluster"

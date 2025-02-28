@@ -128,13 +128,13 @@
 
     - name: Create full cluster manifests
       ansible.builtin.command: |
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" create manifests --dir=.
+        "{{ oc_dir }}/openshift-install" create manifests --dir=.
       args:
         chdir: "{{ fullclusterfolder }}"
 
     - name: Create full cluster ignition configs
       ansible.builtin.command: |
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" create ignition-configs --dir=.
+        "{{ oc_dir }}/openshift-install" create ignition-configs --dir=.
       args:
         chdir: "{{ fullclusterfolder }}"
 
@@ -147,7 +147,7 @@
     - name: Run coreos ignition embedding for bootstrap node
       ansible.builtin.shell: |
         set -xe -o pipefail
-        cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ fullclusterfolder }}/{{ item }}-rhcos-live.iso"
+        cp {{ oc_dir }}/rhcos-live.iso "{{ fullclusterfolder }}/{{ item }}-rhcos-live.iso"
         export IGNITION=$(echo "{{ item }}" | sed -e 's/-.*$//')
         echo "${IGNITION}"
         podman run --privileged --pull always --rm \
@@ -252,7 +252,7 @@
 
     - name: Wait for bootstrap process to complete
       ansible.builtin.command: |
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for bootstrap-complete --log-level=debug
+        "{{ oc_dir }}/openshift-install" --dir=. wait-for bootstrap-complete --log-level=debug
       args:
         chdir: "{{ fullclusterfolder }}"
 
@@ -320,7 +320,7 @@
         if [ ${COUNT} -eq 4 ]; then
             exit 0
         fi
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty oc adm certificate approve
+        "{{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
       register: csr
       until: csr is not failed
       retries: 25
@@ -330,9 +330,9 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty oc adm certificate approve
+        "{{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
         sleep 10
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty oc adm certificate approve
+        "{{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ ob_bin }} adm certificate approve
       register: csr
       until: csr is not failed
       retries: 5
@@ -350,7 +350,7 @@
         set -e -o pipefail
         PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch secret -n kube-system kubeadmin --type json \
+        "{{ oc_bin }} patch secret -n kube-system kubeadmin --type json \
           -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
       when: kubeadmin_pass is defined
       register: kubepass
@@ -362,8 +362,8 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
+        "{{ oc_bin }} apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
+        "{{ oc_bin }} apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
       when: enable_disconnected
       register: mirroring
       until: mirroring is not failed
@@ -419,8 +419,8 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/mcp-workers-iscsi.yaml"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 4}}'
+        "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/mcp-workers-iscsi.yaml"
+        "{{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 4}}'
       register: mcg_iscsi
       until: mcg_iscsi is not failed
       retries: 50
@@ -432,10 +432,10 @@
       ansible.builtin.shell: |
         set -ex
         export KUBECONFIG=./auth/kubeconfig
-        if [ $({{ mirrorfolder }}/{{ ocp_version }}/oc get mcp/master -o jsonpath='{.status.readyMachineCount}') != $({{ mirrorfolder }}/{{ ocp_version }}/oc get mcp/master -o jsonpath='{.status.machineCount}') ]; then
+        if [ $({{ oc_bin }} get mcp/master -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/master -o jsonpath='{.status.machineCount}') ]; then
           exit 1
         fi
-        if [ $({{ mirrorfolder }}/{{ ocp_version }}/oc get mcp/worker -o jsonpath='{.status.readyMachineCount}') != $({{ mirrorfolder }}/{{ ocp_version }}/oc get mcp/worker -o jsonpath='{.status.machineCount}') ]; then
+        if [ $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.machineCount}') ]; then
           exit 1
         fi
       retries: 30
@@ -574,7 +574,7 @@
       ansible.builtin.shell: |
         set -x -e -o pipefail
         export KUBECONFIG=/home/michele/{{ item }}-kubeconfig
-        oc get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
+        {{ oc_bin }} get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
       with_items:
         - fullcluster
       retries: 5
@@ -620,4 +620,4 @@
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc adm wait-for-stable-cluster --minimum-stable-period=5s
+        "{{ oc_bin }} adm wait-for-stable-cluster --minimum-stable-period=5s
