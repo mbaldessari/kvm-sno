@@ -17,22 +17,21 @@ spec:
         path: /usr/local/sbin/iscsi-login
     systemd:
       units:
-       - contents: |
-            [Unit]
-            Description=Custom CoreOS Generate iSCSI Initiator Name
-            Before=coreos-generate-iscsi-initiatorname.service
-            Before=iscsid.service
-  
-            [Service]
-            Type=oneshot
-            ExecStart=/usr/bin/sh -c 'echo "InitiatorName=`hostname`" > /etc/iscsi/initiatorname.iscsi'
-            RemainAfterExit=yes
-  
-            [Install]
-            WantedBy=multi-user.target
-          enabled: true
-          name: custom-coreos-generate-iscsi-initiatorname.service
+      - contents: |
+          [Unit]
+          Description=Custom CoreOS Generate iSCSI Initiator Name
+          Before=coreos-generate-iscsi-initiatorname.service
+          Before=iscsid.service
 
+          [Service]
+          Type=oneshot
+          ExecStart=/usr/bin/sh -c 'echo "InitiatorName=`hostname`" > /etc/iscsi/initiatorname.iscsi'
+          RemainAfterExit=yes
+
+          [Install]
+          WantedBy=multi-user.target
+        enabled: true
+        name: custom-coreos-generate-iscsi-initiatorname.service
       - contents: |
           [Unit]
           Description=Logs into the iSCSI target if not already loged

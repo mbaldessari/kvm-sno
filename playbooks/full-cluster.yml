@@ -382,7 +382,7 @@
         dest: "{{ tempfolder }}/fullcluster/mcp-workers-iscsi.yaml"
         mode: "0644"
 
-    - name: Install local storage operator
+    - name: Install local iscsi MCP
       tags:
         - iscsi
       ansible.builtin.shell: |
