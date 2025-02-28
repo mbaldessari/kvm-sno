@@ -98,7 +98,7 @@
         targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk2
         targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk3
         targetcli iscsi/iqn.2024-02.com.example/tpg1/ set attribute generate_node_acls=1  authentication=0 demo_mode_write_protect=0 cache_dynamic_acls=1
-        
+
     - name: Remove full cluster folder
       ansible.builtin.file:
         path: "{{ fullclusterfolder }}"
@@ -420,6 +420,7 @@
         set -e -o pipefail
         export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
         "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/fullcluster/mcp-workers-iscsi.yaml"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 4}}'
       register: mcg_iscsi
       until: mcg_iscsi is not failed
       retries: 50
