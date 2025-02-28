@@ -81,6 +81,24 @@
   gather_facts: false
   become: true
   tasks:
+    - name: Set up iscsi on the kvm node
+      ansible.builtin.shell: |
+        #!/bin/bash
+        set -ex
+        systemctl stop target.service
+        rm -rf /etc/target/saveconfig.json /var/lib/iscsi_disks/
+        systemctl start target.service
+        targetcli clearconfig confirm=True
+        mkdir -p /var/lib/iscsi_disks
+        targetcli backstores/fileio create iscsi_disk1 /var/lib/iscsi_disks/disk1.img 10G
+        targetcli backstores/fileio create iscsi_disk2 /var/lib/iscsi_disks/disk2.img 15G
+        targetcli backstores/fileio create iscsi_disk3 /var/lib/iscsi_disks/disk3.img 20G
+        targetcli iscsi/ create iqn.2024-02.com.example
+        targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk1
+        targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk2
+        targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk3
+        targetcli iscsi/iqn.2024-02.com.example/tpg1/ set attribute generate_node_acls=1  authentication=0 demo_mode_write_protect=0 cache_dynamic_acls=1
+        
     - name: Remove full cluster folder
       ansible.builtin.file:
         path: "{{ fullclusterfolder }}"
@@ -327,6 +345,19 @@
       args:
         chdir: "{{ fullclusterfolder }}"
 
+    - name: Set kubeadmin password
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
+        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch secret -n kube-system kubeadmin --type json \
+          -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
+      when: kubeadmin_pass is defined
+      register: kubepass
+      until: kubepass is not failed
+      retries: 30
+      delay: 5
+
     # - name: Apply mirroring yaml files
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
@@ -500,19 +531,6 @@
       register: miniosetup
       until: miniosetup is not failed
       retries: 3
-      delay: 5
-
-    - name: Set kubeadmin password
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch secret -n kube-system kubeadmin --type json \
-          -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
-      when: kubeadmin_pass is defined
-      register: kubepass
-      until: kubepass is not failed
-      retries: 30
       delay: 5
 
     - name: Reset ca folder
