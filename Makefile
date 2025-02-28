@@ -29,7 +29,7 @@ ocp-mirror: ## Reads ocp_versions list and makes a mirror
 
 .PHONY: full-cluster
 full-cluster: ## Installs a full OCP cluster on multiple VMs in disconnected mode
-	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/full-cluster.yml
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) --extra-vars='{enable_caching: False}' playbooks/full-cluster.yml
 
 .PHONY: full-cluster-direct
 full-cluster-direct: ## Installs a full OCP cluster on multiple VMs not in disconnected

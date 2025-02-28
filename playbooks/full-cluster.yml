@@ -1,4 +1,54 @@
 ---
+- name: Set firewall rules
+  hosts: fw
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Set rules to REJECT for Full cluster
+      ansible.builtin.lineinfile:
+        path: /etc/shorewall/rules
+        regexp: '^.*lab:{{ full_cluster[item].ip }}.*web$'
+        line: "REJECT         lab:{{ full_cluster[item].ip }}              web"
+        owner: root
+        group: root
+        mode: "0600"
+      when: enable_disconnected
+      with_items:
+        - nginx
+        - bootstrap
+        - master-0
+        - master-1
+        - master-2
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
+
+    - name: Set rules to ALLOW for Full cluster
+      ansible.builtin.lineinfile:
+        path: /etc/shorewall/rules
+        regexp: '^.*lab:{{ full_cluster[item].ip }}.*web$'
+        line: "ACCEPT         lab:{{ ful_cluster[item].ip }}              web"
+        owner: root
+        group: root
+        mode: "0600"
+      when: not enable_disconnected
+      with_items:
+        - nginx
+        - bootstrap
+        - master-0
+        - master-1
+        - master-2
+        - worker-0
+        - worker-1
+        - worker-2
+        - worker-3
+
+    - name: Restart shorewall
+      ansible.builtin.systemd:
+        name: shorewall
+        state: restarted
+
 - name: Wait for nginx reload
   hosts: nginx
   gather_facts: false
