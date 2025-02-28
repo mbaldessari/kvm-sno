@@ -273,7 +273,7 @@
     - name: Wait for installation completion
       ansible.builtin.shell: |
         set -e -o pipefail
-        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=info
+        "{{ mirrorfolder }}/{{ ocp_version }}/openshift-install" --dir=. wait-for install-complete --log-level=debug
       args:
         chdir: "{{ fullclusterfolder }}"
 

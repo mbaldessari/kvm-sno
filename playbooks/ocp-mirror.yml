@@ -36,6 +36,19 @@
         dest: "{{ local_mirror }}/imageset-config.yaml"
         mode: "0644"
 
+    - name: oc mirror version
+      ansible.builtin.shell: |
+        set -e
+        ./oc mirror version --v2 --output=yaml
+      register: oc_mirror_version
+      args:
+        # FIXME: Use newest oc for the time being
+        chdir: "{{ mirrorfolder }}/4.18.2"
+
+    - name: Print version
+      ansible.builtin.debug:
+        msg: "{{ oc_mirror_version.stdout }}"
+
     - name: Mirror images
       ansible.builtin.shell: |
         set -e
@@ -43,4 +56,6 @@
         ./oc mirror --config={{ local_mirror }}/imageset-config.yaml --loglevel debug \
         --workspace file://{{ local_mirror }}/workspace docker://{{ oc_mirror_local_registry }} --v2 &> /var/log/oc-mirror.log
       args:
-        chdir: "{{ mirrorfolder }}/{{ ocp_version }}"
+        # FIXME: Use newest oc for the time being
+        chdir: "{{ mirrorfolder }}/4.18.2"
+        #chdir: "{{ mirrorfolder }}/{{ ocp_version }}"
