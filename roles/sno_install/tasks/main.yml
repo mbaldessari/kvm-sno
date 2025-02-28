@@ -30,7 +30,7 @@
 - name: Create ocp manifests
   ansible.builtin.shell: |
     set -e
-    {{ mirrorfolder }}/{{ ocp_version }}/openshift-install --dir={{ item }} create manifests
+    {{ oc_dir }}/openshift-install --dir={{ item }} create manifests
   args:
     chdir: "{{ tempfolder }}"
   with_items: "{{ inventory_hostname_short }}"
@@ -56,7 +56,7 @@
 - name: Create ocp folder and run openshift-install
   ansible.builtin.shell: |
     set -e
-    {{ mirrorfolder }}/{{ ocp_version }}/openshift-install --dir={{ item }} create single-node-ignition-config
+    {{ oc_dir }}/openshift-install --dir={{ item }} create single-node-ignition-config
   args:
     chdir: "{{ tempfolder }}"
   with_items: "{{ inventory_hostname_short }}"
@@ -73,7 +73,7 @@
 - name: Run coreos ignition embedding
   ansible.builtin.shell: |
     set -e
-    cp {{ mirrorfolder }}/{{ ocp_version }}/rhcos-live.iso "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
+    cp {{ oc_dir }}/rhcos-live.iso "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
     podman run --privileged --pull always --rm \
         -v /dev:/dev -v /run/udev:/run/udev -v "{{ tempfolder }}/{{ item }}:/data" \
         -w /data quay.io/coreos/coreos-installer:release \
@@ -176,7 +176,7 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    timeout 30s "{{ mirrorfolder }}/{{ ocp_version }}"/openshift-install --dir={{ item }} wait-for install-complete &> /tmp/install-{{ item }}.log
+    timeout 30s {{ oc_dir }}/openshift-install --dir={{ item }} wait-for install-complete &> /tmp/install-{{ item }}.log
   args:
     chdir: "{{ tempfolder }}"
   with_items: "{{ inventory_hostname_short }}"
