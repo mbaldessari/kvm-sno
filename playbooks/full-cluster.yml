@@ -81,6 +81,14 @@
   gather_facts: false
   become: true
   tasks:
+    - name: Check that the mirror bits are correct
+      ansible.builtin.shell: |
+        set -ex
+        if ! grep -q "detected minimum version as {{ ocp_version }}" /var/log/oc-mirror.log ; then
+          echo "WRONG VERSION"
+          exit 1
+        fi
+
     - name: Set up iscsi on the kvm node
       ansible.builtin.shell: |
         #!/bin/bash
@@ -241,7 +249,7 @@
         rm -vf "{{ item }}-live.iso"
       register: iso_rm
       args:
-        chdir: "{{ tempfolder }}"
+        chdir: "{{ fullclusterfolder }}"
       with_items:
         - bootstrap
         - master-0
@@ -251,10 +259,6 @@
         - worker-1
         - worker-2
         - worker-3
-
-    - name: Debug Remove ISOs
-      ansible.builtin.debug:
-        msg: "{{ iso_rm.stdout }}"
 
     - name: Wait for bootstrap process to complete
       ansible.builtin.command: |
