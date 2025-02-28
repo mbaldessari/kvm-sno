@@ -134,7 +134,7 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc get nodes | grep "{{ item }}" | grep -v NotReady
+    {{ oc_bin }} get nodes | grep "{{ item }}" | grep -v NotReady
   with_items: "{{ inventory_hostname_short }}"
   register: cluster_info
   until: cluster_info is not failed
@@ -190,7 +190,7 @@
     set -e -o pipefail
     PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch secret -n kube-system kubeadmin --type json \
+    {{ oc_bin }} patch secret -n kube-system kubeadmin --type json \
       -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
   with_items: "{{ inventory_hostname_short }}"
   when: kubeadmin_pass is defined
@@ -230,8 +230,8 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/cache-mirrorset-digest.yaml"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/cache-mirrorset-tag.yaml"
+    {{ oc_bin }} apply -f "{{ tempfolder }}/{{ item }}/cache-mirrorset-digest.yaml"
+    {{ oc_bin }} apply -f "{{ tempfolder }}/{{ item }}/cache-mirrorset-tag.yaml"
   with_items: "{{ inventory_hostname_short }}"
   when:
     - not enable_disconnected
@@ -245,8 +245,8 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
+    {{ oc_bin }} apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/*oc-mirror.yaml"
+    {{ oc_bin }} apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-*index*v{{ ocp_maj_min_version_dashed }}.yaml"
   with_items: "{{ inventory_hostname_short }}"
   when:
     - enable_disconnected
@@ -260,7 +260,7 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+    {{ oc_bin }} patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
   with_items: "{{ inventory_hostname_short }}"
   when: enable_disconnected
   register: lvm
@@ -274,7 +274,7 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
+    {{ oc_bin }} apply -f "{{ tempfolder }}/{{ item }}/lvm-base.yaml"
   with_items: "{{ inventory_hostname_short }}"
   register: lvm
   until: lvm is not failed
@@ -286,7 +286,7 @@
   ansible.builtin.shell: |
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
-    "{{ mirrorfolder }}/{{ ocp_version }}"/oc apply -f "{{ tempfolder }}/{{ item }}/lvm-cluster.yaml"
+    {{ oc_bin }} apply -f "{{ tempfolder }}/{{ item }}/lvm-cluster.yaml"
   register: lvmcluster
   retries: 50
   delay: 30
