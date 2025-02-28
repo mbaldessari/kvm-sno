@@ -61,3 +61,4 @@ mirror:
   - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator:0.0.3
   - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-bundle:v0.0.3
   - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-catalog:v0.0.3
+  - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
