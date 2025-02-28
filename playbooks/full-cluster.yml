@@ -426,6 +426,23 @@
       retries: 50
       delay: 20
 
+    - name: Wait for MCP to settle
+      tags:
+        - iscsi
+      ansible.builtin.shell: |
+        set -ex
+        export KUBECONFIG=./auth/kubeconfig
+        if [ $({{ mirrorfolder }}/{{ ocp_version }}/oc get mcp/master -o jsonpath='{.status.readyMachineCount}') != $({{ mirrorfolder }}/{{ ocp_version }}/oc get mcp/master -o jsonpath='{.status.machineCount}') ]; then
+          exit 1
+        fi
+        if [ $({{ mirrorfolder }}/{{ ocp_version }}/oc get mcp/worker -o jsonpath='{.status.readyMachineCount}') != $({{ mirrorfolder }}/{{ ocp_version }}/oc get mcp/worker -o jsonpath='{.status.machineCount}') ]; then
+          exit 1
+        fi
+      retries: 30
+      delay: 90
+      register: mcp_ready
+      until: mcp_ready is not failed
+
     # - name: Template out localstorage bits
     #   tags:
     #     - localstorage
