@@ -657,3 +657,24 @@
       retries: 5
       delay: 10
 
+    - name: Template purple bits
+      tags:
+        - purple
+      ansible.builtin.template:
+        src: "../templates/{{ item }}"
+        dest: "{{ fullclusterfolder }}/{{ item }}"
+        mode: "0644"
+      loop:
+        - purple-catalog.yaml
+        - purple-subscription.yaml
+
+    - name: Install purple operator
+      tags:
+        - purple
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }"
+      loop:
+        - purple-catalog.yaml
+        - purple-subscription.yaml
