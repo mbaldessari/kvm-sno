@@ -383,10 +383,10 @@
       when: enable_disconnected
       register: mirroring
       until: mirroring is not failed
-      retries: 50
-      delay: 30
+      retries: 3
+      delay: 5
 
-    # Seems this is mandatory?
+    # Seems this is mandatory (lesigh)
     - name: Disable default catalog sources
       ansible.builtin.shell: |
         set -e -o pipefail
