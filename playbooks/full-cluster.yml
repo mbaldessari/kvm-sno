@@ -437,7 +437,7 @@
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
-        {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 2}}'
+        # {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 2}}'
       register: mcg_iscsi
       until: mcg_iscsi is not failed
       retries: 5
