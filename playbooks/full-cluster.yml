@@ -443,12 +443,18 @@
       retries: 5
       delay: 10
 
+    - name: Wait for MCP to start
+      tags:
+        - iscsi
+      ansible.builtin.pause:
+        minutes: 1
+
     - name: Wait for MCP to settle
       tags:
         - iscsi
       ansible.builtin.shell: |
         set -ex
-        export KUBECONFIG=./auth/kubeconfig
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         if [ $({{ oc_bin }} get mcp/master -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/master -o jsonpath='{.status.machineCount}') ]; then
           exit 1
         fi
