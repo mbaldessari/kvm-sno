@@ -301,7 +301,7 @@
     - name: Fetch kubeconfig file
       ansible.posix.synchronize:
         mode: pull
-        src: "{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        src: "{{ fullclusterfolder }}/auth/kubeconfig"
         dest: "~/fullcluster-kubeconfig"
 
     - name: Fix permissions
@@ -325,7 +325,7 @@
     - name: Approve all machines until we have four workers
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         COUNT=$(oc get nodes -l "node-role.kubernetes.io/worker" --no-headers)
         if [ ${COUNT} -eq 4 ]; then
             exit 0
@@ -339,7 +339,7 @@
     - name: Approve all machines again
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
         sleep 10
         {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
@@ -363,7 +363,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} patch secret -n kube-system kubeadmin --type json \
           -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
       when: kubeadmin_pass is defined
@@ -375,7 +375,7 @@
     - name: Apply mirroring yaml files
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         "{{ oc_bin }} apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/idms-oc-mirror.yaml"
         "{{ oc_bin }} apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/itms-oc-mirror.yaml"
         "{{ oc_bin }} apply -f "{{ local_mirror }}/workspace/working-dir/cluster-resources/cs-community-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml"
@@ -390,8 +390,8 @@
     - name: Disable default catalog sources
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ oc_bin }} patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
       when: enable_disconnected
       register: catalog_sources
       until: catalog_sources is not failed
@@ -403,7 +403,7 @@
     #     - nfs
     #   ansible.builtin.template:
     #     src: "../templates/{{ item }}"
-    #     dest: "{{ tempfolder }}/fullcluster/{{ item }}"
+    #     dest: "{{ fullclusterfolder }}/{{ item }}"
     #     mode: "0644"
     #   with_items:
     #     - nfs.yaml
@@ -413,10 +413,10 @@
     #     - nfs
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
-    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
+    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
     #     helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts || /bin/true
     #     helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --version v4.9.0
-    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/nfs.yaml"
+    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/nfs.yaml"
     #   register: nfsstorage
     #   until: nfsstorage is not failed
     #   retries: 10
@@ -427,7 +427,7 @@
         - iscsi
       ansible.builtin.template:
         src: "../templates/mcp-workers-iscsi.yaml"
-        dest: "{{ tempfolder }}/fullcluster/mcp-workers-iscsi.yaml"
+        dest: "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
         mode: "0644"
 
     - name: Install local iscsi MCP
@@ -435,8 +435,8 @@
         - iscsi
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-        "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/mcp-workers-iscsi.yaml"
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
         "{{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 4}}'
       register: mcg_iscsi
       until: mcg_iscsi is not failed
@@ -465,7 +465,7 @@
     #     - localstorage
     #   ansible.builtin.template:
     #     src: "../templates/{{ item }}"
-    #     dest: "{{ tempfolder }}/fullcluster/{{ item }}"
+    #     dest: "{{ fullclusterfolder }}/{{ item }}"
     #     mode: "0644"
     #   with_items:
     #     - local-storage-base.yaml
@@ -476,8 +476,8 @@
     #     - localstorage
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
-    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/local-storage-base.yaml"
+    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/local-storage-base.yaml"
     #   register: localstorage
     #   until: localstorage is not failed
     #   retries: 50
@@ -488,8 +488,8 @@
     #     - localstorage
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
-    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/local-storage-cr.yaml"
+    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/local-storage-cr.yaml"
     #     "{{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
     #   register: localstorage
     #   until: localstorage is not failed
@@ -501,7 +501,7 @@
     #     - lvm
     #   ansible.builtin.template:
     #     src: ../templates/lvm-base.yaml
-    #     dest: "{{ tempfolder }}/fullcluster/lvm-base.yaml"
+    #     dest: "{{ fullclusterfolder }}/lvm-base.yaml"
     #     mode: "0644"
     #
     # - name: Template out lvm cluster
@@ -509,7 +509,7 @@
     #     - lvm
     #   ansible.builtin.template:
     #     src: ../templates/lvm-cluster.yaml
-    #     dest: "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
+    #     dest: "{{ fullclusterfolder }}/{{ item }}-lvm-cluster.yaml"
     #     mode: "0644"
     #   with_items:
     #     - worker-0
@@ -519,8 +519,8 @@
     #     - lvm
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
-    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/lvm-base.yaml"
+    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/lvm-base.yaml"
     #   register: lvm
     #   until: lvm is not failed
     #   retries: 50
@@ -531,8 +531,8 @@
     #     - lvm
     #   ansible.builtin.shell: |
     #     set -e -o pipefail
-    #     export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig"
-    #     "{{ oc_bin }} apply -f "{{ tempfolder }}/fullcluster/{{ item }}-lvm-cluster.yaml"
+    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}-lvm-cluster.yaml"
     #   register: lvmcluster
     #   retries: 50
     #   delay: 30
@@ -545,7 +545,7 @@
         - s3
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
         {{ oc_bin }} create secret generic image-registry-private-configuration-user \
               --from-literal=REGISTRY_STORAGE_S3_ACCESSKEY="{{ minio.admin_access_key }}" \
               --from-literal=REGISTRY_STORAGE_S3_SECRETKEY="{{ minio.admin_secret_key }}" --namespace openshift-image-registry
@@ -559,7 +559,7 @@
         - s3
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
         {{ oc_bin }} patch configs.imageregistry.operator.openshift.io cluster -n openshift-image-registry \
               --type merge --patch '{"spec": { "storage": { "s3": { "region": "notneeded", "regionEndpoint": "https://{{ minio.fqdn }}:{{ minio.port }}", "bucket": "{{ minio.bucket }}"}}}}'
         {{ oc_bin }} patch configs.imageregistry.operator.openshift.io cluster --type=json -p='[{"op": "add", "path": "/spec/managementState", "value": "Managed"}]'
@@ -636,5 +636,5 @@
     - name: Wait for the cluster's stability
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG="{{ tempfolder }}/fullcluster/auth/kubeconfig";
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
         {{ oc_bin }} adm wait-for-stable-cluster --minimum-stable-period=5s
