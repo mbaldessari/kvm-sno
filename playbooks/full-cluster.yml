@@ -28,7 +28,7 @@
       ansible.builtin.lineinfile:
         path: /etc/shorewall/rules
         regexp: '^.*lab:{{ full_cluster[item].ip }}.*web$'
-        line: "ACCEPT         lab:{{ ful_cluster[item].ip }}              web"
+        line: "ACCEPT         lab:{{ full_cluster[item].ip }}              web"
         owner: root
         group: root
         mode: "0600"
@@ -668,13 +668,13 @@
         - purple-catalog.yaml
         - purple-subscription.yaml
 
-    - name: Install purple operator
-      tags:
-        - purple
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }"
-      loop:
-        - purple-catalog.yaml
-        - purple-subscription.yaml
+    # - name: Install purple operator
+    #   tags:
+    #     - purple
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+    #     {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }"
+    #   loop:
+    #     - purple-catalog.yaml
+    #     - purple-subscription.yaml
