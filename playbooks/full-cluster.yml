@@ -669,6 +669,7 @@
         - purple-subscription.yaml
         - purple-localdisk.yaml
         - purple-filesystem.yaml
+        - purple-test.yaml
 
     # - name: Install purple operator
     #   tags:
