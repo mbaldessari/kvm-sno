@@ -1,0 +1,50 @@
+apiVersion: scale.spectrum.ibm.com/v1beta1
+kind: LocalDisk
+metadata:
+  name: shareddisk1
+  namespace: ibm-spectrum-scale
+spec:
+  device: /dev/sdc
+  node: worker-0.cluster.ocplab.ocp
+  # nodeConnectionSelector defines the nodes that have the shared lun directly attached to them
+  nodeConnectionSelector:
+    matchExpressions:
+    - key: node-role.kubernetes.io/worker
+      operator: Exists
+
+  # set below only during testing
+  existingDataSkipVerify: true
+---
+apiVersion: scale.spectrum.ibm.com/v1beta1
+kind: LocalDisk
+metadata:
+  name: shareddisk2
+  namespace: ibm-spectrum-scale
+spec:
+  device: /dev/sdd
+  node: worker-0.cluster.ocplab.ocp
+  # nodeConnectionSelector defines the nodes that have the shared lun directly attached to them
+  nodeConnectionSelector:
+    matchExpressions:
+    - key: node-role.kubernetes.io/worker
+      operator: Exists
+
+  # set below only during testing
+  existingDataSkipVerify: true
+---
+apiVersion: scale.spectrum.ibm.com/v1beta1
+kind: LocalDisk
+metadata:
+  name: shareddisk3
+  namespace: ibm-spectrum-scale
+spec:
+  device: /dev/sde
+  node: worker-0.cluster.ocplab.ocp
+  # nodeConnectionSelector defines the nodes that have the shared lun directly attached to them
+  nodeConnectionSelector:
+    matchExpressions:
+    - key: node-role.kubernetes.io/worker
+      operator: Exists
+
+  # set below only during testing
+  existingDataSkipVerify: true

@@ -667,6 +667,8 @@
       loop:
         - purple-catalog.yaml
         - purple-subscription.yaml
+        - purple-localdisk.yaml
+        - purple-filesystem.yaml
 
     # - name: Install purple operator
     #   tags:
