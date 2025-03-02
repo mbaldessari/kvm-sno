@@ -693,8 +693,8 @@
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
       register: purple_apply
       until: purple_apply is not failed
-      retries: 3
-      delay: 5
+      retries: 30
+      delay: 10
       loop:
         - purple-catalog.yaml
         - purple-subscription.yaml
@@ -702,13 +702,13 @@
 
     - name: Wait for MCP to start
       tags:
-        - iscsi
+        - purple
       ansible.builtin.pause:
         minutes: 3
 
     - name: Wait for MCP to settle
       tags:
-        - iscsi
+        - purple
       ansible.builtin.shell: |
         set -ex
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
@@ -728,12 +728,13 @@
         - purple
       ansible.builtin.shell: |
         set -e
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
       register: purple_apply
       until: purple_apply is not failed
-      retries: 3
-      delay: 5
+      retries: 20
+      delay: 10
+      loop:
         - purple-localdisk.yaml
         - purple-filesystem.yaml
         - purple-test.yaml
