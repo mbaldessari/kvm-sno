@@ -495,6 +495,18 @@
         dest: "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
         mode: "0644"
 
+    - name: Approve all machines again
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+        sleep 10
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+      register: csr
+      until: csr is not failed
+      retries: 5
+      delay: 10
+
     - name: Install local iscsi MCP
       tags:
         - iscsi
