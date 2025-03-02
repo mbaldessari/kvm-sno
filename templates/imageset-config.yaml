@@ -58,9 +58,9 @@ mirror:
   - name: quay.io/hybridcloudpatterns/imperative-container:v1
   - name: quay.io/hybridcloudpatterns/pattern-install:0.0.7
   - name: docker.io/gitea/gitea:1.22.6-rootless
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator:0.0.3
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-bundle:v0.0.3
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-catalog:v0.0.3
+  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator:0.0.4
+  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-bundle:v0.0.4
+  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-catalog:v0.0.4
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
   # v5.2.2.0
   - name: quay.io/rhsysdeseng/cpopen/ibm-spectrum-scale-csi-operator@sha256:c292fa07a03f5accac554a5f366b7241c31dbb85fc4617c0fe2428cf103fce56
