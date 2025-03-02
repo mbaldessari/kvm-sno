@@ -88,7 +88,7 @@ mirror:
   # - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-stunnel@sha256:b900b3912f7ba3e26e6d99c8f5dab66c2de23ed9fe2cf0ab79bae21515676ed0
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/postgres@sha256:bbd7346fab25b7e0b25f214829d6ebfb78ef0465059492e46dee740ce8fcd844
   # v5.2.2.1
-  - name: quay.io/rhsysdeseng/cp/spectrum/scale/erasure-code/ibm-spectrum-scale-daemon@sha256:6e2bfb235a2c89317496124a6f37ad26516530bdc03600b591bd9c846ec92f72
+  # - name: quay.io/rhsysdeseng/cp/spectrum/scale/erasure-code/ibm-spectrum-scale-daemon@sha256:6e2bfb235a2c89317496124a6f37ad26516530bdc03600b591bd9c846ec92f72
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/data-management/ibm-spectrum-scale-daemon@sha256:72868067f337d18f4f61797693e403db177f8e28c7be682ed5c514636fef0f3a
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/data-access/ibm-spectrum-scale-daemon@sha256:814bda6320cfe94eafefa331e4e30f4e07fc16fc0183067bfffada5d731a32e3
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-core-init@sha256:fde69d67fddd2e4e0b7d7d85387a221359daf332d135c9b9f239fb31b9b82fe0
@@ -100,8 +100,8 @@ mirror:
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-grafana-bridge@sha256:956a98023ae3a877410c922c006080ecc7f825eca273fa5dd2bdb94873d1f725
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-coredns@sha256:6a317b23fee629c0b07eb95d34ab7593bb38d41bffc5d1cd4cb2870539c66cd4
   - name: quay.io/rhsysdeseng/cpopen/ibm-spectrum-scale-must-gather@sha256:614cc54f7ed246aef270ef5532aaa32bb64b7c6024e85b562d7ea8675f750192
-  - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-ganesha@sha256:43c2f4306100419eca3706b080f49cfce13830e9982fd50dd0ea6c050dc9b07a
-  - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-stunnel@sha256:a12592525a1d0d67755f2bd0e23cb81c2c99cbb3113366ba27e92a2f9f72130d
+  # - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-ganesha@sha256:43c2f4306100419eca3706b080f49cfce13830e9982fd50dd0ea6c050dc9b07a
+  # - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-stunnel@sha256:a12592525a1d0d67755f2bd0e23cb81c2c99cbb3113366ba27e92a2f9f72130d
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-pmsensors@sha256:8cbcc426c8ed0237b988e20b5f8ea235dae617bef2fcaaac1d34fdb5fc2d6020
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/csi/csi-snapshotter@sha256:b3e90b33781670ac050c22c9e88b9e876493dca248966b9da6f7a90cc412ab86
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/csi/csi-attacher@sha256:b4d611100ece2f9bc980d1cb19c2285b8868da261e3b1ee8f45448ab5512ab94
