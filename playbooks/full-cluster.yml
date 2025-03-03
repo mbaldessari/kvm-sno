@@ -683,6 +683,7 @@
         - purple-localdisk.yaml
         - purple-filesystem.yaml
         - purple-test.yaml
+        - virt-subscription.yaml
 
     - name: Apply purple bits
       tags:
@@ -738,6 +739,7 @@
         - purple-localdisk.yaml
         - purple-filesystem.yaml
         - purple-test.yaml
+        - virt-subscription.yaml
 
     # - name: Install purple operator
     #   tags:
