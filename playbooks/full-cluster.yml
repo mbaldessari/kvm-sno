@@ -684,6 +684,7 @@
         - purple-filesystem.yaml
         - purple-test.yaml
         - virt-subscription.yaml
+        - virt-machine.yaml
 
     - name: Apply purple bits
       tags:
