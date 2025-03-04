@@ -17,3 +17,13 @@ spec:
   source: cs-redhat-operator-index-v4-17
   sourceNamespace: openshift-marketplace
   startingCSV: kubevirt-hyperconverged-operator.v4.17.4
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: cnv-operator
+  namespace: openshift-cnv
+spec:
+  upgradeStrategy: Default
+  targetNamespaces:
+    - openshift-cnv
