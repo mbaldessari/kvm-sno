@@ -17,9 +17,9 @@ spec:
     server:
       duration: 24h0m0s
       renewBefore: 12h0m0s
-  # featureGates:
-  #   enableCommonBootImageImport: true
-  #   withHostPassthroughCPU: false
+  featureGates:
+    enableCommonBootImageImport: true
+    withHostPassthroughCPU: true
   infra: {}
   liveMigrationConfig:
     completionTimeoutPerGiB: 800
