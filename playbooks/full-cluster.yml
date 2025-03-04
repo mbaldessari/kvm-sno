@@ -685,6 +685,7 @@
         - purple-test.yaml
         - virt-subscription.yaml
         - virt-machine.yaml
+        - virt-hyperconverged.yaml
 
     - name: Apply purple bits
       tags:
