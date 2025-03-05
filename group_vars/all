@@ -35,11 +35,13 @@ iscsi_target_ip: 192.168.66.100
 iscsi_iqn: iqn.2024-02.com.example
 iscsi_login_script: |
   #!/bin/bash
-  TARGET_IP={{ iscsi_target_ip }}
-  TARGET_IQN={{ iscsi_iqn }}
+  # Simulate multipath by using two different IPs
+  declare -a TARGET_IPS=("192.168.66.100" "192.168.99.100")
+  TARGET_IQN=iqn.2024-02.com.example
   check_target() {
+  IP=$1
   ACTIVE_SESSIONS=$(iscsiadm -m session 2>&1)
-  if [[ 0$(echo ${ACTIVE_SESSIONS} | grep -c "${TARGET_IQN}") -ge 01 ]]
+  if [[ 0$(echo ${ACTIVE_SESSIONS} | grep -c -e "${IP}.*${TARGET_IQN}") -ge 01 ]]
   then
     echo "Target found"
     return 0
@@ -48,31 +50,35 @@ iscsi_login_script: |
     return 1
   fi
   }
+  
   main(){
-    check_target
-    TARGET_FOUND=$?
-    if [[ 0${TARGET_FOUND} -eq 00 ]]
-    then
-      echo "iSCSI already configured"
-      exit 0
-    else
-      echo "iSCSI not configured, configuring"
-      iscsiadm -m discovery -t st -p ${TARGET_IP}
-      sleep 3
-      iscsiadm --mode  node --target ${TARGET_IQN} --portal ${TARGET_IP} -l
-      sleep 3
-      check_target
+    for TARGET_IP in "${TARGET_IPS[@]}"; do
+      check_target ${TARGET_IP} 
       TARGET_FOUND=$?
       if [[ 0${TARGET_FOUND} -eq 00 ]]
       then
-        echo "iSCSI configured correctly"
-        exit 0
+        echo "iSCSI already configured for ${TARGET_IP}"
+        continue
       else
-        echo "Failed to configure iSCSI"
-        exit 1
+        echo "iSCSI not configured, configuring"
+        iscsiadm -m discovery -t st -p ${TARGET_IP}
+        sleep 3
+        iscsiadm --mode  node --target ${TARGET_IQN} --portal ${TARGET_IP} -l
+        sleep 3
+        check_target ${TARGET_IP}
+        TARGET_FOUND=$?
+        if [[ 0${TARGET_FOUND} -eq 00 ]]
+        then
+          echo "iSCSI configured correctly"
+          continue
+        else
+          echo "Failed to configure iSCSI"
+          exit 1
+        fi
       fi
-    fi
+    done
   }
+  
   main
   exit $?
 
