@@ -4,6 +4,8 @@ kind: Filesystem
 metadata:
   name: localfilesystem1
   namespace: ibm-spectrum-scale
+  labels:
+    scale.spectrum.ibm.com/allowDelete: ""
 spec:
   local:
     blockSize: 4M
@@ -25,6 +27,8 @@ kind: Filesystem
 metadata:
   name: localfilesystem2
   namespace: ibm-spectrum-scale
+  labels:
+    scale.spectrum.ibm.com/allowDelete: ""
 spec:
   local:
     blockSize: 4M

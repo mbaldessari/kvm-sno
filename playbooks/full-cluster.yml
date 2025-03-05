@@ -669,6 +669,12 @@
       retries: 5
       delay: 10
 
+    - name: Label workers as storage nodes
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        oc label nodes -l node-role.kubernetes.io/worker "scale.spectrum.ibm.com/role=storage"
+
     - name: Template purple bits
       tags:
         - purple

@@ -11,6 +11,7 @@ mirror:
   operators:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
     packages:
+      - name: kubernetes-nmstate-operator
       - name: lvms-operator
       - name: local-storage-operator
       - name: kubevirt-hyperconverged
@@ -29,6 +30,7 @@ mirror:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.17
     packages:
       - name: lvms-operator
+      - name: kubernetes-nmstate-operator
       - name: local-storage-operator
       - name: kubevirt-hyperconverged
       - name: advanced-cluster-management
