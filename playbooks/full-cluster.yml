@@ -99,6 +99,7 @@
         set -ex
         systemctl stop target.service
         rm -rf /etc/target/saveconfig.json /var/lib/iscsi_disks/
+        rm -rf /var/lib/iscsi_disks /var/lib/libvirt/iscsi_disks
         systemctl start target.service
         targetcli clearconfig confirm=True
         mkdir -p /var/lib/libvirt/iscsi_disks
