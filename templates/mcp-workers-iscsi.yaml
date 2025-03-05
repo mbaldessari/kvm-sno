@@ -11,6 +11,11 @@ spec:
     storage:
       files:
       - contents:
+          source: data:text/plain;charset=utf-8;base64,ZGVmYXVsdHMgewogICAgdXNlcl9mcmllbmRseV9uYW1lcyB5ZXMKfQoKYmxhY2tsaXN0IHsKICAgICMgL2Rldi9zZGEgYW5kIC9kZXYvc2RiIGFyZSBsb2NhbCBub24taXNjc2kgZGlza3MKICAgIGRldm5vZGUgIl5zZGFbYS16MC05XSsiCiAgICBkZXZub2RlICJec2RiW2EtejAtOV0rIgogICAgZGV2aWNlIHsKICAgICAgICB2ZW5kb3IgUUVNVQogICAgfQp9CgpkZXZpY2VzIHsKICAgIGRldmljZSB7CiAgICAgICAgdmVuZG9yICJMSU8tT1JHIgogICAgICAgIHByb2R1Y3QgIioiCiAgICAgICAgcGF0aF9ncm91cGluZ19wb2xpY3kgbXVsdGlidXMKICAgICAgICBmYWlsYmFjayBpbW1lZGlhdGUKICAgICAgICBycl93ZWlnaHQgcHJpb3JpdGllcwogICAgICAgIHJyX21pbl9pbyAxMDAKICAgICAgICBwYXRoX2NoZWNrZXIgdHVyCiAgICB9Cn0K
+        filesystem: root
+        mode: 420
+        path: /etc/multipath.conf
+      - contents:
           source: data:text/plain;charset=utf-8;base64,b3B0aW9ucyBrdm1faW50ZWwgbmVzdGVkPTEKb3B0aW9ucyBrdm1fYW1kIG5lc3RlZD0xCg==
         filesystem: root
         mode: 420
@@ -58,4 +63,6 @@ spec:
       - name: iscsid.service
         enabled: true
       - name: iscsi.service
+        enabled: true
+      - name: multipathd.service
         enabled: true
