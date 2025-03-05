@@ -5,6 +5,28 @@ metadata:
   name: ibm-test-deployment
 spec:
 ---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: ibm-spectrum-scale-fs1
+provisioner: spectrumscale.csi.ibm.com
+parameters:
+  volBackendFs: localfilesystem1
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+---
+kind: StorageClass
+apiVersion: storage.k8s.io/v1
+metadata:
+  name: ibm-spectrum-scale-fs2
+provisioner: spectrumscale.csi.ibm.com
+parameters:
+  volBackendFs: localfilesystem2
+reclaimPolicy: Delete
+allowVolumeExpansion: true
+volumeBindingMode: Immediate
+---
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -13,7 +35,7 @@ metadata:
 spec:
   accessModes:
     - ReadWriteMany
-  storageClassName: "ibm-spectrum-scale-sample"
+  storageClassName: "ibm-spectrum-scale-fs1"
   resources:
     requests:
       storage: 200Mi
