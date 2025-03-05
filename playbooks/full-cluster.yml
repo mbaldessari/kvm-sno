@@ -4,16 +4,16 @@
   gather_facts: false
   become: true
   vars:
-    ocp_nodes:
-     - bootstrap
-     - master-0
-     - master-1
-     - master-2
-     - worker-0
-     - worker-1
-     - worker-2
-     - worker-3
-    all_nodes: "{{ ocp_nodes + [nginx] }}"
+    all_nodes:
+    - nginx
+    - bootstrap
+    - master-0
+    - master-1
+    - master-2
+    - worker-0
+    - worker-1
+    - worker-2
+    - worker-3
 
   tasks:
     - name: Set rules to REJECT for Full cluster
@@ -25,7 +25,7 @@
         group: root
         mode: "0600"
       when: enable_disconnected
-      with_items: "{{ all_nodes }}
+      loop: "{{ all_nodes }}"
 
     - name: Set rules to ALLOW for Full cluster
       ansible.builtin.lineinfile:
@@ -36,7 +36,7 @@
         group: root
         mode: "0600"
       when: not enable_disconnected
-      with_items: "{{ all_nodes }}
+      loop: "{{ all_nodes }}"
 
     - name: Restart shorewall
       ansible.builtin.systemd:
@@ -74,6 +74,16 @@
   hosts: kvm
   gather_facts: false
   become: true
+  vars:
+    ocp_nodes:
+    - bootstrap
+    - master-0
+    - master-1
+    - master-2
+    - worker-0
+    - worker-1
+    - worker-2
+    - worker-3
   tasks:
     - name: Check that the mirror bits are correct
       ansible.builtin.shell: |
