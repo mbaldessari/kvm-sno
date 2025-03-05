@@ -1,0 +1,17 @@
+apiVersion: nmstate.io/v1
+kind: NodeNetworkConfigurationPolicy
+metadata:
+  name: add-ip-alias-1
+spec:
+  nodeSelector:
+    kubernetes.io/hostname: worker-0.cluster.ocplab.ocp
+  desiredState:
+    interfaces:
+      - name: enp1s1
+        type: ethernet
+        state: up
+        ipv4:
+          enabled: true
+          address:
+            - ip: 192.168.99.201
+              prefix-length: 24

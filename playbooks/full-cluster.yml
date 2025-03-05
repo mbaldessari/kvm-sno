@@ -3,6 +3,18 @@
   hosts: fw
   gather_facts: false
   become: true
+  vars:
+    ocp_nodes:
+     - bootstrap
+     - master-0
+     - master-1
+     - master-2
+     - worker-0
+     - worker-1
+     - worker-2
+     - worker-3
+    all_nodes: "{{ ocp_nodes + [nginx] }}"
+
   tasks:
     - name: Set rules to REJECT for Full cluster
       ansible.builtin.lineinfile:
@@ -13,16 +25,7 @@
         group: root
         mode: "0600"
       when: enable_disconnected
-      with_items:
-        - nginx
-        - bootstrap
-        - master-0
-        - master-1
-        - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
+      with_items: "{{ all_nodes }}
 
     - name: Set rules to ALLOW for Full cluster
       ansible.builtin.lineinfile:
@@ -33,16 +36,7 @@
         group: root
         mode: "0600"
       when: not enable_disconnected
-      with_items:
-        - nginx
-        - bootstrap
-        - master-0
-        - master-1
-        - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
+      with_items: "{{ all_nodes }}
 
     - name: Restart shorewall
       ansible.builtin.systemd:
@@ -166,17 +160,9 @@
       args:
         chdir: "{{ tempfolder }}"
       register: test
-      with_items:
-        - bootstrap
-        - master-0
-        - master-1
-        - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
+      with_items: "{{ ocp_nodes }}"
 
-    - name: "Create bootstrap VM and masters"
+    - name: "Create bootstrap VM, masters and workers"
       ansible.builtin.command: >-
         virt-install
         --name {{ item }}
@@ -186,6 +172,7 @@
         --cdrom {{ fullclusterfolder }}/{{ item }}-rhcos-live.iso
         --os-variant rhel8.0
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
+        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix_secondary }}:{{ full_cluster[item].mac_nr }}"
         --vcpus {{ full_cluster[item].cpus }}
         --ram {{ full_cluster[item].ram }}
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }}
@@ -193,15 +180,7 @@
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
-      with_items:
-        - bootstrap
-        - master-0
-        - master-1
-        - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
+      with_items: "{{ ocp_nodes }}"
       retries: 0
       delay: 10
       register: vm_creation
@@ -215,28 +194,12 @@
       retries: 100
       delay: 20
       until: running is not failed
-      with_items:
-        - bootstrap
-        - master-0
-        - master-1
-        - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
+      with_items: "{{ ocp_nodes }}"
 
     - name: Start "{{ item }}"
       ansible.builtin.command: |
         virsh start "{{ item }}"
-      with_items:
-        - bootstrap
-        - master-0
-        - master-1
-        - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
+      with_items: "{{ ocp_nodes }}"
       retries: 3
       delay: 10
       register: restart
@@ -250,15 +213,7 @@
       register: iso_rm
       args:
         chdir: "{{ fullclusterfolder }}"
-      with_items:
-        - bootstrap
-        - master-0
-        - master-1
-        - master-2
-        - worker-0
-        - worker-1
-        - worker-2
-        - worker-3
+      with_items: "{{ ocp_nodes }}"
 
     - name: Wait for bootstrap process to complete
       ansible.builtin.command: |
@@ -506,6 +461,29 @@
       until: csr is not failed
       retries: 5
       delay: 10
+
+    - name: Template out nmstate bits for workers
+      tags:
+        - iscsi
+      ansible.builtin.template:
+        src: "../templates/{{ item }}"
+        dest: "{{ fullclusterfolder }}/{{ item }}"
+        mode: "0644"
+      loop:
+        - nmstate-subscription.yaml
+        - nmstate-nics.yaml
+
+    - name: Apply nmstate bits
+      tags:
+        - nmstate
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/nmstate-subscription.yaml"
+      register: nmstate
+      until: nmstate is not failed
+      retries: 5
+      delay: 20
 
     - name: Install local iscsi MCP
       tags:
