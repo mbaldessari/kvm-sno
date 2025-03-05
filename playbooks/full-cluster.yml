@@ -469,6 +469,7 @@
         mode: "0644"
       loop:
         - nmstate-subscription.yaml
+        - nmstate-nmstate.yaml
         - nmstate-nics.yaml
 
     - name: Apply nmstate bits
@@ -478,6 +479,7 @@
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/nmstate-subscription.yaml"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/nmstate-nmstate.yaml"
       register: nmstate
       until: nmstate is not failed
       retries: 5
