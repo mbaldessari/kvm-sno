@@ -4,7 +4,7 @@ metadata:
   name: shareddisk1
   namespace: ibm-spectrum-scale
 spec:
-  device: /dev/sdc
+  device: /dev/dm-0
   node: worker-0.cluster.ocplab.ocp
   # nodeConnectionSelector defines the nodes that have the shared lun directly attached to them
   nodeConnectionSelector:
@@ -21,7 +21,7 @@ metadata:
   name: shareddisk2
   namespace: ibm-spectrum-scale
 spec:
-  device: /dev/sdd
+  device: /dev/dm-1
   node: worker-0.cluster.ocplab.ocp
   # nodeConnectionSelector defines the nodes that have the shared lun directly attached to them
   nodeConnectionSelector:
@@ -38,7 +38,7 @@ metadata:
   name: shareddisk3
   namespace: ibm-spectrum-scale
 spec:
-  device: /dev/sde
+  device: /dev/dm-1
   node: worker-0.cluster.ocplab.ocp
   # nodeConnectionSelector defines the nodes that have the shared lun directly attached to them
   nodeConnectionSelector:
