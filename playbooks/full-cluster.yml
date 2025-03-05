@@ -182,7 +182,6 @@
         --cdrom {{ fullclusterfolder }}/{{ item }}-rhcos-live.iso
         --os-variant rhel8.0
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
-        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix_secondary }}:{{ full_cluster[item].mac_nr }}"
         --vcpus {{ full_cluster[item].cpus }}
         --ram {{ full_cluster[item].ram }}
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }}
@@ -460,30 +459,30 @@
         dest: "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
         mode: "0644"
 
-    - name: Template out nmstate bits for workers
-      tags:
-        - iscsi
-      ansible.builtin.template:
-        src: "../templates/{{ item }}"
-        dest: "{{ fullclusterfolder }}/{{ item }}"
-        mode: "0644"
-      loop:
-        - nmstate-subscription.yaml
-        - nmstate-nmstate.yaml
-        - nmstate-nics.yaml
-
-    - name: Apply nmstate bits
-      tags:
-        - nmstate
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/nmstate-subscription.yaml"
-        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/nmstate-nmstate.yaml"
-      register: nmstate
-      until: nmstate is not failed
-      retries: 5
-      delay: 20
+    # - name: Template out nmstate bits for workers
+    #   tags:
+    #     - iscsi
+    #   ansible.builtin.template:
+    #     src: "../templates/{{ item }}"
+    #     dest: "{{ fullclusterfolder }}/{{ item }}"
+    #     mode: "0644"
+    #   loop:
+    #     - nmstate-subscription.yaml
+    #     - nmstate-nmstate.yaml
+    #     - nmstate-nics.yaml
+    #
+    # - name: Apply nmstate bits
+    #   tags:
+    #     - nmstate
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+    #     {{ oc_bin }} apply -f "{{ fullclusterfolder }}/nmstate-subscription.yaml"
+    #     {{ oc_bin }} apply -f "{{ fullclusterfolder }}/nmstate-nmstate.yaml"
+    #   register: nmstate
+    #   until: nmstate is not failed
+    #   retries: 5
+    #   delay: 20
 
     - name: Install local iscsi MCP
       tags:

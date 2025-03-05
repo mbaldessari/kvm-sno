@@ -36,7 +36,7 @@ iscsi_iqn: iqn.2024-02.com.example
 iscsi_login_script: |
   #!/bin/bash
   # Simulate multipath by using two different IPs
-  declare -a TARGET_IPS=("192.168.66.100" "192.168.99.100")
+  declare -a TARGET_IPS=("192.168.66.100" "192.168.66.101")
   TARGET_IQN=iqn.2024-02.com.example
   check_target() {
   IP=$1
