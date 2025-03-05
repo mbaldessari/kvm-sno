@@ -101,10 +101,10 @@
         rm -rf /etc/target/saveconfig.json /var/lib/iscsi_disks/
         systemctl start target.service
         targetcli clearconfig confirm=True
-        mkdir -p /var/lib/iscsi_disks
-        targetcli backstores/fileio create iscsi_disk1 /var/lib/iscsi_disks/disk1.img 10G
-        targetcli backstores/fileio create iscsi_disk2 /var/lib/iscsi_disks/disk2.img 15G
-        targetcli backstores/fileio create iscsi_disk3 /var/lib/iscsi_disks/disk3.img 20G
+        mkdir -p /var/lib/libvirt/iscsi_disks
+        targetcli backstores/fileio create iscsi_disk1 /var/lib/libvirt/iscsi_disks/disk1.img 70G
+        targetcli backstores/fileio create iscsi_disk2 /var/lib/libvirt/iscsi_disks/disk2.img 80G
+        targetcli backstores/fileio create iscsi_disk3 /var/lib/libvirt/iscsi_disks/disk3.img 90G
         targetcli iscsi/ create iqn.2024-02.com.example
         targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk1
         targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk2
