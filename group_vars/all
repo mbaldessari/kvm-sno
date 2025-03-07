@@ -409,7 +409,6 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea7566"
     disk2: 50
-    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea7577"
     disk3: 10
@@ -424,7 +423,6 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea7588"
     disk2: 50
-    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea7599"
     disk3: 10
@@ -439,7 +437,6 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea75aa"
     disk2: 50
-    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea75bb"
     disk3: 10
@@ -454,7 +451,6 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea75cc"
     disk2: 50
-    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea75dd"
     disk3: 10
@@ -469,7 +465,6 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea75ee"
     disk2: 50
-    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea75ff"
     disk3: 10
