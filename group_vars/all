@@ -116,7 +116,9 @@ additional_trust_bundle: |
   U8LwiGLfCl7vTrz+27FHTCx0IBxU
   -----END CERTIFICATE-----
 
-diskserial: "seconddisk"
+diskserial: "firstdisk"
+diskserial2: "seconddisk"
+diskserial3: "thirddisk"
 vm_pool: "fast"
 second_disk_pool: "default"
 clusters:
@@ -353,6 +355,9 @@ full_cluster:
     disk2: 2
     cache2: unsafe
     wwn2: "0x5000c50015ea7511"
+    disk3: 10
+    cache3: unsafe
+    wwn3: "0x5000c50015ff7511"
   bootstrap:
     cpus: 12
     ram: 64768
@@ -364,6 +369,9 @@ full_cluster:
     disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7533"
+    disk3: 10
+    cache3: unsafe
+    wwn3: "0x5000c50015ff7522"
   master-0:
     cpus: 12
     ram: 64768
@@ -375,6 +383,9 @@ full_cluster:
     disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7555"
+    disk3: 10
+    cache3: unsafe
+    wwn3: "0x5000c50015ff7544"
   master-1:
     cpus: 12
     ram: 64768
@@ -386,6 +397,9 @@ full_cluster:
     disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea7655"
+    disk3: 10
+    cache3: unsafe
+    wwn3: "0x5000c50015ff7644"
   master-2:
     cpus: 12
     ram: 64768
@@ -395,8 +409,12 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea7566"
     disk2: 50
+    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea7577"
+    disk3: 10
+    cache3: unsafe
+    wwn3: "0x5000c50015ff7566"
   worker-0:
     cpus: 12
     ram: 64768
@@ -406,8 +424,12 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea7588"
     disk2: 50
+    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea7599"
+    disk3: 10
+    cache3: unsafe
+    wwn3: "0x5000c50015ff7588"
   worker-1:
     cpus: 12
     ram: 64768
@@ -417,8 +439,12 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea75aa"
     disk2: 50
+    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea75bb"
+    disk3: 10
+    cache3: unsafe
+    wwn3: "0x5000c50015ff75aa"
   worker-2:
     cpus: 12
     ram: 64768
@@ -428,8 +454,12 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea75cc"
     disk2: 50
+    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea75dd"
+    disk3: 10
+    cache3: unsafe
+    wwn3: "0x5000c50015ff75cc"
   worker-3:
     cpus: 12
     ram: 64768
@@ -439,8 +469,12 @@ full_cluster:
     cache: unsafe
     wwn: "0x5000c50015ea75ee"
     disk2: 50
+    disk3: 10
     cache2: unsafe
     wwn2: "0x5000c50015ea75ff"
+    disk3: 10
+    cache3: unsafe
+    wwn3: "0x5000c50015ff75ee"
 
 coreos:
   base_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{ ocp_maj_min_version }}/latest"
