@@ -65,6 +65,11 @@ mirror:
   - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator:0.0.4
   - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-bundle:v0.0.4
   - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-catalog:v0.0.4
+  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-console:v0.0.4
+  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-console:latest
+  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-diskmaker:v0.0.4
+  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-diskmaker:latest
+  - name: quay.io/openshift/origin-kube-rbac-proxy:latest
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
   - name: quay.io/containerdisks/centos-stream:9
   - name: quay.io/containerdisks/centos-stream:10
