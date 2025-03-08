@@ -60,6 +60,8 @@ log_format basic '$remote_addr [$time_local] '
 	    server worker-1.cluster.{{ domain }}:80;
 	    server worker-2.cluster.{{ domain }}:80;
 	    server worker-3.cluster.{{ domain }}:80;
+	    server worker-4.cluster.{{ domain }}:80;
+	    server worker-5.cluster.{{ domain }}:80;
     }
 
     server {
@@ -80,6 +82,8 @@ log_format basic '$remote_addr [$time_local] '
 	    server worker-1.cluster.{{ domain }}:443;
 	    server worker-2.cluster.{{ domain }}:443;
 	    server worker-3.cluster.{{ domain }}:443;
+	    server worker-4.cluster.{{ domain }}:443;
+	    server worker-5.cluster.{{ domain }}:443;
     }
 
     server {

@@ -23,6 +23,8 @@
        - worker-1
        - worker-2
        - worker-3
+       - worker-4
+       - worker-5
 
     - name: Remove ISOs
       ansible.builtin.shell: |
@@ -41,3 +43,5 @@
         - worker-1
         - worker-2
         - worker-3
+        - worker-4
+        - worker-5

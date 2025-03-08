@@ -14,6 +14,8 @@
     - worker-1
     - worker-2
     - worker-3
+    - worker-4
+    - worker-5
 
   tasks:
     - name: Set rules to REJECT for Full cluster
@@ -84,6 +86,21 @@
     - worker-1
     - worker-2
     - worker-3
+    - worker-4
+    - worker-5
+    san_nodes:
+    - bootstrap
+    - master-0
+    - master-1
+    - master-2
+    - worker-0
+    - worker-1
+    - worker-2
+    - worker-3
+
+    nonsan_nodes:
+    - worker-4
+    - worker-5
   tasks:
     - name: Check that the mirror bits are correct
       ansible.builtin.shell: |
@@ -191,7 +208,29 @@
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
-      with_items: "{{ ocp_nodes }}"
+      with_items: "{{ san_nodes }}"
+      retries: 0
+      delay: 10
+      register: vm_creation
+      until: vm_creation is not failed
+
+    - name: "Create bootstrap VM, masters and workers"
+      ansible.builtin.command: >-
+        virt-install
+        --name {{ item }}
+        --hvm
+        --virt-type kvm
+        --arch {{ arch }}
+        --cdrom {{ fullclusterfolder }}/{{ item }}-rhcos-live.iso
+        --os-variant rhel8.0
+        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
+        --vcpus {{ full_cluster[item].cpus }}
+        --ram {{ full_cluster[item].ram }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }},serial={{ diskserial }}
+        --check disk_size=off
+        --graphics spice,listen=127.0.0.1
+        --noautoconsole
+      with_items: "{{ nonsan_nodes }}"
       retries: 0
       delay: 10
       register: vm_creation
@@ -293,7 +332,7 @@
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         COUNT=$(oc get nodes -l "node-role.kubernetes.io/worker" --no-headers)
-        if [ ${COUNT} -eq 4 ]; then
+        if [ ${COUNT} -eq 6 ]; then
             exit 0
         fi
         {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
@@ -318,7 +357,8 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         "{{ oc_dir }}/openshift-install" --dir=. wait-for install-complete --log-level=debug
-      retries: 1
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+      retries: 2
       delay: 5
       register: wait_for_install
       until: wait_for_install is not failed
@@ -493,7 +533,7 @@
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
-        # {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 2}}'
+        {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 6}}'
       register: mcg_iscsi
       until: mcg_iscsi is not failed
       retries: 5

@@ -470,6 +470,22 @@ full_cluster:
     disk3: 10
     cache3: unsafe
     wwn3: "0x5000c50015ff75ee"
+  worker-4:
+    cpus: 6
+    ram: 24768
+    mac_nr: a7
+    ip: 192.168.66.157
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea75ee"
+  worker-5:
+    cpus: 6
+    ram: 24768
+    mac_nr: a8
+    ip: 192.168.66.158
+    disk: 100
+    cache: unsafe
+    wwn: "0x5000c50015ea75ee"
 
 coreos:
   base_url: "https://mirror.openshift.com/pub/openshift-v4/dependencies/rhcos/{{ ocp_maj_min_version }}/latest"
