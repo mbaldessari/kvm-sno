@@ -86,8 +86,8 @@
     - worker-1
     - worker-2
     - worker-3
-    - worker-4
-    - worker-5
+    # - worker-4
+    # - worker-5
     san_nodes:
     - bootstrap
     - master-0
@@ -99,8 +99,8 @@
     - worker-3
 
     nonsan_nodes:
-    - worker-4
-    - worker-5
+    # - worker-4
+    # - worker-5
   tasks:
     - name: Check that the mirror bits are correct
       ansible.builtin.shell: |
@@ -214,27 +214,27 @@
       register: vm_creation
       until: vm_creation is not failed
 
-    - name: "Create bootstrap VM, masters and workers"
-      ansible.builtin.command: >-
-        virt-install
-        --name {{ item }}
-        --hvm
-        --virt-type kvm
-        --arch {{ arch }}
-        --cdrom {{ fullclusterfolder }}/{{ item }}-rhcos-live.iso
-        --os-variant rhel8.0
-        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
-        --vcpus {{ full_cluster[item].cpus }}
-        --ram {{ full_cluster[item].ram }}
-        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }},serial={{ diskserial }}
-        --check disk_size=off
-        --graphics spice,listen=127.0.0.1
-        --noautoconsole
-      with_items: "{{ nonsan_nodes }}"
-      retries: 0
-      delay: 10
-      register: vm_creation
-      until: vm_creation is not failed
+    # - name: "Create bootstrap VM, masters and workers"
+    #   ansible.builtin.command: >-
+    #     virt-install
+    #     --name {{ item }}
+    #     --hvm
+    #     --virt-type kvm
+    #     --arch {{ arch }}
+    #     --cdrom {{ fullclusterfolder }}/{{ item }}-rhcos-live.iso
+    #     --os-variant rhel8.0
+    #     --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
+    #     --vcpus {{ full_cluster[item].cpus }}
+    #     --ram {{ full_cluster[item].ram }}
+    #     --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }},serial={{ diskserial }}
+    #     --check disk_size=off
+    #     --graphics spice,listen=127.0.0.1
+    #     --noautoconsole
+    #   with_items: "{{ nonsan_nodes }}"
+    #   retries: 0
+    #   delay: 10
+    #   register: vm_creation
+    #   until: vm_creation is not failed
 
     - name: Wait for vm to be stopped
       ansible.builtin.shell: |
@@ -552,7 +552,7 @@
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
-        {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 6}}'
+        {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 3}}'
       register: mcg_iscsi
       until: mcg_iscsi is not failed
       retries: 5
@@ -593,86 +593,6 @@
       delay: 90
       register: mcp_ready
       until: mcp_ready is not failed
-
-    # - name: Template out localstorage bits
-    #   tags:
-    #     - localstorage
-    #   ansible.builtin.template:
-    #     src: "../templates/{{ item }}"
-    #     dest: "{{ fullclusterfolder }}/{{ item }}"
-    #     mode: "0644"
-    #   with_items:
-    #     - local-storage-base.yaml
-    #     - local-storage-cr.yaml
-    #
-    # - name: Install local storage operator
-    #   tags:
-    #     - localstorage
-    #   ansible.builtin.shell: |
-    #     set -e -o pipefail
-    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/local-storage-base.yaml"
-    #   register: localstorage
-    #   until: localstorage is not failed
-    #   retries: 50
-    #   delay: 20
-    #
-    # - name: Install local storage cr
-    #   tags:
-    #     - localstorage
-    #   ansible.builtin.shell: |
-    #     set -e -o pipefail
-    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/local-storage-cr.yaml"
-    #     "{{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations": {"storageclass.kubernetes.io/is-default-class": "true"}}}'
-    #   register: localstorage
-    #   until: localstorage is not failed
-    #   retries: 5
-    #   delay: 20
-
-    # - name: Template out lvm bits
-    #   tags:
-    #     - lvm
-    #   ansible.builtin.template:
-    #     src: ../templates/lvm-base.yaml
-    #     dest: "{{ fullclusterfolder }}/lvm-base.yaml"
-    #     mode: "0644"
-    #
-    # - name: Template out lvm cluster
-    #   tags:
-    #     - lvm
-    #   ansible.builtin.template:
-    #     src: ../templates/lvm-cluster.yaml
-    #     dest: "{{ fullclusterfolder }}/{{ item }}-lvm-cluster.yaml"
-    #     mode: "0644"
-    #   with_items:
-    #     - worker-0
-    #
-    # - name: Install LVM operator
-    #   tags:
-    #     - lvm
-    #   ansible.builtin.shell: |
-    #     set -e -o pipefail
-    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/lvm-base.yaml"
-    #   register: lvm
-    #   until: lvm is not failed
-    #   retries: 50
-    #   delay: 20
-    #
-    # - name: Install LVM Cluster
-    #   tags:
-    #     - lvm
-    #   ansible.builtin.shell: |
-    #     set -e -o pipefail
-    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}-lvm-cluster.yaml"
-    #   register: lvmcluster
-    #   retries: 50
-    #   delay: 30
-    #   until: lvmcluster is not failed
-    #   with_items:
-    #     - worker-0
 
     - name: Set minio-s3 secret for image registry
       tags:
@@ -725,6 +645,12 @@
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         oc label nodes -l node-role.kubernetes.io/worker "scale.spectrum.ibm.com/role=storage"
+
+    - name: Patch MCP back to 1 maxunavail
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 1}}'
 
     - name: Template purple bits
       tags:
