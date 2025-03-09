@@ -72,6 +72,11 @@
   hosts: nginx
   gather_facts: false
   become: true
+  vars:
+    minio_file: "minio-20240418190919.0.0-1.x86_64.rpm"
+    minio_client_file: "mcli-20240418164529.0.0-1.x86_64.rpm"
+    minio_url: "http://fw.int.rhx/{{ minio_file }}"
+    minio_client_url: "http://fw.int.rhx/{{ minio_client_file }}"
   tasks:
     - name: Wait for boxes
       ansible.builtin.wait_for_connection:
@@ -125,3 +130,101 @@
         name: nginx
         state: started
         enabled: true
+
+    - name: Download minio binary
+      ansible.builtin.get_url:
+        url: "{{ minio_url }}"
+        dest: "/tmp/{{ minio_file }}"
+        mode: "0755"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+
+    - name: Download minio client binary
+      ansible.builtin.get_url:
+        url: "{{ minio_client_url }}"
+        dest: "/tmp/{{ minio_client_file }}"
+        mode: "0755"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+
+    - name: Install minio rpm
+      ansible.builtin.shell: |
+        dnf install -y "/tmp/{{ minio_file }}" "/tmp/{{ minio_client_file }}"
+
+    - name: Add minio-user user
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        groupadd --system minio-user
+        adduser --system --shell /bin/bash \
+          --comment 'MINIO' \
+          --gid minio-user --home-dir /home/minio-user --create-home \
+          minio-user
+
+    - name: Template /etc/default/minio
+      ansible.builtin.template:
+        src: ../templates/minio-default.j2
+        dest: /etc/default/minio
+        mode: "0640"
+        owner: minio-user
+        group: minio-user
+
+    - name: Set extra_wwn to be sure sdb is the right disk
+      ansible.builtin.set_fact:
+        extra_wwn: "disk/by-id/wwn-{{ full_cluster['nginx'].wwn2 }}"
+
+    - name: Create disks and mount
+      ansible.builtin.shell: |
+        set -e
+        mkfs.xfs "/dev/{{ extra_wwn }}"
+        mkdir /mnt/data
+        mount "/dev/{{ extra_wwn }}" /mnt/data
+        mkdir -p /mnt/data/disk{1,2,3,4}
+        chown -R minio-user: /mnt/data/disk{1,2,3,4}
+
+    - name: Add {{ extra_wwn }} in fstab
+      ansible.posix.mount:
+        state: present
+        path: /mnt/data
+        src: /dev/"{{ extra_wwn }}"
+        fstype: xfs
+
+    - name: Create minio folders
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        mkdir /etc/minio
+        chown -R minio-user:minio-user /etc/minio
+        chmod 750 /etc/minio
+
+    - name: Copy TLS certs for minio
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/minio/public.crt
+        mode: "0640"
+        owner: minio-user
+        group: minio-user
+      with_items:
+        - /home/michele/ssl-ca/certs/nginx.ocplab.ocp.crt
+
+    - name: Copy TLS certs for minio (2)
+      ansible.builtin.copy:
+        src: "{{ item }}"
+        dest: /etc/minio/private.key
+        mode: "0640"
+        owner: minio-user
+        group: minio-user
+      with_items:
+        - /home/michele/ssl-ca/certs/nginx.ocplab.ocp.key
+
+    - name: Start minio
+      ansible.builtin.systemd_service:
+        name: minio
+        state: started
+        enabled: true
+
+    - name: Init myminio
+      ansible.builtin.shell: |
+        set -e
+        /usr/local/bin/mcli alias set {{ minio.org}} https://{{ minio.fqdn }}:9000 {{ minio.admin_user }} {{ minio.admin_pass }}
+        /usr/local/bin/mcli admin user add {{ minio.org }} {{ minio.user }} {{ minio.pass }}
+        /usr/local/bin/mcli mb --with-lock {{ minio.org }}/{{ minio.bucket }}
+        /usr/local/bin/mcli admin user svcacct add {{ minio.org }} {{ minio.admin_user }} --name adminkey --description "adminkey" --access-key {{ minio.admin_access_key }} --secret-key {{ minio.admin_secret_key }}
