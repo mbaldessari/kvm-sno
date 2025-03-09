@@ -327,7 +327,7 @@
       with_items:
        - bootstrap
 
-    - name: Approve all machines until we have four workers
+    - name: Approve all machines until we have six workers
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
@@ -353,10 +353,29 @@
       retries: 5
       delay: 10
 
+    - name: Wait some more time
+      tags:
+        - purple
+      ansible.builtin.pause:
+        minutes: 3
+
+    - name: Approve all machines again
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+        sleep 10
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+      register: csr
+      until: csr is not failed
+      retries: 5
+      delay: 10
+
     - name: Wait for installation completion
       ansible.builtin.shell: |
         set -e -o pipefail
         "{{ oc_dir }}/openshift-install" --dir=. wait-for install-complete --log-level=debug
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
       retries: 2
       delay: 5
