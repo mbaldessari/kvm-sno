@@ -203,7 +203,7 @@
         owner: minio-user
         group: minio-user
       with_items:
-        - /home/michele/ssl-ca/certs/nginx.ocplab.ocp.crt
+        - /home/michele/ssl-ca/certs/nginx.cluster.ocplab.ocp.crt
 
     - name: Copy TLS certs for minio (2)
       ansible.builtin.copy:
@@ -213,7 +213,7 @@
         owner: minio-user
         group: minio-user
       with_items:
-        - /home/michele/ssl-ca/certs/nginx.ocplab.ocp.key
+        - /home/michele/ssl-ca/certs/nginx.cluster.ocplab.ocp.key
 
     - name: Start minio
       ansible.builtin.systemd_service:
