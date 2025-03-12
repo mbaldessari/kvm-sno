@@ -122,11 +122,9 @@
         mkdir -p /var/lib/libvirt/iscsi_disks
         targetcli backstores/fileio create iscsi_disk1 /var/lib/libvirt/iscsi_disks/disk1.img 70G
         targetcli backstores/fileio create iscsi_disk2 /var/lib/libvirt/iscsi_disks/disk2.img 80G
-        targetcli backstores/fileio create iscsi_disk3 /var/lib/libvirt/iscsi_disks/disk3.img 90G
         targetcli iscsi/ create iqn.2024-02.com.example
         targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk1
         targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk2
-        targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk3
         targetcli iscsi/iqn.2024-02.com.example/tpg1/ set attribute generate_node_acls=1  authentication=0 demo_mode_write_protect=0 cache_dynamic_acls=1
 
     - name: Remove full cluster folder
@@ -205,6 +203,8 @@
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }},serial={{ diskserial }}
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }},serial={{ diskserial2 }}
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk3 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache3 }},wwn={{ full_cluster[item].wwn3 }},serial={{ diskserial3 }}
+         {% if item in ["worker-1", "worker-2", "worker-3"] %} --disk /dev/sdh1,device=disk,bus=scsi,wwn=0xf00df00df00df00d --check path_in_use=off {% endif %}
+         {% if item in ["worker-0", "worker-1", "worker-2"] %} --disk /dev/sdh2,device=disk,bus=scsi,wwn=0xcafecafecafecafe --check path_in_use=off {% endif %}
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
@@ -576,24 +576,6 @@
       retries: 5
       delay: 10
 
-
-    - name: Wait for MCP to settle
-      tags:
-        - iscsi
-      ansible.builtin.shell: |
-        set -ex
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        if [ $({{ oc_bin }} get mcp/master -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/master -o jsonpath='{.status.machineCount}') ]; then
-          exit 1
-        fi
-        if [ $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.machineCount}') ]; then
-          exit 1
-        fi
-      retries: 30
-      delay: 90
-      register: mcp_ready
-      until: mcp_ready is not failed
-
     - name: Set minio-s3 secret for image registry
       tags:
         - s3
@@ -621,6 +603,23 @@
       until: miniosetup is not failed
       retries: 3
       delay: 5
+
+    - name: Wait for MCP to settle
+      tags:
+        - iscsi
+      ansible.builtin.shell: |
+        set -ex
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        if [ $({{ oc_bin }} get mcp/master -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/master -o jsonpath='{.status.machineCount}') ]; then
+          exit 1
+        fi
+        if [ $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.machineCount}') ]; then
+          exit 1
+        fi
+      retries: 30
+      delay: 90
+      register: mcp_ready
+      until: mcp_ready is not failed
 
     - name: Wait for the cluster's stability
       ansible.builtin.shell: |
