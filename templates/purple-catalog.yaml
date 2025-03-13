@@ -6,4 +6,4 @@ metadata:
 spec:
   displayName: Test Purple Storage Operator
   sourceType: grpc
-  image: "kuemper.int.rhx/ocp/hybridcloudpatterns/purple-storage-rh-operator-catalog:v0.0.4"
+  image: "kuemper.int.rhx/ocp/openshift-storage-scale/openshift-storage-scale-catalog:0.0.5"
