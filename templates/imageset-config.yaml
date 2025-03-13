@@ -62,13 +62,13 @@ mirror:
   - name: quay.io/hybridcloudpatterns/imperative-container:v1
   - name: quay.io/hybridcloudpatterns/pattern-install:0.0.7
   - name: docker.io/gitea/gitea:1.22.6-rootless
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator:0.0.4
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-bundle:v0.0.4
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-catalog:v0.0.4
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-console:v0.0.4
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-console:latest
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-diskmaker:v0.0.4
-  - name: quay.io/hybridcloudpatterns/purple-storage-rh-operator-diskmaker:latest
+  - name: quay.io/openshift-storage-scale/openshift-storage-scale-operator:0.0.5
+  - name: quay.io/openshift-storage-scale/openshift-storage-scale-bundle:0.0.5
+  - name: quay.io/openshift-storage-scale/openshift-storage-scale-catalog:0.0.5
+  - name: quay.io/openshift-storage-scale/openshift-storage-scale-console:0.0.5
+  - name: quay.io/openshift-storage-scale/openshift-storage-scale-discovery:0.0.5
+  - name: quay.io/openshift-storage-scale/openshift-storage-scale-diskmaker:0.0.5
+  - name: quay.io/openshift-storage-scale/openshift-storage-scale-diskmaker:latest
   - name: quay.io/openshift/origin-kube-rbac-proxy:latest
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
   - name: quay.io/containerdisks/centos-stream:9
