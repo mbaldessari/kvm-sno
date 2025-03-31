@@ -671,7 +671,8 @@
 
     - name: Notify bandini
       ansible.builtin.shell: |
-        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done!"
+        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
+      failed_when: false
 
     - name: STOP HERE
       ansible.builtin.fail:

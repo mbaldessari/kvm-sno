@@ -56,3 +56,8 @@
         --workspace file://{{ local_mirror }}/workspace docker://{{ oc_mirror_local_registry }} --v2 &> /var/log/oc-mirror.log
       args:
         chdir: "{{ oc_dir }}"
+
+    - name: Notify bandini
+      ansible.builtin.shell: |
+        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Mirror Done! "
+      failed_when: false
