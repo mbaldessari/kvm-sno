@@ -48,6 +48,11 @@
       ansible.builtin.debug:
         msg: "{{ oc_mirror_version.stdout }}"
 
+    - name: Notify bandini
+      ansible.builtin.shell: |
+        curl -X POST http://raspyclock.int.rhx:8080/job -d "start"
+      failed_when: false
+
     - name: Mirror images
       ansible.builtin.shell: |
         set -e
@@ -60,4 +65,5 @@
     - name: Notify bandini
       ansible.builtin.shell: |
         curl -X POST http://raspyclock.int.rhx:8080/receive -d "Mirror Done! "
+        curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
       failed_when: false
