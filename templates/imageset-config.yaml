@@ -68,6 +68,7 @@ mirror:
   - name: quay.io/openshift-storage-scale/openshift-storage-scale-catalog:0.0.5
   - name: quay.io/openshift-storage-scale/openshift-storage-scale-console:0.0.5
   - name: quay.io/openshift-storage-scale/openshift-storage-scale-diskmaker:0.0.5
+  - name: quay.io/openshift-storage-scale/openshift-storage-scale-must-gather:0.0.5
   - name: quay.io/openshift-storage-scale/openshift-storage-scale-diskmaker:latest
   - name: quay.io/openshift/origin-kube-rbac-proxy:latest
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
