@@ -102,6 +102,11 @@
     # - worker-4
     # - worker-5
   tasks:
+    - name: Notify bandini
+      ansible.builtin.shell: |
+        curl -X POST http://raspyclock.int.rhx:8080/jobs -d "start"
+      failed_when: false
+
     - name: Check that the mirror bits are correct
       ansible.builtin.shell: |
         set -ex
@@ -672,6 +677,7 @@
     - name: Notify bandini
       ansible.builtin.shell: |
         curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
+        curl -X POST http://raspyclock.int.rhx:8080/jobs -d "finished"
       failed_when: false
 
     - name: STOP HERE
