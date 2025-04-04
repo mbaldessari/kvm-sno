@@ -159,15 +159,29 @@
       vars:
         enable_caching: true
 
+    - name: Set openshift-install command
+      ansible.builtin.set_fact:
+        oc_install: "{{ oc_dir }}/openshift-install"
+      when: not fips_enabled
+
+    - name: Set openshift-install command FIPS
+      ansible.builtin.set_fact:
+        oc_install: "{{ oc_dir }}/openshift-install-fips"
+      when: fips_enabled
+
     - name: Create full cluster manifests
-      ansible.builtin.command: |
-        "{{ oc_dir }}/openshift-install" create manifests --dir=.
+      ansible.builtin.shell: |
+        set -e
+        export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
+        "{{ oc_install }}" create manifests --dir=.
       args:
         chdir: "{{ fullclusterfolder }}"
 
     - name: Create full cluster ignition configs
-      ansible.builtin.command: |
-        "{{ oc_dir }}/openshift-install" create ignition-configs --dir=.
+      ansible.builtin.shell: |
+        set -e
+        export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
+        "{{ oc_install }}" create ignition-configs --dir=.
       args:
         chdir: "{{ fullclusterfolder }}"
 
@@ -271,8 +285,10 @@
       with_items: "{{ ocp_nodes }}"
 
     - name: Wait for bootstrap process to complete
-      ansible.builtin.command: |
-        "{{ oc_dir }}/openshift-install" --dir=. wait-for bootstrap-complete --log-level=debug
+      ansible.builtin.shell: |
+        set -e
+        export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
+        "{{ oc_install }}" --dir=. wait-for bootstrap-complete --log-level=debug
       args:
         chdir: "{{ fullclusterfolder }}"
 
@@ -379,7 +395,8 @@
     - name: Wait for installation completion
       ansible.builtin.shell: |
         set -e -o pipefail
-        "{{ oc_dir }}/openshift-install" --dir=. wait-for install-complete --log-level=debug
+        export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
+        "{{ oc_install }}" --dir=. wait-for install-complete --log-level=debug
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
       retries: 2

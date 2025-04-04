@@ -3,6 +3,9 @@
   hosts: kvm
   gather_facts: false
   become: true
+  vars:
+    oc_cli: openshift-client-linux-amd64-rhel9.tar.gz
+    oc_install: openshift-install-rhel9-amd64.tar.gz
   tasks:
     - name: Create mirror folders
       ansible.builtin.file:
@@ -13,8 +16,8 @@
 
     - name: Download oc
       ansible.builtin.get_url:
-        url: "{{ openshift_mirror }}/{{ item }}/openshift-client-linux.tar.gz"
-        dest: "{{ mirrorfolder }}/{{ item }}/openshift-client-linux.tar.gz"
+        url: "{{ openshift_mirror }}/{{ item }}/{{ oc_cli }}"
+        dest: "{{ mirrorfolder }}/{{ item }}/{{ oc_cli }}"
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
@@ -22,8 +25,8 @@
 
     - name: Download openshift-install
       ansible.builtin.get_url:
-        url: "{{ openshift_mirror }}/{{ item }}/openshift-install-linux.tar.gz"
-        dest: "{{ mirrorfolder }}/{{ item }}/openshift-install-linux.tar.gz"
+        url: "{{ openshift_mirror }}/{{ item }}/{{ oc_install }}"
+        dest: "{{ mirrorfolder }}/{{ item }}/{{ oc_install }}"
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
@@ -31,14 +34,14 @@
 
     - name: Uncompress oc
       ansible.builtin.unarchive:
-        src: "{{ mirrorfolder }}/{{ item }}/openshift-client-linux.tar.gz"
+        src: "{{ mirrorfolder }}/{{ item }}/{{ oc_cli }}"
         dest: "{{ mirrorfolder }}/{{ item }}"
         remote_src: true
       with_items: "{{ ocp_versions }}"
 
     - name: Uncompress openshift install
       ansible.builtin.unarchive:
-        src: "{{ mirrorfolder }}/{{ item }}/openshift-install-linux.tar.gz"
+        src: "{{ mirrorfolder }}/{{ item }}/{{ oc_install }}"
         dest: "{{ mirrorfolder }}/{{ item }}"
         remote_src: true
       with_items: "{{ ocp_versions }}"
