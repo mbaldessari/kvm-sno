@@ -125,3 +125,25 @@ mirror:
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/csi/ibm-spectrum-scale-csi-driver@sha256:ffecac38546bf0b36e0c87fd6e4c06c58bc85c6f7c2140651149a284d29a5d6f
   - name: quay.io/rhsysdeseng/cpopen/ibm-spectrum-scale-csi-operator@sha256:a371ac2539ddf2e4708ba22f539381880e500758de20e8db3823b1f32c5a3794
   - name: quay.io/rhsysdeseng/cpopen/ibm-spectrum-scale-operator@sha256:ceb5c5cf5fd94cc8a677154c31cb8b814c53a8fcd4dfcec0ba2951f73bf9a542
+  # 5.2.3.0rc.1
+  - name: quay.io/openshift-storage-scale/data-management/ibm-spectrum-scale-daemon:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/data-access/ibm-spectrum-scale-daemon:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-core-init:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-gui:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/postgres:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-logs:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-pmcollector:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-monitor:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-grafana-bridge:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-coredns:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-must-gather:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-pmsensors:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/csi/csi-snapshotter:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/csi/csi-attacher:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/csi/csi-provisioner:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/csi/livenessprobe:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/csi/csi-node-driver-registrar:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/csi/csi-resizer:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/csi/ibm-spectrum-scale-csi-driver:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-csi-operator:5.2.3.0.rc1
+  - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-operator:5.2.3.0.rc1
