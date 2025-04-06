@@ -12,6 +12,7 @@ metadata:
 provisioner: spectrumscale.csi.ibm.com
 parameters:
   volBackendFs: localfilesystem1
+  inodeLimit: "2048"
 reclaimPolicy: Delete
 allowVolumeExpansion: true
 volumeBindingMode: Immediate
