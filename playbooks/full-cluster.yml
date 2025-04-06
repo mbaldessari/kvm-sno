@@ -673,6 +673,16 @@
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 1}}'
 
+    - name: Get multipath IDs
+      delegate_to: worker-0
+      ansible.builtin.shell:
+        multipath -ll |grep mpath | grep -oP '\(\K[^)]+'
+      register: multipath_ids_raw
+
+    - name: Set multipath facts
+      ansible.builtin.set_fact:
+        multipath_ids: "{{ multipath_ids_raw.stdout_lines }}"
+
     - name: Template purple bits
       tags:
         - purple

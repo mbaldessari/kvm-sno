@@ -1,6 +1,9 @@
 [kvm]
 kuemper.int.rhx ansible_user=root
 
+[workers]
+worker-0 ansible_user=core ansible_host=192.168.66.153 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
+
 [snohosts]
 sno1 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
 sno2 ansible_user=michele ansible_host=192.168.66.100 ansible_ssh_common_args='-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null'
