@@ -13,7 +13,6 @@ spec:
     - name: system
       disks:
       - shareddisk1
-      - shareddisk2
     # only 1-way is supported for LFS https://www.ibm.com/docs/en/scalecontainernative/5.2.1?topic=systems-local-file-system#filesystem-spec
     replication: 1-way
     type: shared
@@ -36,7 +35,7 @@ spec:
     pools:
     - name: system
       disks:
-      - shareddisk3
+      - shareddisk2
     # only 1-way is supported for LFS https://www.ibm.com/docs/en/scalecontainernative/5.2.1?topic=systems-local-file-system#filesystem-spec
     replication: 1-way
     type: shared
