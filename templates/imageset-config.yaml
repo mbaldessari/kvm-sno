@@ -33,6 +33,7 @@ mirror:
       - name: kubernetes-nmstate-operator
       - name: local-storage-operator
       - name: kubevirt-hyperconverged
+      - name: kernel-module-management
       - name: advanced-cluster-management
         channels:
           - name: release-2.12
