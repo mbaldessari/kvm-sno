@@ -675,8 +675,8 @@
 
     - name: Get multipath IDs
       delegate_to: worker-0
-      ansible.builtin.shell:
-        multipath -ll |grep mpath | grep -oP '\(\K[^)]+'
+      ansible.builtin.shell: |
+        multipathd show maps raw format %w
       register: multipath_ids_raw
 
     - name: Set multipath facts
