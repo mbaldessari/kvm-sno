@@ -11,7 +11,7 @@ spec:
     storage:
       files:
       - contents:
-          source: data:text/plain;charset=utf-8;base64,ZGVmYXVsdHMgewogICAgdXNlcl9mcmllbmRseV9uYW1lcyB5ZXMKfQoKYmxhY2tsaXN0IHsKICAgICMgL2Rldi9zZGEgYW5kIC9kZXYvc2RiIGFyZSBsb2NhbCBub24taXNjc2kgZGlza3MKICAgIGRldm5vZGUgIl5zZGFbYS16MC05XSsiCiAgICBkZXZub2RlICJec2RiW2EtejAtOV0rIgogICAgZGV2aWNlIHsKICAgICAgICB2ZW5kb3IgUUVNVQogICAgfQp9CgpkZXZpY2VzIHsKICAgIGRldmljZSB7CiAgICAgICAgdmVuZG9yICJMSU8tT1JHIgogICAgICAgIHByb2R1Y3QgIioiCiAgICAgICAgcGF0aF9ncm91cGluZ19wb2xpY3kgbXVsdGlidXMKICAgICAgICBmYWlsYmFjayBpbW1lZGlhdGUKICAgICAgICBycl93ZWlnaHQgcHJpb3JpdGllcwogICAgICAgIHJyX21pbl9pbyAxMDAKICAgICAgICBwYXRoX2NoZWNrZXIgdHVyCiAgICB9Cn0K
+          source: data:text/plain;charset=utf-8;base64,{{ iscsi_multipath_conf | b64encode }}
         filesystem: root
         mode: 420
         path: /etc/multipath.conf

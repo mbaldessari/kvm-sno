@@ -34,6 +34,31 @@ kubeadmin_pass: "{{ lookup('file', '~/.kubeadminpass') }}"
 iscsi_mco_pool: "worker"
 iscsi_target_ip: 192.168.66.100
 iscsi_iqn: iqn.2024-02.com.example
+iscsi_multipath_conf: |
+  defaults {
+      user_friendly_names yes
+  }
+  
+  blacklist {
+      # /dev/sda and /dev/sdb are local non-iscsi disks
+      devnode "^sda[a-z0-9]+"
+      devnode "^sdb[a-z0-9]+"
+      device {
+          vendor QEMU
+      }
+  }
+  
+  devices {
+      device {
+          vendor "LIO-ORG"
+          product "*"
+          path_grouping_policy multibus
+          failback immediate
+          rr_weight priorities
+          rr_min_io 100
+          path_checker tur
+      }
+  }
 iscsi_login_script: |
   #!/bin/bash
   # Simulate multipath by using two different IPs
