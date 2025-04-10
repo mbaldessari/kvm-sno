@@ -104,7 +104,7 @@ mirror:
   # v5.2.2.1
   # - name: quay.io/rhsysdeseng/cp/spectrum/scale/erasure-code/ibm-spectrum-scale-daemon@sha256:6e2bfb235a2c89317496124a6f37ad26516530bdc03600b591bd9c846ec92f72
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/data-management/ibm-spectrum-scale-daemon@sha256:72868067f337d18f4f61797693e403db177f8e28c7be682ed5c514636fef0f3a
-  - name: quay.io/rhsysdeseng/cp/spectrum/scale/data-access/ibm-spectrum-scale-daemon@sha256:814bda6320cfe94eafefa331e4e30f4e07fc16fc0183067bfffada5d731a32e3
+  # - name: quay.io/rhsysdeseng/cp/spectrum/scale/data-access/ibm-spectrum-scale-daemon@sha256:814bda6320cfe94eafefa331e4e30f4e07fc16fc0183067bfffada5d731a32e3
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-core-init@sha256:fde69d67fddd2e4e0b7d7d85387a221359daf332d135c9b9f239fb31b9b82fe0
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/ibm-spectrum-scale-gui@sha256:11ffb0e5bccf6d679c86e02ed7d1df155800c6502adb72378e08c007ddd66443
   - name: quay.io/rhsysdeseng/cp/spectrum/scale/postgres@sha256:0bcc5bbbb2aa9c9b4c6505845918c7eb55d783cf5c1f434fac33012579fb149d
@@ -128,7 +128,7 @@ mirror:
   - name: quay.io/rhsysdeseng/cpopen/ibm-spectrum-scale-operator@sha256:ceb5c5cf5fd94cc8a677154c31cb8b814c53a8fcd4dfcec0ba2951f73bf9a542
   # 5.2.3.0rc.1
   - name: quay.io/openshift-storage-scale/data-management/ibm-spectrum-scale-daemon:5.2.3.0.rc1
-  - name: quay.io/openshift-storage-scale/data-access/ibm-spectrum-scale-daemon:5.2.3.0.rc1
+  # - name: quay.io/openshift-storage-scale/data-access/ibm-spectrum-scale-daemon:5.2.3.0.rc1
   - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-core-init:5.2.3.0.rc1
   - name: quay.io/openshift-storage-scale/ibm-spectrum-scale-gui:5.2.3.0.rc1
   - name: quay.io/openshift-storage-scale/postgres:5.2.3.0.rc1
