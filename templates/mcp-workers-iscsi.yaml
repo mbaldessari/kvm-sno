@@ -5,11 +5,11 @@ metadata:
     machineconfiguration.openshift.io/role: {{ iscsi_mco_pool }}
   name: 99-{{ iscsi_mco_pool }}-iscsi
 spec:
+  extensions:
+    - kernel-devel
   config:
     ignition:
       version: 3.2.0
-    extensions:
-    - kernel-devel
     storage:
       files:
       - contents:

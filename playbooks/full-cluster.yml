@@ -694,7 +694,8 @@
       loop:
         - purple-catalog.yaml
         - purple-subscription.yaml
-        - purple-object.yaml
+        - fusion-object.yaml
+        - fusion-cluster.yaml
         - purple-localdisk.yaml
         - purple-filesystem.yaml
         - purple-test.yaml
@@ -726,7 +727,7 @@
       loop:
         - purple-catalog.yaml
         - purple-subscription.yaml
-        - purple-object.yaml
+        - fusion-object.yaml
 
     - name: Wait for MCP to start
       tags:

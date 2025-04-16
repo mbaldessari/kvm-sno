@@ -1,0 +1,9 @@
+apiVersion: fusion.storage.openshift.io/v1alpha1
+kind: FusionAccess
+metadata:
+  name: fusionaccess-sample
+  namespace: openshift-fusion-access
+spec:
+  ibm_cnsa_version: v5.2.3.0.rc1
+  storagedevicediscovery:
+    create: true
