@@ -222,7 +222,6 @@
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }},serial={{ diskserial }}
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }},serial={{ diskserial2 }}
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk3 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache3 }},wwn={{ full_cluster[item].wwn3 }},serial={{ diskserial3 }}
-        --disk /dev/sdh1,device=disk,bus=scsi,wwn=0xf00df00df00df00d --check path_in_use=off
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole
@@ -231,6 +230,7 @@
       delay: 10
       register: vm_creation
       until: vm_creation is not failed
+        #--disk /dev/sdh1,device=disk,bus=scsi,wwn=0xf00df00df00df00d --check path_in_use=off
       # {% if item in ["worker-1", "worker-2", "worker-3"] %} --disk /dev/sdh1,device=disk,bus=scsi,wwn=0xf00df00df00df00d --check path_in_use=off {% endif %}
       # {% if item in ["worker-0", "worker-1", "worker-2"] %} --disk /dev/sdh2,device=disk,bus=scsi,wwn=0xcafecafecafecafe --check path_in_use=off {% endif %}
 
