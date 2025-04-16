@@ -3,10 +3,10 @@ apiVersion: mirror.openshift.io/v2alpha1
 mirror:
   platform:
     channels:
-    # - name: stable-4.18
-    #   type: ocp
-    - name: stable-4.17
+    - name: stable-4.18
       type: ocp
+    # - name: stable-4.17
+    #   type: ocp
     graph: true
   operators:
   # - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
@@ -27,7 +27,7 @@ mirror:
   # - catalog: registry.redhat.io/redhat/community-operator-index:v4.18
   #   packages:
   #     - name: patterns-operator
-  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.17
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
     packages:
       - name: lvms-operator
       - name: kubernetes-nmstate-operator
@@ -35,15 +35,9 @@ mirror:
       - name: kubevirt-hyperconverged
       - name: kernel-module-management
       - name: advanced-cluster-management
-        channels:
-          - name: release-2.12
       - name: multicluster-engine
-        channels:
-          - name: stable-2.6
       - name: openshift-gitops-operator
-        channels:
-          - name: gitops-1.15
-  - catalog: registry.redhat.io/redhat/community-operator-index:v4.17
+  - catalog: registry.redhat.io/redhat/community-operator-index:v4.18
     packages:
       - name: patterns-operator
   additionalImages:
@@ -64,13 +58,12 @@ mirror:
   - name: quay.io/hybridcloudpatterns/imperative-container:v1
   - name: quay.io/hybridcloudpatterns/pattern-install:0.0.7
   - name: docker.io/gitea/gitea:1.22.6-rootless
-  - name: quay.io/openshift-storage-scale/openshift-storage-scale-operator:0.0.5
-  - name: quay.io/openshift-storage-scale/openshift-storage-scale-bundle:0.0.5
-  - name: quay.io/openshift-storage-scale/openshift-storage-scale-catalog:0.0.5
-  - name: quay.io/openshift-storage-scale/openshift-storage-scale-console:0.0.5
-  - name: quay.io/openshift-storage-scale/openshift-storage-scale-diskmaker:0.0.5
-  - name: quay.io/openshift-storage-scale/openshift-storage-scale-must-gather:0.0.5
-  - name: quay.io/openshift-storage-scale/openshift-storage-scale-diskmaker:latest
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-operator:0.0.7
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-bundle:0.0.7
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:0.0.7
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-console:0.0.7
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-diskmaker:0.0.7
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-must-gather:0.0.7
   - name: quay.io/openshift/origin-kube-rbac-proxy:latest
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
   - name: quay.io/containerdisks/centos-stream:9
