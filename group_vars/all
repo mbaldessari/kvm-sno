@@ -28,6 +28,7 @@ sshkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 sshkey2: "{{ lookup('file', '~/.ssh/id_ansible.pub', errors='ignore') | default('') }}"
 pullsecret: "{{ lookup('file', '~/.pullsecret.json') }}"
 kubeadmin_pass: "{{ lookup('file', '~/.kubeadminpass') }}"
+ntfy_topic: "{{ lookup('file', '~/.ntfy_topic') }}"
 iscsi_mco_pool: "worker"
 iscsi_target_ip: 192.168.66.100
 iscsi_iqn: iqn.2024-02.com.example

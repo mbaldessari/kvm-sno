@@ -707,6 +707,7 @@
       ansible.builtin.shell: |
         curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
         curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
+        curl -d "Cluster install successful 😀" "ntfy.sh/{{ ntfy_topic }}"
       failed_when: false
 
     - name: STOP HERE
