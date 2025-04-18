@@ -617,7 +617,8 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        oc label nodes -l node-role.kubernetes.io/worker "scale.spectrum.ibm.com/role=storage"
+        {{ oc_bin }} label nodes -l node-role.kubernetes.io/worker "scale.spectrum.ibm.com/role=storage"
+        {{ oc_bin }} label nodes -l node-role.kubernetes.io/worker "scale.spectrum.ibm.com/daemon-selector="
 
     - name: Patch MCP back to 1 maxunavail
       ansible.builtin.shell: |
