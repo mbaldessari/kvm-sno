@@ -670,6 +670,7 @@
         - fusion-cluster.yaml
         - fusion-localdisk.yaml
         - fusion-filesystem.yaml
+        - fusion-storageclass.yaml
         - fusion-test.yaml
         - virt-subscription.yaml
         - virt-machine.yaml
@@ -736,6 +737,7 @@
       loop:
         - fusion-localdisk.yaml
         - fusion-filesystem.yaml
+        - fusion-storageclass.yaml
         - fusion-test.yaml
 
     - name: Create Virt HCO
@@ -772,4 +774,3 @@
     - name: STOP HERE
       ansible.builtin.fail:
         msg: "STOP HERE FOR NOW"
-
