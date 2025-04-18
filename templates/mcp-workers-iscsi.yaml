@@ -12,11 +12,11 @@ spec:
       version: 3.2.0
     storage:
       files:
-      - contents:
-          source: data:text/plain;charset=utf-8;base64,{{ iscsi_multipath_conf | b64encode }}
-        filesystem: root
-        mode: 420
-        path: /etc/multipath.conf
+      # - contents:
+      #     source: data:text/plain;charset=utf-8;base64,{{ iscsi_multipath_conf | b64encode }}
+      #   filesystem: root
+      #   mode: 420
+      #   path: /etc/multipath.conf
       - contents:
           source: data:text/plain;charset=utf-8;base64,b3B0aW9ucyBrdm1faW50ZWwgbmVzdGVkPTEKb3B0aW9ucyBrdm1fYW1kIG5lc3RlZD0xCg==
         filesystem: root
@@ -66,5 +66,5 @@ spec:
         enabled: true
       - name: iscsi.service
         enabled: true
-      - name: multipathd.service
-        enabled: true
+      # - name: multipathd.service
+      #   enabled: true
