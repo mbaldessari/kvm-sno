@@ -17,15 +17,15 @@ spec:
     spec:
       sourceRef:
         kind: DataSource
-        name: rhel8
+        name: fedora
         namespace: openshift-virtualization-os-images
       pvc:
         accessModes:
           - "ReadWriteMany"
         resources:
           requests:
-            storage: "10Gi"
-        storageClassName: ibm-spectrum-scale-sample
+            storage: "35Gi"
+        storageClassName: ibm-spectrum-scale-fs1
         volumeMode: Filesystem
   running: true
   template:
@@ -39,13 +39,13 @@ spec:
         kubevirt.io/size: tiny
         vm.kubevirt.io/name: test-vm
     spec:
-      accessCredentials:
-        - sshPublicKey:
-            propagationMethod:
-              configDrive: {}
-            source:
-              secret:
-                secretName: authorizedsshkeys-test-vm
+      # accessCredentials:
+      #   - sshPublicKey:
+      #       propagationMethod:
+      #         configDrive: {}
+      #       source:
+      #         secret:
+      #           secretName: authorizedsshkeys-test-vm
       domain:
         cpu:
           cores: 1
@@ -79,13 +79,19 @@ spec:
         pod: {}
       terminationGracePeriodSeconds: 180
       volumes:
+      volumes:
       - dataVolume:
           name: test-vm
         name: test-vm
-      - name: cloudinitdisk
-        cloudInitConfigDrive:
-          secretRef:
-            name: cloudinit-test-vm
+      - cloudInitNoCloud:
+          userData: |-
+            #cloud-config
+            user: kni
+            password: redhat
+            chpasswd: { expire: False }
+            runcmd:
+            - echo "Hello from `hostname`" |sudo tee /tmp/washere
+        name: cloudinitdisk        
 ---
 apiVersion: v1
 kind: Service
