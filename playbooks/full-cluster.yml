@@ -727,7 +727,7 @@
 
     - name: Create small VM
       tags:
-        - fusion
+        - virt
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
