@@ -661,15 +661,15 @@
         - virt-machine.yaml
         - virt-hyperconverged.yaml
 
-    - name: Apply purple bits
+    - name: Apply fusion bits
       tags:
         - fusion
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
-      register: purple_apply
-      until: purple_apply is not failed
+      register: fusion_apply
+      until: fusion_apply is not failed
       retries: 30
       delay: 10
       loop:
@@ -681,22 +681,61 @@
         - virt-subscription.yaml
         - virt-hyperconverged.yaml
 
-    - name: Apply purple bits (2)
+    - name: Apply fusion cluster
+      tags:
+        - fusion
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/fusion-cluster.yaml"
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 20
+      delay: 10
+
+    - name: Wait for fusion pods
+      tags:
+        - fusion
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        COUNT=$({{ oc_bin }} get pods -n ibm-spectrum-scale | grep worker | grep Running | wc -l)
+        NODES=$(oc get nodes -l "node-role.kubernetes.io/worker" --no-headers | wc -l)
+        if [ ${COUNT} != ${NODES} ]; then
+          exit 1
+        fi
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 20
+      delay: 10
+
+    - name: Apply fusion filesystem objects and small test
       tags:
         - fusion
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
-      register: purple_apply
-      until: purple_apply is not failed
+      register: fusion_apply
+      until: fusion_apply is not failed
       retries: 20
       delay: 10
       loop:
-        - fusion-cluster.yaml
         - fusion-localdisk.yaml
         - fusion-filesystem.yaml
         - fusion-test.yaml
+
+    - name: Create small VM
+      tags:
+        - fusion
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/virt-machine.yaml"
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 20
+      delay: 10
 
     - name: Notify bandini
       ansible.builtin.shell: |
