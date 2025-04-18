@@ -626,12 +626,16 @@
         {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 1}}'
 
     - name: Get multipath IDs
+      tags:
+        - fusion
       delegate_to: worker-0
       ansible.builtin.shell: |
         multipathd show maps raw format %w
       register: multipath_ids_raw
 
     - name: Set multipath facts
+      tags:
+        - fusion
       ansible.builtin.set_fact:
         multipath_ids: "{{ multipath_ids_raw.stdout_lines }}"
 
@@ -658,7 +662,7 @@
 
     - name: Apply purple bits
       tags:
-        - purple
+        - fusion
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
@@ -678,7 +682,7 @@
 
     - name: Apply purple bits (2)
       tags:
-        - purple
+        - fusion
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
