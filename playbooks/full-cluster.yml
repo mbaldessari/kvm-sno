@@ -749,13 +749,24 @@
         - fusion-filesystem.yaml
         - fusion-test.yaml
 
-    - name: Create small VM
+    - name: Create Virt HCO
       tags:
         - virt
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/virt-hyperconverged.yaml"
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 20
+      delay: 10
+
+    - name: Create small VM
+      tags:
+        - virt
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/virt-machine.yaml"
       register: fusion_apply
       until: fusion_apply is not failed
