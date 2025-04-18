@@ -96,7 +96,7 @@
     - worker-0
     - worker-1
     - worker-2
-    - worker-3
+    # - worker-3
 
     nonsan_nodes:
     # - worker-4
