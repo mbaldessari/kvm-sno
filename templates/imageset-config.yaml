@@ -59,12 +59,12 @@ mirror:
   - name: quay.io/hybridcloudpatterns/pattern-install:0.0.7
   - name: docker.io/gitea/gitea:1.22.6-rootless
   - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:stable
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:0.0.7
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-operator:0.0.7
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-bundle:0.0.7
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-console:0.0.7
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-devicefinder:0.0.7
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-must-gather:0.0.7
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:0.0.8
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-operator:0.0.8
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-bundle:0.0.8
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-console:0.0.8
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-devicefinder:0.0.8
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-must-gather:0.0.8
   - name: quay.io/openshift/origin-kube-rbac-proxy:latest
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
   - name: quay.io/containerdisks/centos-stream:9
