@@ -1,11 +1,11 @@
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: purple-storage-rh-operator
+  name: openshift-fusion-access-operator
   namespace: openshift-operators
 spec:
   channel: alpha
   installPlanApproval: Automatic
-  name: purple-storage-rh-operator
-  source: test-purplestorage-operator
+  name: openshift-fusion-access-operator
+  source: test-fusion-access-operator
   sourceNamespace: openshift-marketplace

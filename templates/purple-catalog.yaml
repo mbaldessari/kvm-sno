@@ -1,9 +1,0 @@
-apiVersion: operators.coreos.com/v1alpha1
-kind: CatalogSource
-metadata:
-  name: test-purplestorage-operator
-  namespace: openshift-marketplace
-spec:
-  displayName: Test Purple Storage Operator
-  sourceType: grpc
-  image: "kuemper.int.rhx/ocp/openshift-storage-scale/openshift-storage-scale-catalog:0.0.5"

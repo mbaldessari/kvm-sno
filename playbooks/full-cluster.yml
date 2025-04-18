@@ -511,30 +511,6 @@
       retries: 50
       delay: 20
 
-    # - name: Template out nfs bits
-    #   tags:
-    #     - nfs
-    #   ansible.builtin.template:
-    #     src: "../templates/{{ item }}"
-    #     dest: "{{ fullclusterfolder }}/{{ item }}"
-    #     mode: "0644"
-    #   with_items:
-    #     - nfs.yaml
-    #
-    # - name: Install nfs
-    #   tags:
-    #     - nfs
-    #   ansible.builtin.shell: |
-    #     set -e -o pipefail
-    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-    #     helm repo add csi-driver-nfs https://raw.githubusercontent.com/kubernetes-csi/csi-driver-nfs/master/charts || /bin/true
-    #     helm install csi-driver-nfs csi-driver-nfs/csi-driver-nfs --namespace kube-system --version v4.9.0
-    #     "{{ oc_bin }} apply -f "{{ fullclusterfolder }}/nfs.yaml"
-    #   register: nfsstorage
-    #   until: nfsstorage is not failed
-    #   retries: 10
-    #   delay: 20
-
     - name: Template out iscsi MCP for workers
       tags:
         - iscsi
@@ -542,31 +518,6 @@
         src: "../templates/mcp-workers-iscsi.yaml"
         dest: "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
         mode: "0644"
-
-    # - name: Template out nmstate bits for workers
-    #   tags:
-    #     - iscsi
-    #   ansible.builtin.template:
-    #     src: "../templates/{{ item }}"
-    #     dest: "{{ fullclusterfolder }}/{{ item }}"
-    #     mode: "0644"
-    #   loop:
-    #     - nmstate-subscription.yaml
-    #     - nmstate-nmstate.yaml
-    #     - nmstate-nics.yaml
-    #
-    # - name: Apply nmstate bits
-    #   tags:
-    #     - nmstate
-    #   ansible.builtin.shell: |
-    #     set -e -o pipefail
-    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-    #     {{ oc_bin }} apply -f "{{ fullclusterfolder }}/nmstate-subscription.yaml"
-    #     {{ oc_bin }} apply -f "{{ fullclusterfolder }}/nmstate-nmstate.yaml"
-    #   register: nmstate
-    #   until: nmstate is not failed
-    #   retries: 5
-    #   delay: 20
 
     - name: Install local iscsi MCP
       tags:
@@ -684,35 +635,26 @@
       ansible.builtin.set_fact:
         multipath_ids: "{{ multipath_ids_raw.stdout_lines }}"
 
-    - name: Template purple bits
+    - name: Template fusion bits
       tags:
-        - purple
+        - fusion
       ansible.builtin.template:
         src: "../templates/{{ item }}"
         dest: "{{ fullclusterfolder }}/{{ item }}"
         mode: "0644"
       loop:
-        - purple-catalog.yaml
-        - purple-subscription.yaml
+        - fusion-ns.yaml
+        - fusion-operatorgroup.yaml
+        - fusion-catalog.yaml
+        - fusion-subscription.yaml
         - fusion-object.yaml
         - fusion-cluster.yaml
-        - purple-localdisk.yaml
-        - purple-filesystem.yaml
-        - purple-test.yaml
+        - fusion-localdisk.yaml
+        - fusion-filesystem.yaml
+        - fusion-test.yaml
         - virt-subscription.yaml
         - virt-machine.yaml
         - virt-hyperconverged.yaml
-
-    - name: Notify bandini
-      ansible.builtin.shell: |
-        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
-        curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
-        curl -d "Cluster install successful 😀" "ntfy.sh/{{ ntfy_topic }}"
-      failed_when: false
-
-    - name: STOP HERE
-      ansible.builtin.fail:
-        msg: "STOP HERE FOR NOW"
 
     - name: Apply purple bits
       tags:
@@ -726,32 +668,13 @@
       retries: 30
       delay: 10
       loop:
-        - purple-catalog.yaml
-        - purple-subscription.yaml
+        - fusion-ns.yaml
+        - fusion-operatorgroup.yaml
+        - fusion-catalog.yaml
+        - fusion-subscription.yaml
         - fusion-object.yaml
-
-    - name: Wait for MCP to start
-      tags:
-        - purple
-      ansible.builtin.pause:
-        minutes: 3
-
-    - name: Wait for MCP to settle
-      tags:
-        - purple
-      ansible.builtin.shell: |
-        set -ex
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        if [ $({{ oc_bin }} get mcp/master -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/master -o jsonpath='{.status.machineCount}') ]; then
-          exit 1
-        fi
-        if [ $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.machineCount}') ]; then
-          exit 1
-        fi
-      retries: 30
-      delay: 90
-      register: mcp_ready
-      until: mcp_ready is not failed
+        - virt-subscription.yaml
+        - virt-hyperconverged.yaml
 
     - name: Apply purple bits (2)
       tags:
@@ -765,18 +688,18 @@
       retries: 20
       delay: 10
       loop:
-        - purple-localdisk.yaml
-        - purple-filesystem.yaml
-        - purple-test.yaml
-        - virt-subscription.yaml
+        - fusion-cluster.yaml
+        - fusion-localdisk.yaml
+        - fusion-filesystem.yaml
+        - fusion-test.yaml
 
-    # - name: Install purple operator
-    #   tags:
-    #     - purple
-    #   ansible.builtin.shell: |
-    #     set -e -o pipefail
-    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-    #     {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }"
-    #   loop:
-    #     - purple-catalog.yaml
-    #     - purple-subscription.yaml
+    - name: Notify bandini
+      ansible.builtin.shell: |
+        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
+        curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
+        curl -d "Cluster install successful 😀" "ntfy.sh/{{ ntfy_topic }}"
+      failed_when: false
+
+    # - name: STOP HERE
+    #   ansible.builtin.fail:
+    #     msg: "STOP HERE FOR NOW"
