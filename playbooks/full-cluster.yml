@@ -742,7 +742,7 @@
 
     - name: Create Virt HCO
       tags:
-        - virt
+        - virt1
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
@@ -752,9 +752,35 @@
       retries: 20
       delay: 10
 
+    - name: Download virtctl
+      tags:
+        - virt2
+      ansible.builtin.shell: |
+        set -e
+        rm -f /tmp/virtctl.tar.gz
+        curl -L -o /tmp/virtctl.tar.gz -k https://hyperconverged-cluster-cli-download-openshift-cnv.apps.cluster.{{ domain }}/amd64/linux/virtctl.tar.gz
+        pushd /tmp
+        tar xf virtctl.tar.gz
+        mv virtctl "{{ oc_dir }}"
+        popd
+
+    - name: Download cirros
+      tags:
+        - virt3
+      ansible.builtin.shell: |
+        set -e
+        rm -f /tmp/cirros.img
+        curl -L -o /tmp/cirros.img -k "{{ cirros_image }}"
+        oc project ibm-test-deployment
+        {{ oc_dir }}/virtctl image-upload dv cirros-dv --size=2Gi --image-path=/tmp/cirros.img --insecure --datasource
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 2
+      delay: 10
+
     - name: Create small VM
       tags:
-        - virt
+        - virt4
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"

@@ -8,23 +8,24 @@ metadata:
     vm.kubevirt.io/template.revision: "45"
     vm.kubevirt.io/template.version: v0.11.3
   name: test-vm
+  namespace: ibm-test-deployment
 spec:
   dataVolumeTemplates:
   - apiVersion: cdi.kubevirt.io/v1beta1
     kind: DataVolume
     metadata:
-      name: test-vm
+      name: cirros-dv
     spec:
       sourceRef:
         kind: DataSource
-        name: fedora
+        name: cirros-dv
         namespace: openshift-virtualization-os-images
       pvc:
         accessModes:
           - "ReadWriteMany"
         resources:
           requests:
-            storage: "35Gi"
+            storage: "5Gi"
         storageClassName: ibm-spectrum-scale-fs1
         volumeMode: Filesystem
   running: true

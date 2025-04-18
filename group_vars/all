@@ -10,7 +10,6 @@ ocp_versions:
 
 ocp_version: "4.18.8"
 fips_enabled: false
-#ocp_version: "4.18.0-rc.8"
 ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"
 ocp_maj_min_version_dashed: "{{ ocp_maj_min_version | replace('.', '-') }}"
 arch: "x86_64"
@@ -29,6 +28,7 @@ sshkey2: "{{ lookup('file', '~/.ssh/id_ansible.pub', errors='ignore') | default(
 pullsecret: "{{ lookup('file', '~/.pullsecret.json') }}"
 kubeadmin_pass: "{{ lookup('file', '~/.kubeadminpass') }}"
 ntfy_topic: "{{ lookup('file', '~/.ntfy_topic') }}"
+cirros_image: "http://fw.int.rhx/cirros-0.6.3-x86_64-disk.img"
 iscsi_mco_pool: "worker"
 iscsi_target_ip: 192.168.66.100
 iscsi_iqn: iqn.2024-02.com.example
