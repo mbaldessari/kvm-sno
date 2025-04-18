@@ -637,19 +637,33 @@
       ansible.builtin.fail:
         msg: "STOP HERE FOR NOW"
 
-    - name: Get multipath IDs
+    # - name: Get multipath IDs
+    #   tags:
+    #     - fusion
+    #   delegate_to: worker-0
+    #   ansible.builtin.shell: |
+    #     for i in $(multipathd show maps raw format %w); do ls -1 /dev/disk/by-id/wwn-$i; done
+    #   register: disk_ids_raw
+    #
+    # - name: Set multipath facts
+    #   tags:
+    #     - fusion
+    #   ansible.builtin.set_fact:
+    #     disk_ids: "{{ disk_ids_raw.stdout_lines }}"
+
+    - name: Get wwn IDs of iscsi disks
       tags:
         - fusion
       delegate_to: worker-0
       ansible.builtin.shell: |
-        multipathd show maps raw format %w
-      register: multipath_ids_raw
+        for i in $(lsblk -o name,size,wwn,vendor | grep LIO-ORG | awk '{ print $3 }' | sort | uniq); do ls -1 /dev/disk/by-id/wwn-$i; done
+      register: disk_ids_raw
 
-    - name: Set multipath facts
+    - name: Set wwn disk facts
       tags:
         - fusion
       ansible.builtin.set_fact:
-        multipath_ids: "{{ multipath_ids_raw.stdout_lines }}"
+        disk_ids: "{{ disk_ids_raw.stdout_lines }}"
 
     - name: Template fusion bits
       tags:

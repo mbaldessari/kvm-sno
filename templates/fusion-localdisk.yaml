@@ -4,7 +4,7 @@ metadata:
   name: shareddisk1
   namespace: ibm-spectrum-scale
 spec:
-  device: /dev/disk/by-id/dm-uuid-mpath-{{ multipath_ids[0] }}
+  device: {{ disk_ids[0] }}
   node: worker-0.cluster.ocplab.ocp
   # nodeConnectionSelector defines the nodes that have the shared lun directly attached to them
   nodeConnectionSelector:
@@ -21,7 +21,7 @@ metadata:
   name: shareddisk2
   namespace: ibm-spectrum-scale
 spec:
-  device: /dev/disk/by-id/dm-uuid-mpath-{{ multipath_ids[1] }}
+  device: {{ disk_ids[1] }}
   node: worker-0.cluster.ocplab.ocp
   # nodeConnectionSelector defines the nodes that have the shared lun directly attached to them
   nodeConnectionSelector:
