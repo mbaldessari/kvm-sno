@@ -9,24 +9,14 @@ kind: StorageClass
 apiVersion: storage.k8s.io/v1
 metadata:
   name: ibm-spectrum-scale-fs1
+  annotations:
+    storageclass.kubevirt.io/is-default-virt-class: "true"
 provisioner: spectrumscale.csi.ibm.com
 parameters:
   volBackendFs: localfilesystem1
-  inodeLimit: "2048"
 reclaimPolicy: Delete
 allowVolumeExpansion: true
 volumeBindingMode: Immediate
----
-# kind: StorageClass
-# apiVersion: storage.k8s.io/v1
-# metadata:
-#   name: ibm-spectrum-scale-fs2
-# provisioner: spectrumscale.csi.ibm.com
-# parameters:
-#   volBackendFs: localfilesystem2
-# reclaimPolicy: Delete
-# allowVolumeExpansion: true
-# volumeBindingMode: Immediate
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim

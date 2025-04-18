@@ -125,8 +125,8 @@
         systemctl start target.service
         targetcli clearconfig confirm=True
         mkdir -p /var/lib/libvirt/iscsi_disks
-        targetcli backstores/fileio create iscsi_disk1 /var/lib/libvirt/iscsi_disks/disk1.img 70G
-        targetcli backstores/fileio create iscsi_disk2 /var/lib/libvirt/iscsi_disks/disk2.img 80G
+        targetcli backstores/fileio create iscsi_disk1 /var/lib/libvirt/iscsi_disks/disk1.img 150G
+        targetcli backstores/fileio create iscsi_disk2 /var/lib/libvirt/iscsi_disks/disk2.img 160G
         targetcli iscsi/ create iqn.2024-02.com.example
         targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk1
         targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk2
@@ -704,7 +704,6 @@
         - fusion-subscription.yaml
         - fusion-object.yaml
         - virt-subscription.yaml
-        - virt-hyperconverged.yaml
 
     - name: Apply fusion cluster
       tags:
@@ -756,6 +755,7 @@
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/virt-hyperconverged.yaml"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/virt-machine.yaml"
       register: fusion_apply
       until: fusion_apply is not failed
