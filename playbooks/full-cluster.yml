@@ -803,8 +803,21 @@
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/virt-machine.yaml"
       register: fusion_apply
       until: fusion_apply is not failed
-      retries: 1
+      retries: 2
       delay: 10
+
+    - name: Test ssh access to VM
+      tags:
+        - virt5
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_dir }}/virtctl ssh --namespace ibm-test-deployment -t="-o StrictHostKeyChecking=no" test-vm
+      register: vm_ssh
+      until: vm_ssh is not failed
+      retries: 15
+      delay: 30
+
 
     - name: Notify bandini
       ansible.builtin.shell: |
