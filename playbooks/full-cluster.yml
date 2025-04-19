@@ -756,13 +756,17 @@
       tags:
         - virt2
       ansible.builtin.shell: |
-        set -e
+        set -ex
         rm -f /tmp/virtctl.tar.gz
         curl -L -o /tmp/virtctl.tar.gz -k https://hyperconverged-cluster-cli-download-openshift-cnv.apps.cluster.{{ domain }}/amd64/linux/virtctl.tar.gz
         pushd /tmp
         tar xf virtctl.tar.gz
         mv virtctl "{{ oc_dir }}"
         popd
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 5
+      delay: 30
 
     - name: Download cirros
       tags:
