@@ -812,7 +812,7 @@
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        {{ oc_dir }}/virtctl ssh --namespace ibm-test-deployment -t="-o StrictHostKeyChecking=no" -t="-o UserKnownHostsFile=/dev/null" -i ~/.ssh/id_ansible kni@test-vm -c "ls /tmp"
+        {{ oc_dir }}/virtctl ssh --namespace ibm-test-deployment -t="-o StrictHostKeyChecking=no" -t="-o UserKnownHostsFile=/dev/null" -i ~/home/michele/.ssh/id_ansible kni@test-vm -c "ls /tmp"
       register: vm_ssh
       until: vm_ssh is not failed
       retries: 15
