@@ -89,6 +89,8 @@ spec:
             user: kni
             password: redhat
             chpasswd: { expire: False }
+            ssh_authorized_keys:
+              - {{ sshkey }}
             runcmd:
             - echo "Hello from `hostname`" |sudo tee /tmp/washere
         name: cloudinitdisk        

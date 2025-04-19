@@ -654,7 +654,7 @@
       ansible.builtin.set_fact:
         disk_ids: "{{ disk_ids_raw.stdout_lines }}"
 
-    - name: Template fusion bits
+    - name: Template fusion and virt bits
       tags:
         - fusion
       ansible.builtin.template:
@@ -673,7 +673,6 @@
         - fusion-storageclass.yaml
         - fusion-test.yaml
         - virt-subscription.yaml
-        - virt-machine.yaml
         - virt-hyperconverged.yaml
 
     - name: Apply fusion bits
@@ -784,6 +783,16 @@
       until: fusion_apply is not failed
       retries: 2
       delay: 10
+
+    - name: Template virt-machine
+      tags:
+        - virt4
+      ansible.builtin.template:
+        src: "../templates/{{ item }}"
+        dest: "{{ fullclusterfolder }}/{{ item }}"
+        mode: "0644"
+      loop:
+        - virt-machine.yaml
 
     - name: Create small VM
       tags:
