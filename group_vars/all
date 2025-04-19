@@ -28,7 +28,7 @@ sshkey2: "{{ lookup('file', '~/.ssh/id_ansible.pub', errors='ignore') | default(
 pullsecret: "{{ lookup('file', '~/.pullsecret.json') }}"
 kubeadmin_pass: "{{ lookup('file', '~/.kubeadminpass') }}"
 ntfy_topic: "{{ lookup('file', '~/.ntfy_topic') }}"
-cirros_image: "http://fw.int.rhx/cirros-0.6.3-x86_64-disk.img"
+vm_image: "http://fw.int.rhx/Fedora-Cloud-Base-Generic-42-1.1.x86_64.qcow2"
 iscsi_mco_pool: "worker"
 iscsi_target_ip: 192.168.66.100
 iscsi_iqn: iqn.2024-02.com.example

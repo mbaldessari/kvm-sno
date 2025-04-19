@@ -768,16 +768,18 @@
       retries: 5
       delay: 30
 
-    - name: Download and cirros
+    - name: Download and vm image
       tags:
         - virt3
       ansible.builtin.shell: |
         set -e
-        rm -f /tmp/cirros.img
-        curl -L -o /tmp/cirros.img -k "{{ cirros_image }}"
+        rm -f /tmp/vm.img
+        curl -L -o /tmp/vm.img -k "{{ vm_image }}"
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         oc project ibm-test-deployment
-        {{ oc_dir }}/virtctl image-upload dv cirros-dv --size=2Gi --image-path=/tmp/cirros.img --insecure --datasource
+        oc delete datavolume/vm-test-dv || /bin/true
+        oc delete datasource/vm-test-dv || /bin/true
+        {{ oc_dir }}/virtctl image-upload dv vm-test-dv --size=20Gi --image-path=/tmp/vm.img --insecure --datasource
       register: fusion_apply
       until: fusion_apply is not failed
       retries: 2
@@ -792,7 +794,7 @@
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/virt-machine.yaml"
       register: fusion_apply
       until: fusion_apply is not failed
-      retries: 20
+      retries: 1
       delay: 10
 
     - name: Notify bandini

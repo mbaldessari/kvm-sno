@@ -14,12 +14,12 @@ spec:
   - apiVersion: cdi.kubevirt.io/v1beta1
     kind: DataVolume
     metadata:
-      name: cirros-dv
+      name: vm-test-dv
     spec:
       sourceRef:
         kind: DataSource
-        name: cirros-dv
-        namespace: openshift-virtualization-os-images
+        name: vm-test-dv
+        namespace: ibm-test-deployment
       pvc:
         accessModes:
           - "ReadWriteMany"
@@ -80,9 +80,8 @@ spec:
         pod: {}
       terminationGracePeriodSeconds: 180
       volumes:
-      volumes:
       - dataVolume:
-          name: test-vm
+          name: vm-test-dv
         name: test-vm
       - cloudInitNoCloud:
           userData: |-
