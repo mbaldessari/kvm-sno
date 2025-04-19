@@ -775,6 +775,7 @@
         set -e
         rm -f /tmp/cirros.img
         curl -L -o /tmp/cirros.img -k "{{ cirros_image }}"
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         oc project ibm-test-deployment
         {{ oc_dir }}/virtctl image-upload dv cirros-dv --size=2Gi --image-path=/tmp/cirros.img --insecure --datasource
       register: fusion_apply
