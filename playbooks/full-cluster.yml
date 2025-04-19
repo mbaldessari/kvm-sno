@@ -768,7 +768,7 @@
       retries: 5
       delay: 30
 
-    - name: Download cirros
+    - name: Download and cirros
       tags:
         - virt3
       ansible.builtin.shell: |
