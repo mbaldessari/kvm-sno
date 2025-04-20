@@ -816,17 +816,16 @@
         {{ oc_dir }}/virtctl ssh --namespace ibm-test-deployment -t="-o StrictHostKeyChecking=no" -t="-o UserKnownHostsFile=/dev/null" -i /home/michele/.ssh/id_ansible kni@test-vm -c "sudo dnf install -y mariadb-server"
       register: vm_ssh
       until: vm_ssh is not failed
-      retries: 3
+      retries: 5
       delay: 30
 
-    - name: Test ssh access to VM
+    - name: Enable mariadb
       tags:
         - virt5
       ansible.builtin.shell: |
         set -ex
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_dir }}/virtctl ssh --namespace ibm-test-deployment -t="-o StrictHostKeyChecking=no" -t="-o UserKnownHostsFile=/dev/null" -i /home/michele/.ssh/id_ansible kni@test-vm -c "sudo systemctl enable --now mariadb.service"
-
 
     - name: Notify bandini
       ansible.builtin.shell: |
