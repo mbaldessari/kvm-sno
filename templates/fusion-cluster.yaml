@@ -34,4 +34,4 @@ spec:
   license:
     accept: true
     license: data-management
-  networkPolicy: {}
+  # networkPolicy: {}
