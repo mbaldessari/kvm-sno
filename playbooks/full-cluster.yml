@@ -676,6 +676,12 @@
         - local-storage-base.yaml
         - local-storage-cr.yaml
 
+    - name: Make localstorage storageclass the default
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
     - name: Template fusion and virt bits
       tags:
         - fusion
