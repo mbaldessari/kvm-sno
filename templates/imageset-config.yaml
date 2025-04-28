@@ -50,7 +50,7 @@ mirror:
   - name: ghcr.io/external-secrets/external-secrets:v0.10.2-ubi
   - name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
   - name: quay.io/hybridcloudpatterns/acm:0.1.6
-  - name: quay.io/hybridcloudpatterns/clustergroup:0.9.16
+  - name: quay.io/hybridcloudpatterns/clustergroup:0.9.17
   - name: quay.io/hybridcloudpatterns/gitea:0.0.3
   - name: quay.io/hybridcloudpatterns/golang-external-secrets:0.1.4
   - name: quay.io/hybridcloudpatterns/hashicorp-vault:0.1.5
@@ -59,12 +59,12 @@ mirror:
   - name: quay.io/hybridcloudpatterns/pattern-install:0.0.7
   - name: docker.io/gitea/gitea:1.22.6-rootless
   - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:stable
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:0.0.9
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-operator:0.0.9
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-bundle:0.0.9
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-console:0.0.9
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-devicefinder:0.0.9
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-must-gather:0.0.9
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:0.0.10
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-operator:0.0.10
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-bundle:0.0.10
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-console:0.0.10
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-devicefinder:0.0.10
+  - name: quay.io/openshift-storage-scale/openshift-fusion-access-must-gather:0.0.10
   - name: quay.io/openshift/origin-kube-rbac-proxy:latest
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
   - name: quay.io/containerdisks/centos-stream:9
