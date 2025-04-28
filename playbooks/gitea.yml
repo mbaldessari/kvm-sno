@@ -182,19 +182,19 @@
       with_items:
         - /home/michele/ssl-ca/certs/gitea.ocplab.ocp.key
 
-    - name: Start minio
-      ansible.builtin.systemd_service:
-        name: minio
-        state: started
-        enabled: true
-
-    - name: Init myminio
-      ansible.builtin.shell: |
-        set -e
-        /usr/local/bin/mcli alias set {{ minio.org}} https://{{ minio.fqdn }}:9000 {{ minio.admin_user }} {{ minio.admin_pass }}
-        /usr/local/bin/mcli admin user add {{ minio.org }} {{ minio.user }} {{ minio.pass }}
-        /usr/local/bin/mcli mb --with-lock {{ minio.org }}/{{ minio.bucket }}
-        /usr/local/bin/mcli admin user svcacct add {{ minio.org }} {{ minio.admin_user }} --name adminkey --description "adminkey" --access-key {{ minio.admin_access_key }} --secret-key {{ minio.admin_secret_key }}
+    # - name: Start minio
+    #   ansible.builtin.systemd_service:
+    #     name: minio
+    #     state: started
+    #     enabled: true
+    #
+    # - name: Init myminio
+    #   ansible.builtin.shell: |
+    #     set -e
+    #     /usr/local/bin/mcli alias set {{ minio.org}} https://{{ minio.fqdn }}:9000 {{ minio.admin_user }} {{ minio.admin_pass }}
+    #     /usr/local/bin/mcli admin user add {{ minio.org }} {{ minio.user }} {{ minio.pass }}
+    #     /usr/local/bin/mcli mb --with-lock {{ minio.org }}/{{ minio.bucket }}
+    #     /usr/local/bin/mcli admin user svcacct add {{ minio.org }} {{ minio.admin_user }} --name adminkey --description "adminkey" --access-key {{ minio.admin_access_key }} --secret-key {{ minio.admin_secret_key }}
 
     - name: Download gitea binary
       ansible.builtin.get_url:
