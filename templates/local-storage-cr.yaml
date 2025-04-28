@@ -14,7 +14,6 @@ spec:
           - worker-0.cluster.ocplab.ocp
           - worker-1.cluster.ocplab.ocp
           - worker-2.cluster.ocplab.ocp
-          - worker-3.cluster.ocplab.ocp
   storageClassDevices:
     - storageClassName: "localfs-sc"
       volumeMode: Filesystem
