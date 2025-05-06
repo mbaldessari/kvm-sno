@@ -681,6 +681,10 @@
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
         {{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+      register: localstorage_apply
+      until: localstorage_apply is not failed
+      retries: 5
+      delay: 10
 
     - name: Template fusion and virt bits
       tags:
