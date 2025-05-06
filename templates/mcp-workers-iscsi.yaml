@@ -5,6 +5,9 @@ metadata:
     machineconfiguration.openshift.io/role: {{ iscsi_mco_pool }}
   name: 99-{{ iscsi_mco_pool }}-iscsi
 spec:
+  openshift:
+    kernel_arguments:
+      - crashkernel=256M
   extensions:
     - kernel-devel
   config:
@@ -27,6 +30,23 @@ spec:
         filesystem: root
         mode: 493
         path: /usr/local/sbin/iscsi-login
+      - path: /etc/kdump.conf
+          mode: 0644
+          overwrite: true
+          contents:
+            inline: |
+              path /var/crash
+              core_collector makedumpfile -l --message-level 7 -d 31
+
+        - path: /etc/sysconfig/kdump
+          mode: 0644
+          overwrite: true
+          contents:
+            inline: |
+              KDUMP_COMMANDLINE_REMOVE="hugepages hugepagesz slub_debug quiet log_buf_len swiotlb"
+              KDUMP_COMMANDLINE_APPEND="irqpoll nr_cpus=1 reset_devices cgroup_disable=memory mce=off numa=off udev.children-max=2 panic=10 rootflags=nofail acpi_no_memhotplug transparent_hugepage=never nokaslr novmcoredd hest_disable" 6
+              KEXEC_ARGS="-s"
+              KDUMP_IMG="vmlinuz"
     systemd:
       units:
       - contents: |
