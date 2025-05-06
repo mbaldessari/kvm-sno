@@ -707,6 +707,17 @@
         - virt-subscription.yaml
         - virt-hyperconverged.yaml
 
+
+    - name: Notify bandini
+      ansible.builtin.shell: |
+        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
+        curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
+        curl -d "Cluster install successful 😀" "ntfy.sh/{{ ntfy_topic }}"
+      failed_when: false
+
+    - name: STOP HERE
+      ansible.builtin.fail:
+        msg: "STOP HERE FOR NOW"
     - name: Apply fusion bits
       tags:
         - fusion
@@ -858,14 +869,3 @@
         set -ex
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_dir }}/virtctl ssh --namespace ibm-test-deployment -t="-o StrictHostKeyChecking=no" -t="-o UserKnownHostsFile=/dev/null" -i /home/michele/.ssh/id_ansible kni@test-vm -c "sudo systemctl enable --now mariadb.service"
-
-    - name: Notify bandini
-      ansible.builtin.shell: |
-        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
-        curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
-        curl -d "Cluster install successful 😀" "ntfy.sh/{{ ntfy_topic }}"
-      failed_when: false
-
-    - name: STOP HERE
-      ansible.builtin.fail:
-        msg: "STOP HERE FOR NOW"
