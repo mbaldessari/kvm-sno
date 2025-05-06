@@ -11,6 +11,10 @@
       - "4.16"
       - "4.17"
       - "4.18"
+    ocp_candidate_url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/
+    ocp_candidate_tmp_file: /tmp/ocp-versions.html
+    major_candidate_versions:
+      - "4.19"
   tasks:
     - name: Fetch URL
       ansible.builtin.get_url:
@@ -28,6 +32,28 @@
       with_items: "{{ major_versions }}"
 
     - name: Debug
+      ansible.builtin.debug:
+        msg: "Major version [{{ item.item }}]: {{ item.stdout }}"
+      with_items: "{{ versions_output.results }}"
+      loop_control:
+        label: "{{ item.item }}"
+
+    - name: Fetch URL candidates
+      ansible.builtin.get_url:
+        url: "{{ ocp_candidate_url }}"
+        dest: "{{ ocp_candidate_tmp_file }}"
+        mode: "0644"
+
+    - name: Read file into var
+      ansible.builtin.shell: |
+        set -o pipefail
+        grep -E '<a href="[[:digit:]]+.[[:digit:]]+.[[:digit:]]+.*">' "{{ ocp_candidate_tmp_file }}" | \
+          sed -e 's/<a href="//' | sed -e 's/\/">//' | awk '{$1=$1};1' | sort --version-sort | \
+          grep -w -e "^{{ item }}" | tail -n1
+      register: versions_output
+      with_items: "{{ major_candidate_versions }}"
+
+    - name: Debug candidates
       ansible.builtin.debug:
         msg: "Major version [{{ item.item }}]: {{ item.stdout }}"
       with_items: "{{ versions_output.results }}"
