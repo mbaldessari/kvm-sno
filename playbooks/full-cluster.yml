@@ -110,7 +110,7 @@
     - name: Check that the mirror bits are correct
       ansible.builtin.shell: |
         set -ex
-        if ! grep -q "detected minimum version as {{ ocp_version }}" /var/log/oc-mirror.log ; then
+        if ! grep -q "Found update {{ ocp_version }}" /var/log/oc-mirror.log ; then
           echo "WRONG VERSION"
           exit 1
         fi
@@ -513,19 +513,36 @@
 
     - name: Template out iscsi MCP for workers
       tags:
-        - iscsi
+        - mcp
       ansible.builtin.template:
         src: "../templates/mcp-workers-iscsi.yaml"
         dest: "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
         mode: "0644"
 
+    - name: Template out butane kdump for workers
+      tags:
+        - mcp
+      ansible.builtin.template:
+        src: "../templates/mcp-kdump.yaml"
+        dest: "{{ fullclusterfolder }}/mcp-kdump.yaml"
+        mode: "0644"
+
+    - name: Render butane kdump
+      tags:
+        - mcp
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        butane "{{ fullclusterfolder }}/mcp-kdump.yaml" -o "{{ fullclusterfolder }}/99-worker-kdump.yaml"
+
     - name: Install local iscsi MCP
       tags:
-        - iscsi
+        - mcp
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/99-worker-kdump.yaml"
         {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 2}}'
       register: mcg_iscsi
       until: mcg_iscsi is not failed
