@@ -671,37 +671,37 @@
       ansible.builtin.set_fact:
         disk_ids: "{{ disk_ids_raw.stdout_lines }}"
 
-    - name: Template localstorage bits
-      ansible.builtin.template:
-        src: "../templates/{{ item }}"
-        dest: "{{ fullclusterfolder }}/{{ item }}"
-        mode: "0644"
-      loop:
-        - local-storage-base.yaml
-        - local-storage-cr.yaml
-
-    - name: Apply localstorage bits
-      ansible.builtin.shell: |
-        set -e
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
-        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
-      register: localstorage_apply
-      until: localstorage_apply is not failed
-      retries: 30
-      delay: 10
-      loop:
-        - local-storage-base.yaml
-        - local-storage-cr.yaml
-
-    - name: Make localstorage storageclass the default
-      ansible.builtin.shell: |
-        set -e
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
-        {{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-      register: localstorage_apply
-      until: localstorage_apply is not failed
-      retries: 5
-      delay: 10
+    # - name: Template localstorage bits
+    #   ansible.builtin.template:
+    #     src: "../templates/{{ item }}"
+    #     dest: "{{ fullclusterfolder }}/{{ item }}"
+    #     mode: "0644"
+    #   loop:
+    #     - local-storage-base.yaml
+    #     - local-storage-cr.yaml
+    #
+    # - name: Apply localstorage bits
+    #   ansible.builtin.shell: |
+    #     set -e
+    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+    #     {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
+    #   register: localstorage_apply
+    #   until: localstorage_apply is not failed
+    #   retries: 30
+    #   delay: 10
+    #   loop:
+    #     - local-storage-base.yaml
+    #     - local-storage-cr.yaml
+    #
+    # - name: Make localstorage storageclass the default
+    #   ansible.builtin.shell: |
+    #     set -e
+    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+    #     {{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+    #   register: localstorage_apply
+    #   until: localstorage_apply is not failed
+    #   retries: 5
+    #   delay: 10
 
     - name: Template fusion and virt bits
       tags:
@@ -725,16 +725,6 @@
         - virt-hyperconverged.yaml
 
 
-    - name: Notify bandini
-      ansible.builtin.shell: |
-        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
-        curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
-        curl -d "Cluster install successful 😀" "ntfy.sh/{{ ntfy_topic }}"
-      failed_when: false
-
-    - name: STOP HERE
-      ansible.builtin.fail:
-        msg: "STOP HERE FOR NOW"
     - name: Apply fusion bits
       tags:
         - fusion
@@ -886,3 +876,14 @@
         set -ex
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_dir }}/virtctl ssh --namespace ibm-test-deployment -t="-o StrictHostKeyChecking=no" -t="-o UserKnownHostsFile=/dev/null" -i /home/michele/.ssh/id_ansible kni@test-vm -c "sudo systemctl enable --now mariadb.service"
+
+    - name: Notify bandini
+      ansible.builtin.shell: |
+        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
+        curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
+        curl -d "Cluster install successful 😀" "ntfy.sh/{{ ntfy_topic }}"
+      failed_when: false
+
+    # - name: STOP HERE
+    #   ansible.builtin.fail:
+    #     msg: "STOP HERE FOR NOW"
