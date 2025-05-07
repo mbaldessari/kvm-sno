@@ -14,7 +14,7 @@ spec:
   channel: stable
   installPlanApproval: Automatic
   name: kubevirt-hyperconverged
-  source: cs-redhat-operator-index-v4-18
+  source: cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}
   sourceNamespace: openshift-marketplace
 ---
 apiVersion: operators.coreos.com/v1

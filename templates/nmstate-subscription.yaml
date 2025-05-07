@@ -14,7 +14,7 @@ spec:
   channel: stable
   installPlanApproval: Automatic
   name: kubernetes-nmstate-operator
-  source: cs-redhat-operator-index-v4-17
+  source: cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}
   sourceNamespace: openshift-marketplace
   startingCSV: kubernetes-nmstate-operator.4.17.0-202502250404
 ---
