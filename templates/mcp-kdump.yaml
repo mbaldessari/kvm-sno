@@ -6,7 +6,7 @@ metadata:
     machineconfiguration.openshift.io/role: worker
 openshift:
   kernel_arguments:
-    - crashkernel=512M
+    - crashkernel=4096M
     - kernel.panic=0
     - console=ttyS0
 storage:
