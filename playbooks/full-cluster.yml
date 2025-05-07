@@ -110,7 +110,7 @@
     - name: Check that the mirror bits are correct
       ansible.builtin.shell: |
         set -ex
-        if ! grep -q "Found update {{ ocp_version }}" /var/log/oc-mirror.log ; then
+        if ! grep -q "detected minimum version as {{ ocp_version }}" /var/log/oc-mirror.log ; then
           echo "WRONG VERSION"
           exit 1
         fi
