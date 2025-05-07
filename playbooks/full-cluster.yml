@@ -215,6 +215,7 @@
         --virt-type kvm
         --arch {{ arch }}
         --cdrom {{ fullclusterfolder }}/{{ item }}-rhcos-live.iso
+        --console pty,target_type=serial
         --os-variant rhel8.0
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
         --vcpus {{ full_cluster[item].cpus }}
