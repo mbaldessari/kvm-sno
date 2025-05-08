@@ -9,8 +9,8 @@ ocp_versions:
   #- "4.18.10"
   - "4.19.0-ec.5"
 
-#ocp_version: "4.18.10"
-ocp_version: "4.19.0-ec.5"
+ocp_version: "4.18.10"
+#ocp_version: "4.19.0-ec.5"
 fips_enabled: false
 ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"
 ocp_maj_min_version_dashed: "{{ ocp_maj_min_version | replace('.', '-') }}"
@@ -29,6 +29,7 @@ sshkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
 sshkey2: "{{ lookup('file', '~/.ssh/id_ansible.pub', errors='ignore') | default('') }}"
 pullsecret: "{{ lookup('file', '~/.pullsecret.json') }}"
 kubeadmin_pass: "{{ lookup('file', '~/.kubeadminpass') }}"
+ibmentitlementkeyfile: "{{ lookup('file', '~/.ibm-entitlement-key' | expanduser) }}"
 ntfy_topic: "{{ lookup('file', '~/.ntfy_topic') }}"
 vm_image: "http://fw.int.rhx/Fedora-Cloud-Base-Generic-42-1.1.x86_64.qcow2"
 iscsi_mco_pool: "worker"
