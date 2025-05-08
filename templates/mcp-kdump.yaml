@@ -7,7 +7,6 @@ metadata:
 openshift:
   kernel_arguments:
     - crashkernel=4096M
-    - kernel.panic=0
     - console=ttyS0
 storage:
   files:
@@ -25,7 +24,7 @@ storage:
       contents:
         inline: |
           KDUMP_COMMANDLINE_REMOVE="hugepages hugepagesz slub_debug quiet log_buf_len swiotlb"
-          KDUMP_COMMANDLINE_APPEND="irqpoll nr_cpus=1 reset_devices cgroup_disable=memory mce=off numa=off udev.children-max=2 panic=10 rootflags=nofail acpi_no_memhotplug transparent_hugepage=never nokaslr novmcoredd hest_disable"
+          KDUMP_COMMANDLINE_APPEND="irqpoll nr_cpus=1 reset_devices cgroup_disable=memory mce=off numa=off udev.children-max=2 panic=10 rootflags=nofail acpi_no_memhotplug transparent_hugepage=never nokaslr novmcoredd hest_disable panic=20"
           KEXEC_ARGS="-s"
           KDUMP_IMG="vmlinuz"
 
