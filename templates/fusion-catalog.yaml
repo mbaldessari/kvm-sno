@@ -6,4 +6,4 @@ metadata:
 spec:
   displayName: Test Fusion Access for SAN Operator
   sourceType: grpc
-  image: "kuemper.int.rhx/ocp/openshift-storage-scale/openshift-fusion-access-catalog:stable"
+  image: "kuemper.int.rhx/ocp/openshift-storage-scale/openshift-fusion-access-catalog:latest"
