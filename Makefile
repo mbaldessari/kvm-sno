@@ -19,6 +19,10 @@ help: ## This help message
 ocp-versions: ## Prints latest minor versions for ocp
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/print-ocp-versions.yml
 
+.PHONY: kernel-versions
+kernel-versions: ## Get kernels debug rpms for ocp versions
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/kernel-version.yml
+
 .PHONY: ocp-clients
 ocp-clients: ## Reads ocp_versions list and makes sure client tools are downloaded and uncompressed
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/ocp-clients.yml

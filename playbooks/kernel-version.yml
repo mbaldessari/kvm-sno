@@ -1,0 +1,72 @@
+---
+- name: Get ocp kernel versions
+  hosts: kvm
+  gather_facts: false
+  become: true
+  vars:
+    oc_cli: openshift-client-linux-amd64-rhel9.tar.gz
+    oc_install_fips: openshift-install-rhel9-amd64.tar.gz
+    oc_install: openshift-install-linux.tar.gz
+    base_url: "https://download-01.beak-001.prod.iad2.dc.redhat.com/brewroot/vol/rhel-9/packages/kernel"
+    debug_rpms_dir: "{{ mirrorfolder }}/debug-rpms"
+  tasks:
+    - name: Run oc
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        "{{ mirrorfolder }}/{{ item }}/oc"  adm release info {{ item }} --pullspecs | grep rhel-coreos | grep -v extensions | awk '{ print $2 }'
+      with_items: "{{ ocp_versions }}"
+      register: output
+
+    - name: Podman pull for each version
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        podman pull "{{ item.stdout }}"
+      with_items: "{{ output.results }}"
+
+    - name: Find kernel version for 
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        podman run -it --security-opt 'label=disable' --rm '--net=host' "{{ item.stdout }}" sh -c "rpm -q kernel | cut -f2- -d-" 2>/dev/null
+      with_items: "{{ output.results }}"
+      register: kernels
+
+    # - name: Show the resulting dictionary
+    #   debug:
+    #     var: kernel.results
+
+    - name: Initialize kernel_versions as an empty list
+      ansible.builtin.set_fact:
+        kernel_versions: []
+
+    - name: Parse each kernel into major and minor version
+      ansible.builtin.set_fact:
+        kernel_versions: "{{ kernel_versions + [ {'full': item.stdout, 'major': major, 'minor': minor, 'arch': arch, 'url': base_url ~ '/' ~ major ~ '/' ~ minor ~ '/' ~ arch } ] }}"
+      vars:
+        major: "{{ item.stdout.split('-')[0] }}"
+        minor: "{{ item.stdout.split('-')[1].rsplit('.', 1)[0] }}"
+        arch: "{{ item.stdout.split('.')[-1] }}"
+      loop: "{{ kernels.results }}"
+
+    - name: Show the resulting dictionary
+      ansible.builtin.debug:
+        var: kernel_versions      
+
+    - name: Create folder
+      ansible.builtin.file:
+        path: "{{ debug_rpms_dir }}"
+        state: directory
+        mode: "0755"
+
+    # kernel-debuginfo-common-x86_64-5.14.0-570.12.1.el9_6.x86_64.rpm
+    - name: Download common debug rpms
+      ansible.builtin.get_url:
+        url: "{{ item.url ~ '/kernel-debuginfo-common-x86_64-' ~ item.full }}"
+        dest: "{{ debug_rpms_dir }}"
+      loop: "{{ kernel_versions }}"
+
+    # kernel-debuginfo-5.14.0-570.12.1.el9_6.x86_64.rpm
+    - name: Download debug rpms
+      ansible.builtin.get_url:
+        url: "{{ item.url ~ '/kernel-debuginfo-' ~ item.full }}"
+        dest: "{{ debug_rpms_dir }}"
+      loop: "{{ kernel_versions }}"
