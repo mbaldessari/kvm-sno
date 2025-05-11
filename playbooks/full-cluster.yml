@@ -725,10 +725,6 @@
         - virt-subscription.yaml
         - virt-hyperconverged.yaml
 
-    - name: STOP HERE
-      ansible.builtin.fail:
-        msg: "STOP HERE FOR NOW"
-
     - name: Apply fusion bits
       tags:
         - fusion
@@ -748,9 +744,13 @@
         - fusion-object.yaml
         - virt-subscription.yaml
 
+    - name: STOP HERE
+      ansible.builtin.fail:
+        msg: "STOP HERE FOR NOW"
+
     - name: Apply fusion cluster
       tags:
-        - fusion
+        - fusion2
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
@@ -762,7 +762,7 @@
 
     - name: Wait for fusion pods
       tags:
-        - fusion
+        - fusion2
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
@@ -778,7 +778,7 @@
 
     - name: Apply fusion filesystem objects and small test
       tags:
-        - fusion
+        - fusion3
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"

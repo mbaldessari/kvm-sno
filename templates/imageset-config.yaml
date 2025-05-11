@@ -95,3 +95,7 @@ mirror:
   - name: cp.icr.io/cp/gpfs/csi/ibm-spectrum-scale-csi-driver@sha256:4856f2904c1893e8893f6d8e6775c23fe0871f0547c5d24984d70bbbbb7b3580
   - name: icr.io/cpopen/ibm-spectrum-scale-csi-operator@sha256:8d74a489683d33a2e21d2b00b774d08b51861213fcd0a93ad93a1a1658595439
   - name: icr.io/cpopen/ibm-spectrum-scale-operator@sha256:d2f9ebc3bb196ad85b931f2dabdce13aed2e6598227b8fc2434d6df9f840f696
+  # Tests
+  - name: quay.io/rhn_support_mbaldess/ibm-spectrum-scale-core-init:revertall
+  - name: quay.io/rhn_support_mbaldess/ibm-spectrum-scale-core-init:revert1
+  - name: quay.io/rhn_support_mbaldess/ibm-spectrum-scale-core-init:revert2
