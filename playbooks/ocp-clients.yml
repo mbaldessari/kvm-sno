@@ -22,6 +22,8 @@
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
+      vars:
+        openshift_mirror: "{{ 'https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview' if '-ec' in item else 'https://mirror.openshift.com/pub/openshift-v4/clients/ocp' }}"
       with_items: "{{ ocp_versions }}"
 
     - name: Download openshift-install fips
@@ -31,6 +33,8 @@
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
+      vars:
+        openshift_mirror: "{{ 'https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview' if '-ec' in item else 'https://mirror.openshift.com/pub/openshift-v4/clients/ocp' }}"
       with_items: "{{ ocp_versions }}"
 
     - name: Download openshift-install
@@ -40,6 +44,8 @@
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
+      vars:
+        openshift_mirror: "{{ 'https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview' if '-ec' in item else 'https://mirror.openshift.com/pub/openshift-v4/clients/ocp' }}"
       with_items: "{{ ocp_versions }}"
 
     - name: Uncompress oc

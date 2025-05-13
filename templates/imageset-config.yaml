@@ -5,11 +5,11 @@ mirror:
     channels:
     - name: candidate-4.19
       type: ocp
-      minVersion: 4.19.0-ec.5
-      maxVersion: 4.19.0-ec.5
+      minVersion: 4.19.0-rc.0
+      maxVersion: 4.19.0-rc.0
     - name: stable-4.18
       type: ocp
-      minVersion: 4.18.10
+      minVersion: 4.18.8
       maxVersion: 4.18.10
     # graph: true
   operators:
@@ -96,6 +96,6 @@ mirror:
   - name: icr.io/cpopen/ibm-spectrum-scale-csi-operator@sha256:8d74a489683d33a2e21d2b00b774d08b51861213fcd0a93ad93a1a1658595439
   - name: icr.io/cpopen/ibm-spectrum-scale-operator@sha256:d2f9ebc3bb196ad85b931f2dabdce13aed2e6598227b8fc2434d6df9f840f696
   # Tests
-  - name: quay.io/rhn_support_mbaldess/ibm-spectrum-scale-core-init:revertall
-  - name: quay.io/rhn_support_mbaldess/ibm-spectrum-scale-core-init:revert1
-  - name: quay.io/rhn_support_mbaldess/ibm-spectrum-scale-core-init:revert2
+  # - name: quay.io/rhn_support_mbaldess/ibm-spectrum-scale-core-init:revertall
+  # - name: quay.io/rhn_support_mbaldess/ibm-spectrum-scale-core-init:revert1
+  # - name: quay.io/rhn_support_mbaldess/ibm-spectrum-scale-core-init:revert2
