@@ -6,11 +6,10 @@
     ocp_url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp/
     ocp_tmp_file: /tmp/ocp-versions.html
     major_versions:
-      - "4.14"
-      - "4.15"
       - "4.16"
       - "4.17"
       - "4.18"
+      - "4.19"
     ocp_candidate_url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/
     ocp_candidate_tmp_file: /tmp/ocp-versions.html
     major_candidate_versions:
