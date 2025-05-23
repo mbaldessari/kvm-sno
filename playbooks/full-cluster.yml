@@ -639,24 +639,10 @@
         - fusion
       delegate_to: worker-0
       ansible.builtin.shell: |
-        for i in $(multipathd show maps raw format %w); do ls -1 /dev/disk/by-id/wwn-$i; done
+        for i in $(multipathd show maps raw format %w); do ls -1 /dev/disk/by-id/dm-uuid-mpath-$i; done
       register: disk_ids_raw
 
     - name: Set multipath facts
-      tags:
-        - fusion
-      ansible.builtin.set_fact:
-        disk_ids: "{{ disk_ids_raw.stdout_lines }}"
-
-    - name: Get wwn IDs of iscsi disks
-      tags:
-        - fusion
-      delegate_to: worker-0
-      ansible.builtin.shell: |
-        for i in $(lsblk -o name,size,wwn,vendor | grep LIO-ORG | awk '{ print $3 }' | sort | uniq); do ls -1 /dev/disk/by-id/wwn-$i; done
-      register: disk_ids_raw
-
-    - name: Set wwn disk facts
       tags:
         - fusion
       ansible.builtin.set_fact:
@@ -733,10 +719,6 @@
         - fusion-subscription.yaml
         - fusion-object.yaml
         - virt-subscription.yaml
-
-    - name: STOP HERE
-      ansible.builtin.fail:
-        msg: "STOP HERE FOR NOW"
 
     - name: Apply fusion cluster
       tags:
