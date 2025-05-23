@@ -512,14 +512,6 @@
       retries: 50
       delay: 20
 
-    - name: Template out iscsi MCP for workers
-      tags:
-        - mcp
-      ansible.builtin.template:
-        src: "../templates/mcp-workers-iscsi.yaml"
-        dest: "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
-        mode: "0644"
-
     - name: Template out butane kdump for workers
       tags:
         - mcp
@@ -533,8 +525,7 @@
         - mcp
       ansible.builtin.shell: |
         set -e -o pipefail
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        butane "{{ fullclusterfolder }}/mcp-kdump.yaml" -o "{{ fullclusterfolder }}/99-worker-kdump.yaml"
+        butane "{{ fullclusterfolder }}/mcp-kdump.yaml" -o "{{ fullclusterfolder }}/99-worker-mco-kdump.yaml"
 
     - name: Install local iscsi MCP
       tags:
@@ -542,8 +533,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/mcp-workers-iscsi.yaml"
-        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/99-worker-kdump.yaml"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/99-worker-mco-kdump.yaml"
         {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 2}}'
       register: mcg_iscsi
       until: mcg_iscsi is not failed
@@ -644,19 +634,19 @@
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 1}}'
 
-    # - name: Get multipath IDs
-    #   tags:
-    #     - fusion
-    #   delegate_to: worker-0
-    #   ansible.builtin.shell: |
-    #     for i in $(multipathd show maps raw format %w); do ls -1 /dev/disk/by-id/wwn-$i; done
-    #   register: disk_ids_raw
-    #
-    # - name: Set multipath facts
-    #   tags:
-    #     - fusion
-    #   ansible.builtin.set_fact:
-    #     disk_ids: "{{ disk_ids_raw.stdout_lines }}"
+    - name: Get multipath IDs
+      tags:
+        - fusion
+      delegate_to: worker-0
+      ansible.builtin.shell: |
+        for i in $(multipathd show maps raw format %w); do ls -1 /dev/disk/by-id/wwn-$i; done
+      register: disk_ids_raw
+
+    - name: Set multipath facts
+      tags:
+        - fusion
+      ansible.builtin.set_fact:
+        disk_ids: "{{ disk_ids_raw.stdout_lines }}"
 
     - name: Get wwn IDs of iscsi disks
       tags:
