@@ -500,6 +500,13 @@
       register: pki_import
       until: pki_import is not failed
 
+    # - name: Copy kubeconfig file to oshie
+    #   ansible.builtin.copy:
+    #     src: "{{ fullclusterfolder }}/auth/kubeconfig"
+    #     dest: /home/michele/fullcluster-kubeconfig
+    #     mode: "0640"
+    #   delegate_to: oshie
+
     # Seems this is mandatory (lesigh)
     - name: Disable default catalog sources
       ansible.builtin.shell: |
