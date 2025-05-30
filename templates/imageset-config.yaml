@@ -9,8 +9,8 @@ mirror:
       maxVersion: 4.19.0-rc.4
     - name: stable-4.18
       type: ocp
-      minVersion: 4.18.16
-      maxVersion: 4.18.16
+      minVersion: 4.18.14
+      maxVersion: 4.18.14
     # graph: true
   operators:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.19

@@ -711,7 +711,7 @@
     # - name: STOP HERE
     #   ansible.builtin.fail:
     #     msg: "STOP HERE FOR NOW"
-        
+    #
     - name: Apply fusion bits
       tags:
         - fusion
