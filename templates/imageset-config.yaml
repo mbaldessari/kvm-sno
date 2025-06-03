@@ -7,6 +7,7 @@ mirror:
       type: ocp
       minVersion: 4.19.0-rc.3
       maxVersion: 4.19.0-rc.4
+      shortestPath: true
     - name: stable-4.18
       type: ocp
       minVersion: 4.18.14
@@ -19,6 +20,9 @@ mirror:
       - name: kubernetes-nmstate-operator
       - name: local-storage-operator
       - name: kubevirt-hyperconverged
+        channels:
+          - name: stable
+          - name: dev-preview
       - name: kernel-module-management
       - name: advanced-cluster-management
       - name: multicluster-engine
@@ -32,6 +36,9 @@ mirror:
       - name: kubernetes-nmstate-operator
       - name: local-storage-operator
       - name: kubevirt-hyperconverged
+        channels:
+          - name: stable
+          - name: dev-preview
       - name: kernel-module-management
       - name: advanced-cluster-management
       - name: multicluster-engine
