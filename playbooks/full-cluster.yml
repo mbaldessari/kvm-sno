@@ -408,6 +408,18 @@
       args:
         chdir: "{{ fullclusterfolder }}"
 
+    - name: Template out update operator
+      ansible.builtin.template:
+        src: "../templates/update-operator.yaml"
+        dest: "{{ fullclusterfolder }}/update-operator.yaml"
+        mode: "0644"
+
+    - name: Install update operator
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/update-operator.yaml"
+
     - name: Set kubeadmin password
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -429,11 +441,12 @@
         {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/itms-oc-mirror.yaml
         {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/cs-community-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
         {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
+        {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/updateService.yaml
       when: enable_disconnected
       register: mirroring
       until: mirroring is not failed
-      retries: 3
-      delay: 5
+      retries: 10
+      delay: 10
 
     - name: Reset ca folder
       ansible.builtin.shell: |

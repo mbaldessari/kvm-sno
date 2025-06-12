@@ -19,6 +19,7 @@ mirror:
     packages:
       - name: lvms-operator
       - name: kubernetes-nmstate-operator
+      - name: cincinnati-operator
       - name: local-storage-operator
       - name: kubevirt-hyperconverged
         channels:
@@ -34,6 +35,7 @@ mirror:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
     packages:
       - name: lvms-operator
+      - name: cincinnati-operator
       - name: kubernetes-nmstate-operator
       - name: local-storage-operator
       - name: kubevirt-hyperconverged
