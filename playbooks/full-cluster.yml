@@ -478,7 +478,7 @@
       when: enable_disconnected
       register: mirroring
       until: mirroring is not failed
-      retries: 10
+      retries: 40
       delay: 10
 
     - name: Reset ca folder
