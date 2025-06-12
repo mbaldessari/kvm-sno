@@ -408,19 +408,9 @@
       args:
         chdir: "{{ fullclusterfolder }}"
 
-    - name: Template out update operator
-      ansible.builtin.template:
-        src: "../templates/update-operator.yaml"
-        dest: "{{ fullclusterfolder }}/update-operator.yaml"
-        mode: "0644"
-
-    - name: Install update operator
-      ansible.builtin.shell: |
-        set -e
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/update-operator.yaml"
-
     - name: Set kubeadmin password
+      tags:
+        - password
       ansible.builtin.shell: |
         set -e -o pipefail
         PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
@@ -434,6 +424,8 @@
       delay: 5
 
     - name: Apply mirroring yaml files
+      tags:
+        - update
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
@@ -441,6 +433,47 @@
         {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/itms-oc-mirror.yaml
         {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/cs-community-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
         {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
+      when: enable_disconnected
+      register: mirroring
+      until: mirroring is not failed
+      retries: 10
+      delay: 10
+
+    - name: Disable default catalog sources
+      tags:
+        - update
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+      when: enable_disconnected
+      register: catalog_sources
+      until: catalog_sources is not failed
+      retries: 50
+      delay: 20
+
+    - name: Template out update operator
+      tags:
+        - update
+      ansible.builtin.template:
+        src: "../templates/update-operator.yaml"
+        dest: "{{ fullclusterfolder }}/update-operator.yaml"
+        mode: "0644"
+
+    - name: Install update operator
+      tags:
+        - update
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/update-operator.yaml"
+
+    - name: Apply update yaml file
+      tags:
+        - update
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/updateService.yaml
       when: enable_disconnected
       register: mirroring
