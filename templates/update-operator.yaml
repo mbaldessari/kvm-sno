@@ -11,8 +11,9 @@ metadata:
   name: update-service-operatorgroup
   namespace: openshift-update-service
 spec:
-  targetNamespaces:
-  - openshift-update-service
+  upgradeStrategy: Default
+  # targetNamespaces:
+  # - openshift-update-service
 ---
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
