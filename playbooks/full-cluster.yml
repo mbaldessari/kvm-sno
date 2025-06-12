@@ -474,7 +474,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/updateService.yaml
+        {{ oc_bin }} apply -n openshift-update-service -f {{ local_mirror }}/workspace/working-dir/cluster-resources/updateService.yaml
       when: enable_disconnected
       register: mirroring
       until: mirroring is not failed
