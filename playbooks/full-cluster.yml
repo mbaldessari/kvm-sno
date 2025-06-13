@@ -468,19 +468,6 @@
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} apply -f "{{ fullclusterfolder }}/update-operator.yaml"
 
-    - name: Apply update yaml file
-      tags:
-        - update
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        {{ oc_bin }} apply -n openshift-update-service -f {{ local_mirror }}/workspace/working-dir/cluster-resources/updateService.yaml
-      when: enable_disconnected
-      register: mirroring
-      until: mirroring is not failed
-      retries: 40
-      delay: 10
-
     - name: Reset ca folder
       ansible.builtin.shell: |
         mkdir -p "{{ ca_folder }}"
@@ -552,18 +539,6 @@
     #     dest: /home/michele/fullcluster-kubeconfig
     #     mode: "0640"
     #   delegate_to: oshie
-
-    # Seems this is mandatory (lesigh)
-    - name: Disable default catalog sources
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        {{ oc_bin }} patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
-      when: enable_disconnected
-      register: catalog_sources
-      until: catalog_sources is not failed
-      retries: 50
-      delay: 20
 
     - name: Template out butane kdump for workers
       tags:
@@ -753,6 +728,19 @@
         - fusion-test.yaml
         - virt-subscription.yaml
         - virt-hyperconverged.yaml
+
+    - name: Apply update yaml file
+      tags:
+        - update
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -n openshift-update-service -f {{ local_mirror }}/workspace/working-dir/cluster-resources/updateService.yaml
+      when: enable_disconnected
+      register: mirroring
+      until: mirroring is not failed
+      retries: 40
+      delay: 10
 
     - name: STOP HERE
       ansible.builtin.fail:
