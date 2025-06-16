@@ -742,9 +742,9 @@
       retries: 40
       delay: 10
 
-    - name: STOP HERE
-      ansible.builtin.fail:
-        msg: "STOP HERE FOR NOW"
+    # - name: STOP HERE
+    #   ansible.builtin.fail:
+    #     msg: "STOP HERE FOR NOW"
 
     - name: Apply fusion bits
       tags:
@@ -764,6 +764,15 @@
         - fusion-subscription.yaml
         - fusion-object.yaml
         - virt-subscription.yaml
+
+    - name: Create ibm secret
+      tags:
+        - fusion
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} create secret -n ibm-fusion-access generic fusion-pullsecret \
+          --from-literal=ibm-entitlement-key={{ ibmentitlementkeyfile }}
 
     - name: Apply fusion cluster
       tags:
