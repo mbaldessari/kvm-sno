@@ -25,10 +25,10 @@ echo "${TIME}: New OC mirror"
 set +e
 make ocp-mirror &> "${LOGDIR}/00-ocp-mirror.log"
 ret=$?
-set -e
 if [ $ret -ne 0 ]; then
     make ocp-mirror &> "${LOGDIR}/00-ocp-mirror.log"
 fi
+set -e
 
 make nginx-destroy nginx full-cluster-destroy full-cluster &> "${LOGDIR}/01-full-cluster.log"
 exit 0
