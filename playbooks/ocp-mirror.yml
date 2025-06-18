@@ -27,6 +27,21 @@
         src: ../templates/pullsecret.json.j2
         mode: "0640"
 
+    - name: Template image list script
+      ansible.builtin.template:
+        dest: /tmp/image-list.sh
+        src: ../templates/image-list.sh
+        mode: "0755"
+
+    - name: Fetch all fusion access images
+      ansible.builtin.shell: |
+        /tmp/image-list.sh
+
+    - name: Read all images
+      ansible.builtin.shell: |
+        cat /tmp/all-images.txt
+      register: all_images
+
     # The initial template was created via:
     # ./oc mirror init --registry {{ oc_mirror_local_registry }}/{{ item }} > imageset-config.yaml
     # See: https://docs.openshift.com/container-platform/4.14/installing/disconnected_install/installing-mirroring-disconnected.html
@@ -63,6 +78,11 @@
         chdir: "{{ oc_dir }}"
       retries: 1
       delay: 10
+
+    - name: Copy mirror templates away
+      ansible.builtin.shell: |
+        mkdir -p "{{ local_mirror }}/yamls"
+        cp -avf "{{ local_mirror }}/workspace/working-dir/cluster-resources" "{{ local_mirror }}/yamls"
 
     - name: Notify bandini
       ansible.builtin.shell: |

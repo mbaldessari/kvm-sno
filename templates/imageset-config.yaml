@@ -7,13 +7,13 @@ mirror:
     - name: candidate-4.19
       type: ocp
       #full: true
-      minVersion: 4.19.0-rc.3
-      maxVersion: 4.19.0-rc.5
+      minVersion: 4.19.0
+      maxVersion: 4.19.0
       # shortestPath: true
-    - name: stable-4.18
-      type: ocp
-      minVersion: 4.18.14
-      maxVersion: 4.18.15
+    # - name: stable-4.18
+    #   type: ocp
+    #   minVersion: 4.18.14
+    #   maxVersion: 4.18.15
   operators:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.19
     packages:
@@ -32,23 +32,25 @@ mirror:
   - catalog: registry.redhat.io/redhat/community-operator-index:v4.19
     packages:
       - name: patterns-operator
-  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
-    packages:
-      - name: lvms-operator
-      - name: cincinnati-operator
-      - name: kubernetes-nmstate-operator
-      - name: local-storage-operator
-      - name: kubevirt-hyperconverged
-        channels:
-          - name: stable
-          - name: dev-preview
-      - name: kernel-module-management
-      - name: advanced-cluster-management
-      - name: multicluster-engine
-      - name: openshift-gitops-operator
-  - catalog: registry.redhat.io/redhat/community-operator-index:v4.18
-    packages:
-      - name: patterns-operator
+  # - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.18
+  #   packages:
+  #     - name: lvms-operator
+  #     - name: cincinnati-operator
+  #     - name: kubernetes-nmstate-operator
+  #     - name: local-storage-operator
+  #     - name: kubevirt-hyperconverged
+  #       channels:
+  #         - name: stable
+  #         - name: dev-preview
+  #     - name: kernel-module-management
+  #     - name: advanced-cluster-management
+  #     - name: multicluster-engine
+  #     - name: openshift-gitops-operator
+  # - catalog: registry.redhat.io/redhat/community-operator-index:v4.18
+  #   packages:
+  #     - name: patterns-operator
+  #- catalog: quay.io/openshift-storage-scale/openshift-storage-scale-catalog:latest
+  # - catalog: quay.io/openshift-storage-scale/openshift-storage-scale-catalog:stable
   additionalImages:
   - name: registry.redhat.io/ubi8/ubi:latest
   - name: registry.redhat.io/ubi9/ubi:latest
@@ -69,13 +71,9 @@ mirror:
   - name: docker.io/gitea/gitea:1.22.6-rootless
   - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:stable
   - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:latest
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:0.0.20
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-operator:0.0.20
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-bundle:0.0.20
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-console:0.0.20
-  - name: quay.io/openshift-storage-scale/openshift-fusion-access-devicefinder:0.0.20
-  # - name: quay.io/openshift-storage-scale/openshift-fusion-access-must-gather:0.0.20
-  - name: quay.io/openshift/origin-kube-rbac-proxy:latest
+{% for i in all_images.stdout_lines %}
+  - name: {{ i }}
+{% endfor %}
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
   - name: quay.io/containerdisks/centos-stream:9
   - name: quay.io/containerdisks/centos-stream:10

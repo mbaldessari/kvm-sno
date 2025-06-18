@@ -429,10 +429,10 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
-        {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/idms-oc-mirror.yaml
-        {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/itms-oc-mirror.yaml
-        {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/cs-community-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
-        {{ oc_bin }} apply -f {{ local_mirror }}/workspace/working-dir/cluster-resources/cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
+        {{ oc_bin }} apply -f {{ local_mirror }}/yamls/cluster-resources/idms-oc-mirror.yaml
+        {{ oc_bin }} apply -f {{ local_mirror }}/yamls/cluster-resources/itms-oc-mirror.yaml
+        {{ oc_bin }} apply -f {{ local_mirror }}/yamls/cluster-resources/cs-community-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
+        {{ oc_bin }} apply -f {{ local_mirror }}/yamls/cluster-resources/cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
       when: enable_disconnected
       register: mirroring
       until: mirroring is not failed
@@ -742,9 +742,9 @@
       retries: 40
       delay: 10
 
-    # - name: STOP HERE
-    #   ansible.builtin.fail:
-    #     msg: "STOP HERE FOR NOW"
+    - name: STOP HERE
+      ansible.builtin.fail:
+        msg: "STOP HERE FOR NOW"
 
     - name: Apply fusion bits
       tags:
