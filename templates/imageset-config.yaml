@@ -26,9 +26,9 @@ mirror:
           - name: stable
           - name: dev-preview
       - name: kernel-module-management
-      - name: advanced-cluster-management
-      - name: multicluster-engine
-      - name: openshift-gitops-operator
+      # - name: advanced-cluster-management
+      # - name: multicluster-engine
+      # - name: openshift-gitops-operator
   - catalog: registry.redhat.io/redhat/community-operator-index:v4.19
     packages:
       - name: patterns-operator
