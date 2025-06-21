@@ -899,6 +899,40 @@
       retries: 5
       delay: 30
 
+    - name: Get console pod name
+      tags:
+        - console
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} get -n ibm-fusion-access pods | grep console-plugin | awk '{ print $1 }'
+      register: console_pod
+
+    - name: Test console access
+      tags:
+        - console
+      k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: ibm-fusion-access
+        name: "{{ console_pod.stdout }}"
+        kubeconfig: "{{ fullclusterfolder }}/auth/kubeconfig"
+      register: pod_info
+
+    - name: Debug console pod
+      tags:
+        - console
+      ansible.builtin.debug:
+        msg: "{{ pod_info }}"
+
+    - name: Evaluate pod health
+      tags:
+        - console
+      set_fact:
+        pod_healthy: "{{ (pod_info.resources[0].status.phase == 'Running') and
+                         (pod_info.resources[0].status.containerStatuses | selectattr('ready', 'equalto', true) | list | length ==
+                          pod_info.resources[0].status.containerStatuses | length) }}"
+
     - name: Notify bandini
       ansible.builtin.shell: |
         curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
