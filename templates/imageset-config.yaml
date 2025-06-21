@@ -52,6 +52,9 @@ mirror:
   #- catalog: quay.io/openshift-storage-scale/openshift-storage-scale-catalog:latest
   # - catalog: quay.io/openshift-storage-scale/openshift-storage-scale-catalog:stable
   additionalImages:
+{% for i in all_images.stdout_lines %}
+  - name: {{ i }}
+{% endfor %}
   - name: registry.redhat.io/ubi8/ubi:latest
   - name: registry.redhat.io/ubi9/ubi:latest
   - name: registry.redhat.io/ubi9/ubi-minimal:latest
@@ -71,9 +74,6 @@ mirror:
   - name: docker.io/gitea/gitea:1.22.6-rootless
   - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:stable
   - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:latest
-{% for i in all_images.stdout_lines %}
-  - name: {{ i }}
-{% endfor %}
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
   - name: quay.io/containerdisks/centos-stream:9
   - name: quay.io/containerdisks/centos-stream:10
