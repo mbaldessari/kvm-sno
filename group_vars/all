@@ -307,7 +307,7 @@ full_cluster:
     disk: 20
     cache: unsafe
     wwn: "0x5000c50015ea7500"
-    disk2: 2
+    disk2: 100
     cache2: unsafe
     wwn2: "0x5000c50015ea7511"
     disk3: 10
@@ -450,14 +450,14 @@ coreos:
   bios: "rhcos-metal.x86_64.raw.gz"
 
 rhel_isos:
-  "9.4": "/var/lib/libvirt/images/rhel-9.4-x86_64-dvd.iso"
   "9.5": "/var/lib/libvirt/images/rhel-9.5-x86_64-dvd.iso"
-  "8.9": "/var/lib/libvirt/images/rhel-8.9-x86_64-dvd.iso"
+  "9.6": "/var/lib/libvirt/images/rhel-9.6-x86_64-dvd.iso"
+  "10.0": "/var/lib/libvirt/images/rhel-10.0-x86_64-dvd.iso"
 
 rhel_variants:
   "9.5": "rhel9.5"
-  "9.4": "rhel9.4"
-  "8.9": "rhel8.9"
+  "9.6": "rhel9.6"
+  "10.0": "rhel10.0"
 
 rhel_pool: "default"
 fast_pool: "fast"
@@ -466,7 +466,7 @@ ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3Yh
 rhn_org: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key: "{{ lookup('file', '~/.rhn_activation_key') }}"
     
-rhel_version: "9.5"
+rhel_version: "9.6"
 minio:
   fqdn: "nginx.cluster.{{ domain }}"
   port: "9000"
