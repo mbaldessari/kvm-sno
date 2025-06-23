@@ -7,6 +7,7 @@
     oc_cli: openshift-client-linux-amd64-rhel9.tar.gz
     oc_install_fips: openshift-install-rhel9-amd64.tar.gz
     oc_install: openshift-install-linux.tar.gz
+    oc_mirror: oc-mirror.rhel9.tar.gz
   tasks:
     - name: Create mirror folders
       ansible.builtin.file:
@@ -48,6 +49,17 @@
         openshift_mirror: "{{ 'https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview' if '-ec' in item else 'https://mirror.openshift.com/pub/openshift-v4/clients/ocp' }}"
       with_items: "{{ ocp_versions }}"
 
+    - name: Download oc-mirror
+      ansible.builtin.get_url:
+        url: "{{ openshift_mirror }}/{{ item }}/{{ oc_mirror }}"
+        dest: "{{ mirrorfolder }}/{{ item }}/{{ oc_mirror }}"
+        mode: "0640"
+      environment:
+        https_proxy: "{{ https_proxy | default('') }}"
+      vars:
+        openshift_mirror: "{{ 'https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview' if '-ec' in item else 'https://mirror.openshift.com/pub/openshift-v4/clients/ocp' }}"
+      with_items: "{{ ocp_versions }}"
+
     - name: Uncompress oc
       ansible.builtin.unarchive:
         src: "{{ mirrorfolder }}/{{ item }}/{{ oc_cli }}"
@@ -67,6 +79,27 @@
         src: "{{ mirrorfolder }}/{{ item }}/{{ oc_install_fips }}"
         dest: "{{ mirrorfolder }}/{{ item }}"
         remote_src: true
+      with_items: "{{ ocp_versions }}"
+
+    - name: Uncompress oc-mirror
+      ansible.builtin.unarchive:
+        src: "{{ mirrorfolder }}/{{ item }}/{{ oc_mirror }}"
+        dest: "{{ mirrorfolder }}/{{ item }}"
+        remote_src: true
+      with_items: "{{ ocp_versions }}"
+
+    - name: Uncompress oc-mirror
+      ansible.builtin.unarchive:
+        src: "{{ mirrorfolder }}/{{ item }}/{{ oc_mirror }}"
+        dest: "{{ mirrorfolder }}/{{ item }}"
+        remote_src: true
+      with_items: "{{ ocp_versions }}"
+
+    - name: Make oc-mirror script executable
+      ansible.builtin.file:
+        path: "{{ mirrorfolder }}/{{ item }}/oc-mirror"
+        mode: '0755'
+        state: file
       with_items: "{{ ocp_versions }}"
 
     - name: Register iso URL
