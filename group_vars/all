@@ -8,11 +8,11 @@ ocp_versions:
   #- "4.17.23"
   - "4.18.16"
 #  - "4.19.0"
-  - "4.19.0"
+  - "4.19.1"
 
 #ocp_version: "4.18.10"
 #ocp_version: "4.19.0-ec.5"
-ocp_version: "4.19.0"
+ocp_version: "4.19.1"
 fips_enabled: false
 ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"
 ocp_maj_min_version_dashed: "{{ ocp_maj_min_version | replace('.', '-') }}"
@@ -24,7 +24,6 @@ local_mirror: "{{ mirrorfolder }}/mirror"
 tempfolder: "/ramfs/sno-temp-folder"
 fullclusterfolder: "{{ tempfolder }}/fullcluster"
 openshift_mirror: "{{ 'https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview' if '-ec' in ocp_version else 'https://mirror.openshift.com/pub/openshift-v4/clients/ocp' }}"
-oc_mirror_url: "http://fw.int.rhx/oc/oc-mirror"
 oc_mirror_local_registry: "kuemper.int.rhx/ocp"
 domain: "ocplab.ocp"
 sshkey: "{{ lookup('file', '~/.ssh/id_rsa.pub') }}"
@@ -456,7 +455,7 @@ rhel_isos:
 
 rhel_variants:
   "9.5": "rhel9.5"
-  "9.6": "rhel9.6"
+  "9.6": "rhel9-unknown"
   "10.0": "rhel10.0"
 
 rhel_pool: "default"
