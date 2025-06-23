@@ -4,9 +4,11 @@
   gather_facts: false
   become: true
   tasks:
-    - name: Set oc-mirror bin
-      ansible.builtin.set_fact:
-        oc_mirror_bin: "{{ mirrorfolder }}/{{ ocp_version }}/oc-mirror"
+    - name: Create mirror folders
+      ansible.builtin.get_url:
+        url: "{{ oc_mirror_url }}"
+        dest: "/usr/local/bin/oc-mirror"
+        mode: "0755"
 
     - name: Create folders
       ansible.builtin.file:
@@ -52,7 +54,7 @@
     - name: Version of oc mirror
       ansible.builtin.shell: |
         set -e
-        {{ oc_mirror_bin }} version --v2 --output=yaml
+        ./oc mirror version --v2 --output=yaml
       register: oc_mirror_version
       args:
         chdir: "{{ oc_dir }}"
@@ -70,7 +72,7 @@
       ansible.builtin.shell: |
         set -e
         #mirror --config=/var/lib/libvirt/ocp-mirror/mirror/imageset-config.yaml  --workspace file://tmp/workspace docker://nas.int.rhx  --v2
-        {{ oc_mirror_bin }} --config={{ local_mirror }}/imageset-config.yaml --log-level=debug \
+        ./oc mirror --config={{ local_mirror }}/imageset-config.yaml --loglevel debug \
         --workspace file://{{ local_mirror }}/workspace docker://{{ oc_mirror_local_registry }} --v2 &> /var/log/oc-mirror.log
       args:
         chdir: "{{ oc_dir }}"
