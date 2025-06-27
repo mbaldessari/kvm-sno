@@ -79,6 +79,15 @@ mirror:
   - name: quay.io/containerdisks/centos-stream:10
   - name: quay.io/containerdisks/fedora:latest
   # 5.2.3.1
+  - name: cp.icr.io/cp/gpfs/csi/csi-snapshotter@sha256:5f4bb469fec51147ce157329dab598c758da1b018bad6dad26f0ff469326d769
+  - name: cp.icr.io/cp/gpfs/csi/csi-attacher@sha256:69888dba58159c8bc0d7c092b9fb97900c9ca8710d088b0b7ea7bd9052df86f6
+  - name: cp.icr.io/cp/gpfs/csi/csi-provisioner@sha256:d5e46da8aff7d73d6f00c761dae94472bcda6e78f4f17b3802dc89d44de0111b
+  - name: cp.icr.io/cp/gpfs/csi/livenessprobe@sha256:2c5f9dc4ea5ac5509d93c664ae7982d4ecdec40ca7b0638c24e5b16243b8360f
+  - name: cp.icr.io/cp/gpfs/csi/csi-node-driver-registrar@sha256:d7138bcc3aa5f267403d45ad4292c95397e421ea17a0035888850f424c7de25d
+  - name: cp.icr.io/cp/gpfs/csi/csi-resizer@sha256:8ddd178ba5d08973f1607f9b84619b58320948de494b31c9d7cd5375b316d6d4
+  - name: cp.icr.io/cp/gpfs/csi/ibm-spectrum-scale-csi-driver@sha256:ac0bfeb5b4a435efd42130f64eb58779570ffa152dacbeaa039cb6ddd623c634
+  - name: icr.io/cpopen/ibm-spectrum-scale-operator@sha256:f5e924345268b30ec5060308dbaba3c02135f199b0265eb93cba28512d07c1bb 
+  - name: icr.io/cpopen/ibm-spectrum-scale-csi-operator@sha256:a0ed108918fe45ebb54d34685dd3fc9802c22296235f03b97674335e72b50a77
   - name: cp.icr.io/cp/gpfs/erasure-code/ibm-spectrum-scale-daemon@sha256:fdaf30b234bcb4ec6c5304b4d942b2c8b7d92175756d3db580c58f34ac2bf761
   - name: cp.icr.io/cp/gpfs/data-management/ibm-spectrum-scale-daemon@sha256:243d01d63492f43266fbeef623db711df5f40e878f900e39ef6bde36a6148315
   - name: cp.icr.io/cp/gpfs/data-access/ibm-spectrum-scale-daemon@sha256:fa2a0b9f958854a23d48ba4ff0ae613466095d038eda41afeadfbe507a30895c
