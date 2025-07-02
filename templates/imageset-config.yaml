@@ -19,6 +19,7 @@ mirror:
     packages:
       - name: lvms-operator
       - name: kubernetes-nmstate-operator
+      - name: redhat-oadp-operator
       - name: cincinnati-operator
       - name: local-storage-operator
       - name: kubevirt-hyperconverged
