@@ -14,6 +14,7 @@ fi
 rm -rf .ansible/retries/*
 trap "sudo rm -f ${LOCKFILE}; exit" INT TERM EXIT
 sudo touch "${LOCKFILE}"
+sudo rm -f /var/log/vp-testing/today
 sudo ln -sf "${LOGDIR}" /var/log/vp-testing/today
 
 sudo mkdir -p "${LOGDIR}"
