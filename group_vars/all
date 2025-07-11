@@ -5,6 +5,7 @@ ocp_versions:
   - "4.19.2"
 
 ocp_version: "4.19.2"
+fusion_ga: true
 fips_enabled: false
 ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"
 ocp_maj_min_version_dashed: "{{ ocp_maj_min_version | replace('.', '-') }}"
