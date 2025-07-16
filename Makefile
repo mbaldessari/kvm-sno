@@ -35,6 +35,10 @@ ocp-mirror: ## Reads ocp_versions list and makes a mirror
 full-cluster: ## Installs a full OCP cluster on multiple VMs in disconnected mode
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) --extra-vars='{enable_caching: False}' playbooks/full-cluster.yml
 
+.PHONY: pvc-perf
+pvc-perf: ## Runs pvc perf test
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/test-pvc-perf.yml
+
 .PHONY: full-cluster-direct
 full-cluster-direct: ## Installs a full OCP cluster on multiple VMs not in disconnected
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) --extra-vars='{enable_disconnected: False}' playbooks/full-cluster.yml
