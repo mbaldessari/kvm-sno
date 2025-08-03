@@ -7,8 +7,8 @@ mirror:
     - name: candidate-4.19
       type: ocp
       #full: true
-      minVersion: 4.19.0
-      maxVersion: 4.19.6
+      minVersion: 4.19.4
+      maxVersion: 4.19.7
       # shortestPath: true
     # - name: stable-4.18
     #   type: ocp
@@ -85,6 +85,8 @@ mirror:
   - name: quay.io/containerdisks/centos-stream:9
   - name: quay.io/containerdisks/centos-stream:10
   - name: quay.io/containerdisks/fedora:latest
+  - name: quay.io/rhn_support_mbaldess/multipath-daemon:latest
+  - name: quay.io/rhn_support_mbaldess/multipath-operator:latest
   # 5.2.3.1
   - name: cp.icr.io/cp/gpfs/csi/csi-snapshotter@sha256:5f4bb469fec51147ce157329dab598c758da1b018bad6dad26f0ff469326d769
   - name: cp.icr.io/cp/gpfs/csi/csi-attacher@sha256:69888dba58159c8bc0d7c092b9fb97900c9ca8710d088b0b7ea7bd9052df86f6
