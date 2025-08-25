@@ -118,8 +118,8 @@ systemd:
       enabled: true
     - name: iscsi.service
       enabled: true
-    - name: multipathd.service
-      enabled: true
+    # - name: multipathd.service
+    #   enabled: true
     - name: custom-coreos-generate-iscsi-initiatorname.service
       enabled: true
       contents: |

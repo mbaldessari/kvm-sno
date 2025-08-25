@@ -7,8 +7,8 @@ mirror:
     - name: candidate-4.19
       type: ocp
       #full: true
-      minVersion: 4.19.4
-      maxVersion: 4.19.7
+      minVersion: 4.19.6
+      maxVersion: 4.19.9
       # shortestPath: true
     # - name: stable-4.18
     #   type: ocp
