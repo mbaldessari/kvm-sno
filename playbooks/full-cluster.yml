@@ -677,37 +677,37 @@
       ansible.builtin.set_fact:
         disk_ids: "{{ disk_ids_raw.stdout_lines }}"
 
-    # - name: Template localstorage bits
-    #   ansible.builtin.template:
-    #     src: "../templates/{{ item }}"
-    #     dest: "{{ fullclusterfolder }}/{{ item }}"
-    #     mode: "0644"
-    #   loop:
-    #     - local-storage-base.yaml
-    #     - local-storage-cr.yaml
-    #
-    # - name: Apply localstorage bits
-    #   ansible.builtin.shell: |
-    #     set -e
-    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
-    #     {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
-    #   register: localstorage_apply
-    #   until: localstorage_apply is not failed
-    #   retries: 30
-    #   delay: 10
-    #   loop:
-    #     - local-storage-base.yaml
-    #     - local-storage-cr.yaml
-    #
-    # - name: Make localstorage storageclass the default
-    #   ansible.builtin.shell: |
-    #     set -e
-    #     export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
-    #     {{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-    #   register: localstorage_apply
-    #   until: localstorage_apply is not failed
-    #   retries: 5
-    #   delay: 10
+    - name: Template localstorage bits
+      ansible.builtin.template:
+        src: "../templates/{{ item }}"
+        dest: "{{ fullclusterfolder }}/{{ item }}"
+        mode: "0644"
+      loop:
+        - local-storage-base.yaml
+        - local-storage-cr.yaml
+
+    - name: Apply localstorage bits
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
+      register: localstorage_apply
+      until: localstorage_apply is not failed
+      retries: 30
+      delay: 10
+      loop:
+        - local-storage-base.yaml
+        - local-storage-cr.yaml
+
+    - name: Make localstorage storageclass the default
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+      register: localstorage_apply
+      until: localstorage_apply is not failed
+      retries: 5
+      delay: 10
 
     - name: Template fusion and virt bits
       tags:
