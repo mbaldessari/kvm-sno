@@ -50,4 +50,3 @@ cat "$BUNDLE_LIST_FILE" >> "$ALL_IMAGES_FILE"
 sort -u "$ALL_IMAGES_FILE" -o "$ALL_IMAGES_FILE"
 
 echo "Image list saved to: $ALL_IMAGES_FILE"
-
