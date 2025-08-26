@@ -27,19 +27,24 @@
         src: ../templates/pullsecret.json.j2
         mode: "0640"
 
-    - name: Template image list script
+    - name: Template image list scripts
       ansible.builtin.template:
         dest: /tmp/image-list.sh
-        src: ../templates/image-list.sh
+        src: ../templates/"{{ item }}"
         mode: "0755"
+      item:
+        - image-list.sh
+        - patterns-image-list.sh
 
     - name: Fetch all fusion access images
       ansible.builtin.shell: |
         /tmp/image-list.sh
+        /tmp/patterns-image-list.sh > /tmp/pattern-images.txt
 
     - name: Read all images
       ansible.builtin.shell: |
         cat /tmp/all-images.txt
+        cat /tmp/pattern-images.txt
       register: all_images
 
     # The initial template was created via:
