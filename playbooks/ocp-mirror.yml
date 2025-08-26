@@ -29,10 +29,10 @@
 
     - name: Template image list scripts
       ansible.builtin.template:
-        dest: /tmp/image-list.sh
-        src: ../templates/"{{ item }}"
+        dest: /tmp/{{ item }}
+        src: ../templates/{{ item }}
         mode: "0755"
-      item:
+      loop:
         - image-list.sh
         - patterns-image-list.sh
 

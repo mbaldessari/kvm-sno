@@ -6,6 +6,6 @@ CHARTS=(acm clustergroup gitea golang-external-secrets hashicorp-vault pattern-i
 
 for i in "${CHARTS[@]}"; do
 	for j in $(skopeo list-tags docker://${REPO}/${i} | yq -r '.Tags[]'); do
-		echo "  - name: ${REPO}/${i}:${j}"
+		echo "${REPO}/${i}:${j}"
 	done
 done
