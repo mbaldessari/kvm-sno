@@ -4,19 +4,16 @@ kind: ImageDigestMirrorSet
 metadata:
   name: lab-digest
 spec:
-  imageDigestMirrors:
-    - mirrors:
-      - kuemper.int.rhx:5001
-      source: quay.io
-    - mirrors:
-      - kuemper.int.rhx:5002
-      source: ghcr.io
-    - mirrors:
-      - kuemper.int.rhx:5003
-      source: registry.redhat.io
-    - mirrors:
-      - kuemper.int.rhx:5004
-      source: docker.io
-    - mirrors:
-      - kuemper.int.rhx:5005
-      source: gcr.io
+  imageDigestSources:
+  - mirrors:
+    - kuemper.int.rhx:6000
+    source: quay.io
+  - mirrors:
+    - kuemper.int.rhx:6001
+    source: registry.redhat.io
+  - mirrors:
+    - kuemper.int.rhx:6002
+    source: registry.access.redhat.com
+  - mirrors:
+    - kuemper.int.rhx:6003
+    source: registry.connect.redhat.com
