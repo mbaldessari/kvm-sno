@@ -73,8 +73,8 @@ mirror:
   - name: ghcr.io/external-secrets/external-secrets:v0.19.2-ubi
   - name: oci.external-secrets.io/external-secrets/external-secrets:v0.19.2-ubi
   - name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
-  - name: quay.io/hybridcloudpatterns/utility-container:latest
-  - name: quay.io/hybridcloudpatterns/imperative-container:v1
+  - name: quay.io/validatedpatterns/utility-container:latest
+  - name: quay.io/validatedpatterns/imperative-container:v1
   - name: docker.io/gitea/gitea:1.22.6-rootless
   - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:stable
   - name: quay.io/openshift-storage-scale/openshift-fusion-access-catalog:latest

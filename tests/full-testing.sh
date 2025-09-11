@@ -27,10 +27,8 @@ echo "${TIME}: New OC mirror"
 echo "${TIME}: Install fresh SNOs part 1"
 make SNOS=sno1,sno2,sno3,sno4,sno5 sno-destroy &> "${LOGDIR}/01-mcg-fresh-destroy.log"
 set +e
-make SNOS=sno1 sno-direct &> "${LOGDIR}/02-mcg-fresh1.log"
-make SNOS=sno2 sno-direct &> "${LOGDIR}/02-mcg-fresh2.log"
-make SNOS=sno3 sno-direct &> "${LOGDIR}/02-mcg-fresh3.log"
-make SNOS=sno4 sno-direct &> "${LOGDIR}/02-mcg-fresh4.log"
+make SNOS=sno1,sno2 sno-direct &> "${LOGDIR}/02-mcg-fresh1-2.log"
+make SNOS=sno3,sno4 sno-direct &> "${LOGDIR}/02-mcg-fresh3-4.log"
 #make SNOS=sno5 sno-direct &> "${LOGDIR}/02-mcg-fresh5.log"
 
 exit 0

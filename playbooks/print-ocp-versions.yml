@@ -9,8 +9,9 @@
       - "4.17"
       - "4.18"
       - "4.19"
+      - "4.20"
     ocp_candidate_url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/
-    ocp_candidate_tmp_file: /tmp/ocp-versions.html
+    ocp_candidate_tmp_file: /tmp/ocp-candidate-versions.html
     major_candidate_versions:
       - "4.19"
   tasks:

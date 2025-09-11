@@ -12,19 +12,19 @@
         owner: root
         group: root
         mode: "0600"
-      when: enable_disconnected
+      when: true
       with_items: "{{ snos | default('snohosts') }}"
 
-    - name: Set rules to ALLOW for SNOS
-      ansible.builtin.lineinfile:
-        path: /etc/shorewall/rules
-        regexp: '^.*lab:{{ clusters[item].ip }}.*web$'
-        line: "ACCEPT         lab:{{ clusters[item].ip }}              web"
-        owner: root
-        group: root
-        mode: "0600"
-      when: not enable_disconnected
-      with_items: "{{ snos | default('snohosts') }}"
+    # - name: Set rules to ALLOW for SNOS
+    #   ansible.builtin.lineinfile:
+    #     path: /etc/shorewall/rules
+    #     regexp: '^.*lab:{{ clusters[item].ip }}.*web$'
+    #     line: "ACCEPT         lab:{{ clusters[item].ip }}              web"
+    #     owner: root
+    #     group: root
+    #     mode: "0600"
+    #   when: not enable_disconnected
+    #   with_items: "{{ snos | default('snohosts') }}"
 
     - name: Restart shorewall
       ansible.builtin.systemd:
@@ -38,3 +38,24 @@
   strategy: ansible.builtin.free
   roles:
     - sno_install
+
+- name: Set firewall rules
+  hosts: fw
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Set rules to ALLOW for SNOS
+      ansible.builtin.lineinfile:
+        path: /etc/shorewall/rules
+        regexp: '^.*lab:{{ clusters[item].ip }}.*web$'
+        line: "ACCEPT         lab:{{ clusters[item].ip }}              web"
+        owner: root
+        group: root
+        mode: "0600"
+      when: true
+      with_items: "{{ snos | default('snohosts') }}"
+
+    - name: Restart shorewall
+      ansible.builtin.systemd:
+        name: shorewall
+        state: restarted
