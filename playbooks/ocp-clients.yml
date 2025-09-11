@@ -105,7 +105,7 @@
     - name: Register iso URL
       ansible.builtin.shell: |
         set -e -o pipefail
-        ./openshift-install coreos print-stream-json | grep location | grep "{{ arch }}" | grep iso | cut -d\" -f4
+        ./openshift-install coreos print-stream-json | jq . | grep location | grep "{{ arch }}" | grep iso | cut -d\" -f4
       args:
         chdir: "{{ mirrorfolder }}/{{ item }}"
       register: iso_url_raw
