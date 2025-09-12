@@ -116,3 +116,29 @@
           - "ARGO URL: https://argo-argocd.apps.{{ node }}.{{ domain }}"
           - "ARGO USER: admin"
           - "ARGO PASSWORD: {{ argosecret.stdout }}"
+
+    - name: Create small argo application
+      tags:
+        - argoapp
+      kubernetes.core.k8s:
+        state: present
+        kubeconfig: "~/{{ node }}-kubeconfig"
+        definition:
+          apiVersion: argoproj.io/v1alpha1
+          kind: Application
+          metadata:
+            name: hello-test-application
+            namespace: argocd   # important: Applications are namespaced resources
+          spec:
+            destination:
+              namespace: argocd
+              server: "https://kubernetes.default.svc"
+            source:
+              path: examples/hello-world
+              repoURL: "https://github.com/mbaldessari/argocd-tests.git"
+              targetRevision: main
+            project: default
+            syncPolicy:
+              automated:
+                prune: true
+                selfHeal: true
