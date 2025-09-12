@@ -7,10 +7,10 @@
   become_user: michele
   vars:
     argotempfolder: "/home/michele/argocd-git/"
-    gitrepo: https://github.com/argoproj/argo-cd/
-    gitbranch: master
+    gitrepo: https://github.com/mbaldessari/argo-cd/
+    gitbranch: ssh-private-key
     node: sno1
-    registry_url: fw.int.rhx/bandini
+    registry_url: kuemper.int.rhx/bandini
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
@@ -46,7 +46,7 @@
         git reset --hard
         git clean -dxf
         curl -L https://acksyn.org/files/argocd/0001-Disable-selinux-in-podman.patch | git am
-        curl -L https://acksyn.org/files/argocd/0001-Avoid-reusing-uid-1000.patch | git am
+        # curl -L https://acksyn.org/files/argocd/0001-Avoid-reusing-uid-1000.patch | git am
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
 
@@ -54,7 +54,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         # This creates the ~/go tree folder
-        make build-local &> "{{ argotempfolder }}/build-local.log"
+        make DOCKER=podman build &> "{{ argotempfolder }}/build.log"
         make DOCKER_PUSH=true IMAGE_NAMESPACE="{{ registry_url }}" \
           DOCKER=podman all &> "{{ argotempfolder }}/build.log"
       args:
