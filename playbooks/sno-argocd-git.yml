@@ -45,7 +45,7 @@
         set -e -o pipefail
         git reset --hard
         git clean -dxf
-        curl -L https://acksyn.org/files/argocd/0001-Disable-selinux-in-podman.patch | git am
+        #curl -L https://acksyn.org/files/argocd/0001-Disable-selinux-in-podman.patch | git am
         # curl -L https://acksyn.org/files/argocd/0001-Avoid-reusing-uid-1000.patch | git am
       args:
         chdir: "{{ argotempfolder }}/argo-cd"
@@ -117,6 +117,27 @@
           - "ARGO USER: admin"
           - "ARGO PASSWORD: {{ argosecret.stdout }}"
 
+    - name: Create secret for private repo
+      tags:
+        - argoapp
+      kubernetes.core.k8s:
+        state: present
+        kubeconfig: "~/{{ node }}-kubeconfig"
+        definition:
+          apiVersion: v1
+          kind: Secret
+          metadata:
+            name: private-repo
+            namespace: argocd
+            labels:
+              argocd.argoproj.io/secret-type: repository
+          stringData:
+            type: git
+            url: "ssh://git@github.com/mbaldessari/argocd-tests-private.git"
+            sshPassphrase: "{{ lookup('file', '/home/michele/.test_ssh_key') }}"
+            sshPrivateKey: |
+              {{ lookup('file', '/home/michele/.ssh/id_rsa') | trim }}
+
     - name: Create small argo application
       tags:
         - argoapp
@@ -135,7 +156,7 @@
               server: "https://kubernetes.default.svc"
             source:
               path: examples/hello-world
-              repoURL: "https://github.com/mbaldessari/argocd-tests.git"
+              repoURL: "ssh://git@github.com/mbaldessari/argocd-tests-private.git"
               targetRevision: main
             project: default
             syncPolicy:
