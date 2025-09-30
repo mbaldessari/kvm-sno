@@ -280,6 +280,7 @@
   until: lvm is not failed
   retries: 50
   delay: 20
+
 - name: Install LVM Cluster
   tags:
     - lvm

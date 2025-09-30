@@ -15,13 +15,14 @@ mirror:
     - name: candidate-4.19
       type: ocp
       #full: true
-      minVersion: 4.19.6
-      maxVersion: 4.19.11
+      minVersion: 4.19.11
+      maxVersion: 4.19.14
       # shortestPath: true
   operators:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.20
     packages:
       - name: lvms-operator
+      - name: ansible-automation-platform-operator
       - name: mtc-operator
       - name: kubernetes-nmstate-operator
       - name: redhat-oadp-operator
@@ -43,6 +44,7 @@ mirror:
       - name: patterns-operator
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.19
     packages:
+      - name: ansible-automation-platform-operator
       - name: lvms-operator
       - name: mtc-operator
       - name: kubernetes-nmstate-operator
