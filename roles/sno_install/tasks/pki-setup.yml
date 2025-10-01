@@ -19,6 +19,18 @@
     mkdir -p "{{ firefox_profile }}"
   when: not profile_path.stat.exists
 
+- name: Empty the firefox profile entirely
+  tags:
+    - pki
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    for nick in $(certutil -L -d sql:"{{ firefox_profile }}" | awk 'NR>4 {print substr($0,1,45)}' | sed 's/[[:space:]]*$//'); do
+      echo "Deleting $nick"
+      certutil -D -d sql:"{{ firefox_profile }}" -n "$nick"
+    done
+  args:
+    chdir: "{{ ca_folder }}"
+
 # KUBECONFIG certificate-authority-data has the CA only for the API endpoint, we want all of them
 # /home/michele/Bin/yq '.clusters[0].cluster.certificate-authority-data' {{ item }}-kubeconfig | base64 -d > "{{ ca_folder }}/{{ item }}-ca-api"
 - name: Fetch all CAs for each cluster
