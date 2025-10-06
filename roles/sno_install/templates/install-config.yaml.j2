@@ -20,7 +20,7 @@ networking:
 platform:
   none: {}
 bootstrapInPlace:
-  installationDisk: /dev/disk/by-id/wwn-{{ clusters[item].wwn }}
+  installationDisk: /dev/disk/by-id/virtio-{{ diskserial }} 
 pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
 {% if enable_disconnected %}
 {% include "disconnected-imagedigestsources.yaml" %}

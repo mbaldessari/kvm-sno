@@ -72,40 +72,40 @@ vm_pool: "fast"
 second_disk_pool: "default"
 clusters:
   sno1:
-    cpus: 12
+    cpus: 24
     ram: 64768
     mac_nr: 66
     ip: 192.168.66.110
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71aa"
-    disk2: 100
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea71bb"
   sno2:
-    cpus: 12
+    cpus: 24
     ram: 40960
     mac_nr: 67
     ip: 192.168.66.111
     disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea71cc"
-    disk2: 100
+    disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea71dd"
   sno3:
-    cpus: 12
+    cpus: 24
     ram: 40960
     mac_nr: 68
     ip: 192.168.66.112
-    disk: 100
+    disk: 90
     cache: unsafe
     wwn: "0x5000c50015ea71ee"
     disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015ea71ff"
   sno4:
-    cpus: 12
+    cpus: 24
     ram: 40960
     mac_nr: 69
     ip: 192.168.66.113
