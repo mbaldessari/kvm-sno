@@ -11,7 +11,7 @@ spec:
      deviceSelector:
        paths:
        # - /dev/disk/by-id/wwn-{{ full_cluster[item].wwn2 }}
-       - /dev/disk/by-id/virtio-{{ diskserial }}
+       - /dev/disk/by-id/virtio-{{ diskserial2 }}
        # forceWipeDevicesAndDestroyAllData: true # tried it with 4.15 but did not solve my issues
      thinPoolConfig:
        name: thin-pool-1
