@@ -3,10 +3,10 @@
 ocp_versions:
   - "4.18.27"
   - "4.19.17"
-  - "4.20.1"
+  - "4.20.2"
 
-#ocp_version: "4.20.1"
-ocp_version: "4.19.17"
+ocp_version: "4.20.2"
+#ocp_version: "4.19.17"
 fusion_ga: true
 fips_enabled: false
 ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"

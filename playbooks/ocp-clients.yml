@@ -8,6 +8,7 @@
     oc_install_fips: openshift-install-rhel9-amd64.tar.gz
     oc_install: openshift-install-linux.tar.gz
     oc_mirror: oc-mirror.rhel9.tar.gz
+    user_agent: "Mozilla/5.0 (X11; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/118.0"
   tasks:
     - name: Create mirror folders
       ansible.builtin.file:
@@ -20,6 +21,8 @@
       ansible.builtin.get_url:
         url: "{{ openshift_mirror }}/{{ item }}/{{ oc_cli }}"
         dest: "{{ mirrorfolder }}/{{ item }}/{{ oc_cli }}"
+        headers:
+          User-Agent: "{{ user_agent }}"
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
@@ -31,6 +34,8 @@
       ansible.builtin.get_url:
         url: "{{ openshift_mirror }}/{{ item }}/{{ oc_install_fips }}"
         dest: "{{ mirrorfolder }}/{{ item }}/{{ oc_install_fips }}"
+        headers:
+          User-Agent: "{{ user_agent }}"
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
@@ -42,6 +47,8 @@
       ansible.builtin.get_url:
         url: "{{ openshift_mirror }}/{{ item }}/{{ oc_install }}"
         dest: "{{ mirrorfolder }}/{{ item }}/{{ oc_install }}"
+        headers:
+          User-Agent: "{{ user_agent }}"
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
@@ -53,6 +60,8 @@
       ansible.builtin.get_url:
         url: "{{ openshift_mirror }}/{{ item }}/{{ oc_mirror }}"
         dest: "{{ mirrorfolder }}/{{ item }}/{{ oc_mirror }}"
+        headers:
+          User-Agent: "{{ user_agent }}"
         mode: "0640"
       environment:
         https_proxy: "{{ https_proxy | default('') }}"
