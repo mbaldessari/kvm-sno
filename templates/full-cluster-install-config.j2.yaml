@@ -26,67 +26,67 @@ pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
 {% if enable_disconnected %}
 imageDigestSources:
   - mirrors:
-    - kuemper.int.rhx/ocp/openshift-release-dev
+    - fw.int.rhx/ocp/openshift-release-dev
     source: quay.io/openshift-release-dev
   - mirrors:
-    - kuemper.int.rhx/ocp/lvms4
+    - fw.int.rhx/ocp/lvms4
     source: registry.redhat.io/lvms4
   - mirrors:
-    - kuemper.int.rhx/ocp/openshift4
+    - fw.int.rhx/ocp/openshift4
     source: registry.redhat.io/openshift4
   - mirrors:
-    - kuemper.int.rhx/ocp/rhel8
+    - fw.int.rhx/ocp/rhel8
     source: registry.redhat.io/rhel8
   - mirrors:
-    - kuemper.int.rhx/ocp/openshift-gitops-1
+    - fw.int.rhx/ocp/openshift-gitops-1
     source: registry.redhat.io/openshift-gitops-1
   - mirrors:
-    - kuemper.int.rhx/ocp/rh-sso-7
+    - fw.int.rhx/ocp/rh-sso-7
     source: registry.redhat.io/rh-sso-7
   - mirrors:
-    - kuemper.int.rhx/ocp/rhacm2
+    - fw.int.rhx/ocp/rhacm2
     source: registry.redhat.io/rhacm2
   - mirrors:
-    - kuemper.int.rhx/ocp/rhel9
+    - fw.int.rhx/ocp/rhel9
     source: registry.redhat.io/rhel9
   - mirrors:
-    - kuemper.int.rhx/ocp/multicluster-engine
+    - fw.int.rhx/ocp/multicluster-engine
     source: registry.redhat.io/multicluster-engine
   - mirrors:
-    - kuemper.int.rhx/ocp/community-operator-pipeline-prod
+    - fw.int.rhx/ocp/community-operator-pipeline-prod
     source: quay.io/community-operator-pipeline-prod
   - mirrors:
-    - kuemper.int.rhx/ocp/kubebuilder
+    - fw.int.rhx/ocp/kubebuilder
     source: gcr.io/kubebuilder
   - mirrors:
-    - kuemper.int.rhx/ocp/hybridcloudpatterns
+    - fw.int.rhx/ocp/hybridcloudpatterns
     source: quay.io/hybridcloudpatterns
   - mirrors:
-    - kuemper.int.rhx/ocp/ubi8
+    - fw.int.rhx/ocp/ubi8
     source: registry.redhat.io/ubi8
   - mirrors:
-    - kuemper.int.rhx/ocp/ubi9
+    - fw.int.rhx/ocp/ubi9
     source: registry.redhat.io/ubi9
   - mirrors:
-    - kuemper.int.rhx/ocp/ansible
+    - fw.int.rhx/ocp/ansible
     source: quay.io/ansible
   - mirrors:
-    - kuemper.int.rhx/ocp/ansible-automation-platform-24
+    - fw.int.rhx/ocp/ansible-automation-platform-24
     source: registry.redhat.io/ansible-automation-platform-24
 {% endif %}
 {% if enable_caching %}
 imageDigestSources:
 - mirrors:
-  - kuemper.int.rhx:6000
+  - fw.int.rhx:6000
   source: quay.io
 - mirrors:
-  - kuemper.int.rhx:6001
+  - fw.int.rhx:6001
   source: registry.redhat.io
 - mirrors:
-  - kuemper.int.rhx:6002
+  - fw.int.rhx:6002
   source: registry.access.redhat.com
 - mirrors:
-  - kuemper.int.rhx:6003
+  - fw.int.rhx:6003
   source: registry.connect.redhat.com
 {% endif %}
 

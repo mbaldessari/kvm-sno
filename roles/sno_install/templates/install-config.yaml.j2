@@ -27,16 +27,16 @@ pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'
 {% else %}
 imageDigestSources:
 - mirrors:
-  - kuemper.int.rhx:6000
+  - fw.int.rhx:6000
   source: quay.io
 - mirrors:
-  - kuemper.int.rhx:6001
+  - fw.int.rhx:6001
   source: registry.redhat.io
 - mirrors:
-  - kuemper.int.rhx:6002
+  - fw.int.rhx:6002
   source: registry.access.redhat.com
 - mirrors:
-  - kuemper.int.rhx:6003
+  - fw.int.rhx:6003
   source: registry.connect.redhat.com
 {% endif %}
 
