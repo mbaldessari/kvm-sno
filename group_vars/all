@@ -2,10 +2,10 @@
 # ocp_versions is only used by the ocp-mirror target to mirror locally all the versions and uncompress them *once*
 ocp_versions:
   - "4.18.30"
-  - "4.19.21"
-  - "4.20.10"
+  - "4.19.22"
+  - "4.20.12"
 
-ocp_version: "4.20.10"
+ocp_version: "4.20.12"
 #ocp_version: "4.19.17"
 fusion_ga: true
 fips_enabled: false

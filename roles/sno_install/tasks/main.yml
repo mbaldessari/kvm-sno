@@ -270,6 +270,16 @@
   retries: 50
   delay: 20
 
+- name: Disable console initial tour dialog
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+    {{ oc_bin }} patch consoles.operator.openshift.io cluster --type='merge' -p '{"spec":{"customization":{"capabilities":[{"name":"GettingStartedBanner","visibility":{"state":"Disabled"}}]}}}'
+  register: skip_tour
+  until: skip_tour is not failed
+  retries: 5
+  delay: 5
+
 - name: Install LVM operator
   tags:
     - lvm
@@ -282,6 +292,7 @@
   until: lvm is not failed
   retries: 50
   delay: 20
+
 
 - name: Install LVM Cluster
   tags:
