@@ -276,6 +276,7 @@
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
     {{ oc_bin }} patch consoles.operator.openshift.io cluster --type='merge' -p '{"spec":{"customization":{"capabilities":[{"name":"GettingStartedBanner","visibility":{"state":"Disabled"}}]}}}'
   register: skip_tour
+  with_items: "{{ inventory_hostname_short }}"
   until: skip_tour is not failed
   retries: 5
   delay: 5
