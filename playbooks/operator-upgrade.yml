@@ -56,8 +56,7 @@
     - name: Build and upload operator version {{ upgrade_from }} - {{ from_version }} to hub
       ansible.builtin.shell: |
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        make VERSION={{ from_version }} IMAGE_TAG_BASE={{ registry }}/patterns-operator \
-            IMG={{ registry }}/patterns-operator:{{ from_version }} \
+        make VERSION={{ from_version }} UPLOADREGISTRY={{ registry }} USE_IMAGE_DIGESTS="" \
             CHANNELS=fast bundle generate docker-build docker-push bundle-build bundle-push catalog-build catalog-push catalog-install
       args:
         chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
@@ -251,8 +250,7 @@
     - name: Build and upload upgraded operator version {{ upgrade_to }} - {{ to_version }}
       ansible.builtin.shell: |
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        make VERSION={{ to_version }} IMAGE_TAG_BASE={{ registry }}/patterns-operator \
-            IMG={{ registry }}/patterns-operator:{{ to_version }} \
+        make VERSION={{ to_version }} UPLOADREGISTRY={{ registry }} USE_IMAGE_DIGESTS="" \
             CHANNELS=fast bundle generate docker-build docker-push bundle-build bundle-push catalog-build catalog-push catalog-install
       args:
         chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
