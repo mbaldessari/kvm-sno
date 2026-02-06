@@ -47,3 +47,12 @@
         ./pattern.sh make from_os_install INVENTORY="{{ inventory }}" &> /tmp/agof-install.log
       args:
         chdir: "{{ agoftempfolder }}/agof"
+
+    - name: AAP Configuration
+      tags:
+        - aap-config
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ./pattern.sh make api_install &> /tmp/aap-configuration.log
+      args:
+        chdir: "{{ agoftempfolder }}/agof"
