@@ -8,7 +8,7 @@
   vars:
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.61"
+    upgrade_from: "0.0.64"
     upgrade_to: main
     hub: sno1
     spoke: sno2

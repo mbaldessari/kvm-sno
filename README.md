@@ -38,3 +38,5 @@ This assumes that:
         fixed-address 172.16.11.50;
   }
   ```
+
+- Testing operator upgrades
