@@ -4,7 +4,7 @@
 #aws_secret_key_vault: 'Your AWS secret key'
 
 #pattern_prefix: 'A name to distinguish this pattern from other patterns installed on the same infrastructure'
-#pattern_dns_zone: 'A public DNS zone managed by AWS Route53'
+pattern_dns_zone: 'aap.ocplab.ocp'
 
 #ec2_name_prefix: 'A unique prefix to distinguish instances in AWS. Used as the pattern name and in public DNS entries'
 #ec2_region: 'An AWS region that your account has access to'
@@ -19,6 +19,9 @@ admin_password: "{{ lookup('file', '~/.kubeadminpass') }}"
 
 manifest_content: "{{ lookup('file', '~/manifest_bandini-agof-test_20241119T185946Z.zip') | b64encode }}"
 
+#agof_iac_repo: 
+agof_statedir: "{{ '~/agof' | expanduser }}"
+agof_iac_repo: "https://github.com/validatedpatterns-demos/agof_minimal_config.git"
 
 org_number_vault: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key_vault: "{{ lookup('file', '~/.rhn_activation_key') }}"
