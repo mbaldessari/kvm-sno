@@ -48,6 +48,13 @@
       args:
         chdir: "{{ agoftempfolder }}/agof"
 
+    - name: Copy ssh key
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        mkdir -p ~/agof-vp-miche/
+        cp ~/.ssh/agof-vp-miche-private.pem ~/agof-vp-miche/agof-vp-miche-private.pem
+        cp ~/.ssh/id_rsa.pub ~/agof-vp-miche/agof-vp-miche-public.pem
+
     - name: AAP Configuration
       tags:
         - aap-config
