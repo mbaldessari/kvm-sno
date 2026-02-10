@@ -19,7 +19,7 @@ admin_password: "{{ lookup('file', '~/.kubeadminpass') }}"
 
 manifest_content: "{{ lookup('file', '~/manifest_bandini-agof-test_20241119T185946Z.zip') | b64encode }}"
 
-agof_statedir: "{{ '~/agof-statedir' | expanduser }}"
+#agof_statedir: "{{ '~/agof-statedir' | expanduser }}"
 agof_controller_config_dir: "{{ '~/agof-controller-config-dir' | expanduser }}"
 agof_iac_repo: "https://github.com/validatedpatterns-demos/agof_minimal_config.git"
 
