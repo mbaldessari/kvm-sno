@@ -21,7 +21,9 @@ manifest_content: "{{ lookup('file', '~/manifest_bandini-agof-test_20241119T1859
 
 #agof_statedir: "{{ '~/agof-statedir' | expanduser }}"
 agof_controller_config_dir: "{{ '~/agof-controller-config-dir' | expanduser }}"
-agof_iac_repo: "https://github.com/validatedpatterns-demos/agof_minimal_config.git"
+#agof_iac_repo: "https://github.com/validatedpatterns-demos/agof_minimal_config.git"
+agof_iac_repo: "https://github.com/mbaldessari/agof_minimal_config.git"
+agof_iac_repo_version: "bandini1"
 
 org_number_vault: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key_vault: "{{ lookup('file', '~/.rhn_activation_key') }}"
