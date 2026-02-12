@@ -4,7 +4,7 @@
   connection: local
   gather_facts: false
   vars:
-    namespace: perf-pvc
+    pvc_namespace: perf-pvc
     storage_class: ibm-spectrum-scale-fs1
     snapshot_class: ibm-spectrum-scale-snapshot-class
     original_pvc_name: test-pvc
@@ -19,7 +19,7 @@
         state: absent
         kind: PersistentVolumeClaim
         name: "{{ cloned_pvc_name }}"
-        namespace: "{{ namespace }}"
+        namespace: "{{ pvc_namespace }}"
 
     - name: Delete PVC
       kubernetes.core.k8s:
@@ -27,26 +27,26 @@
         state: absent
         kind: PersistentVolumeClaim
         name: "{{ original_pvc_name }}"
-        namespace: "{{ namespace }}"
+        namespace: "{{ pvc_namespace }}"
 
     - name: Delete NS
       kubernetes.core.k8s:
         kubeconfig: "{{ fullclusterfolder }}/auth/kubeconfig"
         state: absent
         kind: Namespace
-        name: "{{ namespace }}"
+        name: "{{ pvc_namespace }}"
 
-  
+
     - name: Wait for the namespace to be fully deleted
       kubernetes.core.k8s_info:
         kubeconfig: "{{ fullclusterfolder }}/auth/kubeconfig"
         kind: Namespace
-        name: "{{ namespace }}"
+        name: "{{ pvc_namespace }}"
       register: ns_status
       until: ns_status.resources | length == 0
       retries: 30
       delay: 5
-      
+
     - name: Create NS
       kubernetes.core.k8s:
         kubeconfig: "{{ fullclusterfolder }}/auth/kubeconfig"
@@ -55,7 +55,7 @@
           apiVersion: v1
           kind: Namespace
           metadata:
-            name: "{{ namespace }}"
+            name: "{{ pvc_namespace }}"
           spec:
 
     - name: Create initial PVC
@@ -67,9 +67,9 @@
           kind: PersistentVolumeClaim
           metadata:
             name: "{{ original_pvc_name }}"
-            namespace: "{{ namespace }}"
+            namespace: "{{ pvc_namespace }}"
           spec:
-            accessModes: [ "ReadWriteOnce" ]
+            accessModes: ["ReadWriteOnce"]
             resources:
               requests:
                 storage: "{{ volume_size }}"
@@ -84,7 +84,7 @@
           kind: Pod
           metadata:
             name: fill-zero-data
-            namespace: "{{ namespace }}"
+            namespace: "{{ pvc_namespace }}"
           spec:
             containers:
               - name: writer
@@ -105,7 +105,7 @@
       kubernetes.core.k8s_info:
         kubeconfig: "{{ fullclusterfolder }}/auth/kubeconfig"
         kind: Pod
-        namespace: "{{ namespace }}"
+        namespace: "{{ pvc_namespace }}"
         name: fill-zero-data
       register: pod_status
       until: pod_status.resources | length > 0 and pod_status.resources[0].status.phase in ['Succeeded']
@@ -117,7 +117,7 @@
         kubeconfig: "{{ fullclusterfolder }}/auth/kubeconfig"
         state: absent
         kind: Pod
-        namespace: "{{ namespace }}"
+        namespace: "{{ pvc_namespace }}"
         name: fill-zero-data
 
     - name: Create snapshot of the PVC
@@ -129,7 +129,7 @@
           kind: VolumeSnapshot
           metadata:
             name: "{{ snapshot_name }}"
-            namespace: "{{ namespace }}"
+            namespace: "{{ pvc_namespace }}"
           spec:
             volumeSnapshotClassName: "{{ snapshot_class }}"
             source:
@@ -139,7 +139,7 @@
       kubernetes.core.k8s_info:
         kubeconfig: "{{ fullclusterfolder }}/auth/kubeconfig"
         kind: VolumeSnapshot
-        namespace: "{{ namespace }}"
+        namespace: "{{ pvc_namespace }}"
         name: "{{ snapshot_name }}"
       register: snap_info
       until: snap_info.resources[0].status.readyToUse
@@ -155,9 +155,9 @@
           kind: PersistentVolumeClaim
           metadata:
             name: "{{ cloned_pvc_name }}"
-            namespace: "{{ namespace }}"
+            namespace: "{{ pvc_namespace }}"
           spec:
-            accessModes: [ "ReadWriteOnce" ]
+            accessModes: ["ReadWriteOnce"]
             resources:
               requests:
                 storage: "{{ volume_size }}"

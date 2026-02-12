@@ -102,9 +102,11 @@
     # - worker-4
     # - worker-5
   tasks:
-    - name: Notify bandini
-      ansible.builtin.shell: |
-        curl -X POST http://raspyclock.int.rhx:8080/job -d "start"
+    - name: Notify bandini - start job
+      ansible.builtin.uri:
+        url: http://raspyclock.int.rhx:8080/job
+        method: POST
+        body: "start"
       failed_when: false
 
     - name: Check that the mirror bits are correct
@@ -231,7 +233,7 @@
       delay: 10
       register: vm_creation
       until: vm_creation is not failed
-        #--disk /dev/sdh1,device=disk,bus=scsi,wwn=0xf00df00df00df00d --check path_in_use=off
+        # --disk /dev/sdh1,device=disk,bus=scsi,wwn=0xf00df00df00df00d --check path_in_use=off
       # {% if item in ["worker-1", "worker-2", "worker-3"] %} --disk /dev/sdh1,device=disk,bus=scsi,wwn=0xf00df00df00df00d --check path_in_use=off {% endif %}
       # {% if item in ["worker-0", "worker-1", "worker-2"] %} --disk /dev/sdh2,device=disk,bus=scsi,wwn=0xcafecafecafecafe --check path_in_use=off {% endif %}
 
@@ -364,7 +366,7 @@
       retries: 25
       delay: 10
 
-    - name: Approve all machines again
+    - name: Approve all machines again (second round)
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
@@ -575,7 +577,7 @@
       ansible.builtin.pause:
         minutes: 1
 
-    - name: Approve all machines again
+    - name: Approve all machines again (after MCP)
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
@@ -638,7 +640,7 @@
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
         {{ oc_bin }} adm wait-for-stable-cluster --minimum-stable-period=5s
 
-    - name: Approve all machines again
+    - name: Approve all machines again (final)
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
@@ -746,7 +748,7 @@
     - name: STOP HERE
       ansible.builtin.fail:
         msg: "STOP HERE FOR NOW"
-      when: "{{ stop_to_develop | default(true) | bool }}"
+      when: stop_to_develop | default(true) | bool
 
     - name: Apply fusion catalog if not GA
       tags:
@@ -781,7 +783,7 @@
         - fusion-object.yaml
         - virt-subscription.yaml
 
-        #- fusion-catalog.yaml
+        # - fusion-catalog.yaml
 
     - name: Create ibm secret
       tags:
@@ -808,7 +810,7 @@
       tags:
         - fusion2
       ansible.builtin.shell: |
-        set -e
+        set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         COUNT=$({{ oc_bin }} get pods -n ibm-spectrum-scale | grep worker | grep Running | wc -l)
         NODES=$(oc get nodes -l "node-role.kubernetes.io/worker" --no-headers | wc -l)
@@ -921,7 +923,7 @@
       tags:
         - console
       ansible.builtin.shell: |
-        set -e
+        set -e -o pipefail
         export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
         {{ oc_bin }} get -n ibm-fusion-access pods | grep console-plugin | awk '{ print $1 }'
       register: console_pod
@@ -929,7 +931,7 @@
     - name: Test console access
       tags:
         - console
-      k8s_info:
+      kubernetes.core.k8s_info:
         api_version: v1
         kind: Pod
         namespace: ibm-fusion-access
@@ -946,14 +948,28 @@
     - name: Evaluate pod health
       tags:
         - console
-      set_fact:
+      ansible.builtin.set_fact:
         pod_healthy: "{{ (pod_info.resources[0].status.phase == 'Running') and
                          (pod_info.resources[0].status.containerStatuses | selectattr('ready', 'equalto', true) | list | length ==
                           pod_info.resources[0].status.containerStatuses | length) }}"
 
-    - name: Notify bandini
-      ansible.builtin.shell: |
-        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Cluster Done! "
-        curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
-        curl -d "Cluster install successful 😀" "ntfy.sh/{{ ntfy_topic }}"
+    - name: Notify bandini - cluster done
+      ansible.builtin.uri:
+        url: http://raspyclock.int.rhx:8080/receive
+        method: POST
+        body: "Cluster Done! "
+      failed_when: false
+
+    - name: Notify bandini - job finished
+      ansible.builtin.uri:
+        url: http://raspyclock.int.rhx:8080/job
+        method: POST
+        body: "finished"
+      failed_when: false
+
+    - name: Notify bandini - ntfy
+      ansible.builtin.uri:
+        url: "https://ntfy.sh/{{ ntfy_topic }}"
+        method: POST
+        body: "Cluster install successful"
       failed_when: false

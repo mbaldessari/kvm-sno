@@ -68,9 +68,11 @@
       ansible.builtin.debug:
         msg: "{{ oc_mirror_version.stdout }}"
 
-    - name: Notify bandini
-      ansible.builtin.shell: |
-        curl -X POST http://raspyclock.int.rhx:8080/job -d "start"
+    - name: Notify bandini - start job
+      ansible.builtin.uri:
+        url: http://raspyclock.int.rhx:8080/job
+        method: POST
+        body: "start"
       failed_when: false
 
     - name: Mirror images
@@ -89,8 +91,16 @@
         mkdir -p "{{ local_mirror }}/yamls"
         cp -avf "{{ local_mirror }}/workspace/working-dir/cluster-resources" "{{ local_mirror }}/yamls"
 
-    - name: Notify bandini
-      ansible.builtin.shell: |
-        curl -X POST http://raspyclock.int.rhx:8080/receive -d "Mirror Done! "
-        curl -X POST http://raspyclock.int.rhx:8080/job -d "finished"
+    - name: Notify bandini - mirror done
+      ansible.builtin.uri:
+        url: http://raspyclock.int.rhx:8080/receive
+        method: POST
+        body: "Mirror Done! "
+      failed_when: false
+
+    - name: Notify bandini - job finished
+      ansible.builtin.uri:
+        url: http://raspyclock.int.rhx:8080/job
+        method: POST
+        body: "finished"
       failed_when: false

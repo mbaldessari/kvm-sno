@@ -23,7 +23,7 @@
         podman pull "{{ item.stdout }}"
       with_items: "{{ output.results }}"
 
-    - name: Find kernel version for 
+    - name: Find kernel version
       ansible.builtin.shell: |
         set -e -o pipefail
         podman run -it --security-opt 'label=disable' --rm '--net=host' "{{ item.stdout }}" sh -c "rpm -q kernel | cut -f2- -d-" 2>/dev/null
@@ -49,7 +49,7 @@
 
     - name: Show the resulting dictionary
       ansible.builtin.debug:
-        var: kernel_versions      
+        var: kernel_versions
 
     - name: Create folder
       ansible.builtin.file:
@@ -62,6 +62,7 @@
       ansible.builtin.get_url:
         url: "{{ item.url ~ '/kernel-debuginfo-common-x86_64-' ~ item.full }}"
         dest: "{{ debug_rpms_dir }}"
+        mode: "0644"
       loop: "{{ kernel_versions }}"
 
     # kernel-debuginfo-5.14.0-570.12.1.el9_6.x86_64.rpm
@@ -69,4 +70,5 @@
       ansible.builtin.get_url:
         url: "{{ item.url ~ '/kernel-debuginfo-' ~ item.full }}"
         dest: "{{ debug_rpms_dir }}"
+        mode: "0644"
       loop: "{{ kernel_versions }}"

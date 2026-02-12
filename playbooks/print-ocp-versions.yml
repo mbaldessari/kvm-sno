@@ -43,7 +43,7 @@
         dest: "{{ ocp_candidate_tmp_file }}"
         mode: "0644"
 
-    - name: Read file into var
+    - name: Read candidate file into var
       ansible.builtin.shell: |
         set -o pipefail
         grep -E '<a href="[[:digit:]]+.[[:digit:]]+.[[:digit:]]+.*">' "{{ ocp_candidate_tmp_file }}" | \

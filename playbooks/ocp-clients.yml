@@ -97,7 +97,7 @@
         remote_src: true
       with_items: "{{ ocp_versions }}"
 
-    - name: Uncompress oc-mirror
+    - name: Uncompress oc-mirror (rhel9)
       ansible.builtin.unarchive:
         src: "{{ mirrorfolder }}/{{ item }}/{{ oc_mirror }}"
         dest: "{{ mirrorfolder }}/{{ item }}"
