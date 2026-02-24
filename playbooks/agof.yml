@@ -41,6 +41,13 @@
         dest: ~/agof_vault.yml
         mode: "0640"
 
+    - name: Run AGOF check
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        ./pattern.sh make check &> /tmp/agof-check.log
+      args:
+        chdir: "{{ agoftempfolder }}/agof"
+
     - name: Install AGOF
       ansible.builtin.shell: |
         set -e -o pipefail
