@@ -31,7 +31,7 @@
         --location {{ rhel_isos[rhel_version] }}
         --os-variant {{ rhel_variants[rhel_version] }}
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
-        --vcpus {{ full_cluster[item].cpus }}
+        --vcpus {{ full_cluster[item].cpus }},sockets=1,cores={{ full_cluster[item].cpus }},threads=1 
         --ram {{ full_cluster[item].ram }}
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }},serial=root
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=scsi,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }},serial={{ diskserial }}

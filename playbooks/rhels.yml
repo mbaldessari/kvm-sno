@@ -26,7 +26,7 @@
         --location {{ rhel_isos[rhels[item].version] }}
         --os-variant {{ rhel_variants[rhels[item].version] }}
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ rhels[item].mac_nr }}"
-        --vcpus {{ rhels[item].cpus }}
+        --vcpus {{ rhels[item].cpus }},sockets=1,cores={{ rhels[item].cpus }},threads=1  
         --ram {{ rhels[item].ram }}
         --disk pool={{ rhel_pool }},size={{ rhels[item].disk }},format=qcow2,bus=scsi,cache={{ rhels[item].cache }},wwn={{ rhels[item].wwn }}
         --check disk_size=off

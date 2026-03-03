@@ -95,7 +95,7 @@
     --arch {{ arch }}
     --os-variant rhel8.0
     --network bridge="{{ bridge_interface }}",model=virtio,mac="{{ mac_prefix }}:{{ clusters[item].mac_nr }}"
-    --vcpus {{ clusters[item].cpus }}
+    --vcpus {{ clusters[item].cpus }},sockets=1,cores={{ clusters[item].cpus }},threads=1 
     --ram {{ clusters[item].ram }}
     --disk pool={{ vm_pool }},size={{ clusters[item].disk }},format=qcow2,bus=virtio,cache={{ clusters[item].cache }},serial={{ diskserial }}
     --disk pool={{ second_disk_pool }},size={{ clusters[item].disk2 }},format=qcow2,bus=virtio,cache={{ clusters[item].cache2 }},serial={{ diskserial2 }}
