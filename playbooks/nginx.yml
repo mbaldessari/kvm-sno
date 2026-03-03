@@ -27,6 +27,7 @@
         --name {{ item }}
         --hvm
         --virt-type kvm
+        --cpu host-passthrough
         --arch {{ arch }}
         --location {{ rhel_isos[rhel_version] }}
         --os-variant {{ rhel_variants[rhel_version] }}
