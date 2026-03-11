@@ -7,9 +7,9 @@
   become_user: michele
   vars:
     vp_operator_tempfolder: "~/sno-vp-operator"
-    gitrepo: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.64"
-    upgrade_to: main
+    gitrepo: https://github.com/mbaldessari/patterns-operator
+    upgrade_from: "0.0.65"
+    upgrade_to: change-namespace
     hub: sno1
     spoke: sno2
     from_version: 6.6.6
@@ -137,20 +137,6 @@
       tags:
         - operator-install
 
-    - name: Wait for all argo apps to be green
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/{{ hub }}-kubeconfig
-        make argo-healthcheck
-      args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      retries: 100
-      delay: 20
-      register: argo
-      until: argo is not failed
-      tags:
-        - operator-install
-
     - name: Wait for ManagedCluster API to show up
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -200,7 +186,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ item }}-kubeconfig
-        make argo-healthcheck
+        ./pattern.sh make argo-healthcheck
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
       retries: 100
