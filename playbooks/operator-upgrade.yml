@@ -7,8 +7,9 @@
   become_user: michele
   vars:
     vp_operator_tempfolder: "~/sno-vp-operator"
-    gitrepo: https://github.com/mbaldessari/patterns-operator
+    gitrepo_from: https://github.com/validatedpatterns/patterns-operator
     upgrade_from: "0.0.65"
+    gitrepo_to: https://github.com/mbaldessari/patterns-operator
     upgrade_to: change-namespace
     hub: sno1
     spoke: sno2
@@ -21,7 +22,7 @@
   tasks:
     - name: Print versions
       ansible.builtin.debug:
-        msg: "Testing upgrade on {{ hub }}-{{ spoke }} from {{ upgrade_from }} to {{ upgrade_to }} of {{ gitrepo }}"
+        msg: "Testing upgrade on {{ hub }}-{{ spoke }} from {{ gitrepo_from }}:{{ upgrade_from }} to {{ gitrepo_to}}:{{ upgrade_to }}"
 
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
@@ -46,7 +47,7 @@
 
     - name: Clone operator git repo using version "{{ upgrade_from }}"
       ansible.builtin.git:
-        repo: "{{ gitrepo }}"
+        repo: "{{ gitrepo_from }}"
         version: "{{ upgrade_from }}"
         dest: "{{ vp_operator_tempfolder }}/patterns-operator"
         clone: true
@@ -200,7 +201,7 @@
 
     - name: Reset operator git repo to upgraded version
       ansible.builtin.git:
-        repo: "{{ gitrepo }}"
+        repo: "{{ gitrepo_to }}"
         version: "{{ upgrade_to }}"
         dest: "{{ vp_operator_tempfolder }}/patterns-operator"
         force: true
