@@ -10,10 +10,11 @@
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/mbaldessari/patterns-operator
     upgrade_from: "0.0.65-wtf"
+    #upgrade_from: "main"
     gitrepo_to: https://github.com/mbaldessari/patterns-operator
     upgrade_to: "ourown-gitops"
-    hub: sno3
-    spoke: sno4
+    hub: sno1
+    spoke: sno2
     from_version: 6.6.6
     to_version: 6.6.7
     registry: kuemper.int.rhx/bandini
@@ -24,10 +25,10 @@
     mcggitbranch: main
     #mcggitrepo_pat: "https://{{ mcgtoken }}@github.com/mbaldessari/mcg-private"
     mcgchangerepo: true
-    mcggitrepo2: https://github.com/mbaldessari/multicloud-gitops
-    mcggitbranch2: ourown-gitops
-    clustergrouprepo2: https://github.com/mbaldessari/clustergroup-chart
-    clustergroupbranch2: ourown-gitops
+    mcggitrepo2: https://github.com/validatedpatterns/multicloud-gitops
+    mcggitbranch2: main
+    #clustergrouprepo2: https://github.com/mbaldessari/clustergroup-chart
+    #clustergroupbranch2: ourown-gitops
     min_age_minutes: 5
   tasks:
     - name: Print versions
@@ -432,9 +433,9 @@
             inClusterGitServer: false
             targetRepo: "{{ mcggitrepo2 }}"
             targetRevision: "{{ mcggitbranch2 }}"
-          multiSourceConfig:
-            clusterGroupGitRepoUrl: "{{ clustergrouprepo2 }}"
-            clusterGroupChartGitRevision: "{{ clustergroupbranch2 }}"
+          # multiSourceConfig:
+          #   clusterGroupGitRepoUrl: "clustergrouprepo2"
+          #   clusterGroupChartGitRevision: "clustergroupbranch2"
             enabled: true      
         EOF
         oc apply -f /tmp/upgrade-mcg.yaml
