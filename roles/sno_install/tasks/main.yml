@@ -70,11 +70,21 @@
 #     cp -f "{{ tempfolder }}/tmp-{{ item }}.ign" "{{ tempfolder }}/{{ item }}/bootstrap-in-place-for-live-iso.ign"
 #   with_items: "{{ inventory_hostname_short }}"
 
+- name: Pre-pull coreos-installer image
+  ansible.builtin.command: podman pull quay.io/coreos/coreos-installer:release
+  run_once: true
+
+- name: Copy rhcos-live.iso for each SNO
+  ansible.builtin.copy:
+    src: "{{ oc_dir }}/rhcos-live.iso"
+    dest: "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
+    remote_src: true
+  with_items: "{{ inventory_hostname_short }}"
+
 - name: Run coreos ignition embedding
   ansible.builtin.shell: |
     set -e
-    cp {{ oc_dir }}/rhcos-live.iso "{{ tempfolder }}/{{ item }}/rhcos-live.iso"
-    podman run --privileged --pull always --rm \
+    podman run --privileged --pull never --rm \
         -v /dev:/dev -v /run/udev:/run/udev -v "{{ tempfolder }}/{{ item }}:/data" \
         -w /data quay.io/coreos/coreos-installer:release \
         iso ignition embed -fi bootstrap-in-place-for-live-iso.ign "rhcos-live.iso"
@@ -104,8 +114,7 @@
     --noautoconsole
     --boot menu=on,useserial=on,uefi
   with_items: "{{ inventory_hostname_short }}"
-  # We serialize this because the *virt stack seems to get fragile when things are run concurrently
-  throttle: 1
+  throttle: 2
   retries: 10
   delay: 10
   register: vm_creation
