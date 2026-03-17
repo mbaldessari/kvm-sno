@@ -9,6 +9,7 @@ ocp_versions:
 
 ocp_version: "4.21.6"
 #ocp_version: "4.19.17"
+gitops_from_testing_catalog: false
 fusion_ga: true
 fips_enabled: false
 ocp_maj_min_version: "{{ ocp_version.split('.')[0] }}.{{ ocp_version.split('.')[1] }}"

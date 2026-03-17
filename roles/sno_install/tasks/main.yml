@@ -317,15 +317,6 @@
     mode: "0644"
   with_items: "{{ inventory_hostname_short }}"
 
-- name: Template gitops testing cs yaml
-  tags:
-    - gitops
-  ansible.builtin.template:
-    src: ./templates/gitops-testing-icsp.yaml
-    dest: "{{ tempfolder }}/{{ item }}"
-    mode: "0644"
-  with_items: "{{ inventory_hostname_short }}"
-
 - name: Install gitops catalog and icsp
   tags:
     - gitops
@@ -339,6 +330,7 @@
   until: gitops_install is not failed
   retries: 50
   delay: 20
+  when: gitops_from_testing_catalog | bool
 
 - name: Install LVM operator
   tags:
