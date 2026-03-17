@@ -308,6 +308,24 @@
     name: shorewall
     state: restarted
 
+- name: Template gitops testing cs yaml
+  ansible.builtin.template: |
+    src: ./templates/gitops-testing-catalogsource.yaml
+    dest: "{{ tempfolder }}/{{ item }}"
+    mode: "0644"
+  register: gitops_cs
+  until: gitops_cs is not failed
+  with_items: "{{ inventory_hostname_short }}"
+
+- name: Template gitops testing cs yaml
+  ansible.builtin.template: |
+    src: ./templates/gitops-testing-icsp.yaml
+    dest: "{{ tempfolder }}/{{ item }}"
+    mode: "0644"
+  register: gitops_icsp
+  until: gitops_icsp is not failed
+  with_items: "{{ inventory_hostname_short }}"
+
 - name: Install LVM operator
   tags:
     - lvm

@@ -1,0 +1,10 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: gitops-test-catalog
+  namespace: openshift-marketplace
+spec:
+  sourceType: grpc
+  image: quay.io/redhat-user-workloads/rh-openshift-gitops-tenant/catalog:v{{ ocp_maj_min_version }}
+  displayName: GitOps Test Catalog
+  publisher: Red Hat
