@@ -4,7 +4,7 @@ kind: ImageDigestMirrorSet
 metadata:
   name: lab-digest
 spec:
-  imageDigestSources:
+  imageDigestMirrors:
 {% if gitops_from_testing_catalog %}
   - source: registry.redhat.io/openshift-gitops-1/gitops-rhel8
     mirrors:
