@@ -324,7 +324,6 @@
     set -e -o pipefail
     export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
     {{ oc_bin }} apply -f "{{ tempfolder }}/{{ item }}/gitops-testing-catalogsource.yaml"
-    {{ oc_bin }} apply -f "{{ tempfolder }}/{{ item }}/gitops-testing-icsp.yaml"
   with_items: "{{ inventory_hostname_short }}"
   register: gitops_install
   until: gitops_install is not failed

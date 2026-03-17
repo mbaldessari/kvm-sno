@@ -5,18 +5,6 @@ metadata:
   name: lab-digest
 spec:
   imageDigestSources:
-  - mirrors:
-    - fw.int.rhx:6000
-    source: quay.io
-  - mirrors:
-    - fw.int.rhx:6001
-    source: registry.redhat.io
-  - mirrors:
-    - fw.int.rhx:6002
-    source: registry.access.redhat.com
-  - mirrors:
-    - fw.int.rhx:6003
-    source: registry.connect.redhat.com
 {% if gitops_from_testing_catalog %}
   - source: registry.redhat.io/openshift-gitops-1/gitops-rhel8
     mirrors:
@@ -104,4 +92,17 @@ spec:
     mirrors:
       - quay.io/redhat-user-workloads/rh-openshift-gitops-tenant/argocd-image-updater-rhel9
       - registry.stage.redhat.io/openshift-gitops-1/argocd-image-updater-rhel9
+{% else %}
+  - mirrors:
+    - fw.int.rhx:6000
+    source: quay.io
+  - mirrors:
+    - fw.int.rhx:6001
+    source: registry.redhat.io
+  - mirrors:
+    - fw.int.rhx:6002
+    source: registry.access.redhat.com
+  - mirrors:
+    - fw.int.rhx:6003
+    source: registry.connect.redhat.com
 {% endif %}
