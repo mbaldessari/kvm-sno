@@ -326,6 +326,20 @@
   until: gitops_icsp is not failed
   with_items: "{{ inventory_hostname_short }}"
 
+- name: Install gitops catalog and icsp
+  tags:
+    - gitops
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+    {{ oc_bin }} apply -f "{{ tempfolder }}/{{ item }}/gitops-testing-catalogsource.yaml"
+    {{ oc_bin }} apply -f "{{ tempfolder }}/{{ item }}/gitops-testing-icsp.yaml"
+  with_items: "{{ inventory_hostname_short }}"
+  register: gitops_install
+  until: gitops_installis not failed
+  retries: 50
+  delay: 20
+
 - name: Install LVM operator
   tags:
     - lvm
