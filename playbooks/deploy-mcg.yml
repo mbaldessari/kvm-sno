@@ -1,0 +1,157 @@
+---
+- name: Deploy Multicloud GitOps pattern
+  hosts: localhost
+  connection: local
+  gather_facts: false
+  become: true
+  become_user: michele
+  vars:
+    mcgtempfolder: "~/deploy-mcg"
+    gitrepo: https://github.com/mbaldessari/multicloud-gitops
+    gitbranch: "{{ lookup('env', 'BRANCH') | default('main', true) }}"
+    hubconfig: "{{ lookup('env', 'HUBCONFIG') }}"
+    spokeconfig: "{{ lookup('env', 'SPOKECONFIG') }}"
+  tasks:
+    - name: Record start time
+      ansible.builtin.set_fact:
+        deploy_start_time: "{{ now(utc=false) }}"
+        deploy_start_epoch: "{{ now(utc=false, fmt='%s') }}"
+
+    - name: Print start time
+      ansible.builtin.debug:
+        msg: "Started at: {{ deploy_start_time }}"
+
+    - name: Check that HUBCONFIG env variable is set
+      ansible.builtin.fail:
+        msg: "HUBCONFIG env variable needs to be set and pointing to the HUB kubeconfig file"
+      when: hubconfig is not defined or hubconfig | length == 0
+
+    - name: Check that SPOKECONFIG env variable is set
+      ansible.builtin.fail:
+        msg: "SPOKECONFIG env variable needs to be set and pointing to the SPOKE kubeconfig file"
+      when: spokeconfig is not defined or spokeconfig | length == 0
+
+    - name: Verify hub cluster connectivity
+      ansible.builtin.command: oc cluster-info
+      environment:
+        KUBECONFIG: "{{ hubconfig }}"
+      changed_when: false
+
+    - name: Verify spoke cluster connectivity
+      ansible.builtin.command: oc cluster-info
+      environment:
+        KUBECONFIG: "{{ spokeconfig }}"
+      changed_when: false
+
+    - name: Delete temporary folder
+      ansible.builtin.file:
+        path: "{{ mcgtempfolder }}"
+        state: absent
+
+    - name: Create temporary folder
+      ansible.builtin.file:
+        path: "{{ mcgtempfolder }}"
+        state: directory
+        recurse: true
+
+    - name: Clone multicloud-gitops repo
+      ansible.builtin.git:
+        repo: "{{ gitrepo }}"
+        version: "{{ gitbranch }}"
+        dest: "{{ mcgtempfolder }}/multicloud-gitops"
+        clone: true
+
+    - name: Verify checked out branch matches expected branch
+      ansible.builtin.command: git rev-parse --abbrev-ref HEAD
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      register: current_branch
+      changed_when: false
+      failed_when: current_branch.stdout != gitbranch
+
+    - name: Install pattern on HUB
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG={{ hubconfig }}
+        ./pattern.sh make install &> /tmp/mcg-install-hub.log
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+
+    - name: Wait for all argo apps to be green on hub
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG={{ hubconfig }}
+        ./pattern.sh make argo-healthcheck
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argo_hub
+      until: argo_hub is not failed
+
+    - name: Wait for ManagedCluster API to show up
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG={{ hubconfig }}
+        oc api-resources | grep cluster.open-cluster-management.io/v1 | grep ManagedCluster
+      retries: 50
+      delay: 20
+      register: managedcluster_api
+      until: managedcluster_api is not failed
+
+    - name: Set facts for ACM import role
+      ansible.builtin.set_fact:
+        HUBCONFIG: "{{ hubconfig }}"
+        REGIONCONFIG: "{{ spokeconfig }}"
+
+    - name: Import spoke cluster via ACM
+      ansible.builtin.import_role:
+        name: acm_import
+      retries: 10
+      delay: 30
+      register: acm_import_result
+      until: acm_import_result is not failed
+
+    - name: Wait for ArgoCD Application CRD on spoke
+      ansible.builtin.command: oc get crd applications.argoproj.io
+      environment:
+        KUBECONFIG: "{{ spokeconfig }}"
+      retries: 40
+      delay: 15
+      register: argo_crd
+      until: argo_crd is not failed
+      changed_when: false
+
+    - name: Wait for ArgoCD Application objects on spoke
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        oc get applications.argoproj.io -n openshift-gitops -o json | jq '.items | length'
+      environment:
+        KUBECONFIG: "{{ spokeconfig }}"
+      retries: 40
+      delay: 15
+      register: app_count
+      until: app_count is not failed and (app_count.stdout | int) > 0
+      changed_when: false
+
+    - name: Wait for all argo apps to be green on spoke
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG={{ spokeconfig }}
+        ./pattern.sh make argo-healthcheck
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 100
+      delay: 20
+      register: argo_spoke
+      until: argo_spoke is not failed
+
+    - name: Record end time and print elapsed
+      ansible.builtin.debug:
+        msg: >-
+          Finished at: {{ now(utc=false) }} -
+          Elapsed: {{ '%dh %dm %ds' | format(
+            ((now(utc=false, fmt='%s') | int) - (deploy_start_epoch | int)) // 3600,
+            (((now(utc=false, fmt='%s') | int) - (deploy_start_epoch | int)) % 3600) // 60,
+            ((now(utc=false, fmt='%s') | int) - (deploy_start_epoch | int)) % 60
+          ) }}
