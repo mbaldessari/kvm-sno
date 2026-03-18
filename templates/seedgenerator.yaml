@@ -1,0 +1,8 @@
+---
+apiVersion: lca.openshift.io/v1alpha1
+kind: SeedGenerator
+metadata:
+  name: seed-image-export
+spec:
+  seedImage: "{{ local_registry }}/sno-seed-image:v{{ ocp_maj_min_version }}"
+  recertImage: quay.io/edge-infrastructure/recert:latest # Required for crypto-wiping IDs

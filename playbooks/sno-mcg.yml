@@ -7,8 +7,8 @@
   become_user: michele
   vars:
     mcgtempfolder: "~/sno-mcg"
-    gitrepo: https://github.com/validatedpatterns/multicloud-gitops
-    gitbranch: main
+    gitrepo: https://github.com/mbaldessari/multicloud-gitops
+    gitbranch: clustergroup_race
     hub: sno1
     spoke: sno2
   tasks:
@@ -58,7 +58,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        make argo-healthcheck
+        ./pattern.sh make argo-healthcheck
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
       retries: 100
@@ -107,7 +107,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ item }}-kubeconfig
-        make argo-healthcheck
+        ./pattern.sh make argo-healthcheck
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
       retries: 100

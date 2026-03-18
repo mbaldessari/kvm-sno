@@ -1,0 +1,83 @@
+- name: Snapshot SNO cluster seed
+  hosts: "{{ snos | default('snohosts') }}"
+  gather_facts: false
+  become: true
+  vars:
+    # We do one node at the time
+    my_node: "{{ snos | first }}"
+    kfile: "/home/michele/{{ my_node }}-kubeconfig"
+  tasks:
+    - name: debug
+      ansible.builtin.debug:
+        msg: "{{ tempfolder }} - {{ my_node }}"
+
+    - name: Template Seedgenerator
+      delegate_to: localhost
+      ansible.builtin.template:
+        src: ../templates/seedgenerator.yaml
+        dest: "{{ tempfolder }}/{{ my_node }}/seedgenerator.yaml"
+        mode: "0640"
+
+    - name: Template Seedoperator
+      delegate_to: localhost
+      ansible.builtin.template:
+        src: ../templates/seedoperator.yaml
+        dest: "{{ tempfolder }}/{{ my_node }}/seedoperator.yaml"
+        mode: "0640"
+
+    - name: Apply seed operator stuff
+      delegate_to: localhost
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ kfile }}"
+        oc apply -f "{{ tempfolder }}/{{ my_node }}/seedoperator.yaml" 
+      
+    - name: Wait for Lifecycle Agent Operator to be fully installed
+      block:
+        - name: Get the name of the current CSV from the Subscription
+          kubernetes.core.k8s_info:
+            api_version: operators.coreos.com/v1alpha1
+            kind: Subscription
+            name: openshift-lifecycle-agent-subscription
+            namespace: openshift-lifecycle-agent
+            kubeconfig: "{{ kfile }}"
+          register: lca_subscription
+          until: lca_subscription.resources[0].status.currentCSV is defined
+          retries: 30
+          delay: 10
+    
+        - name: Wait until CSV phase is Succeeded
+          kubernetes.core.k8s_info:
+            api_version: operators.coreos.com/v1alpha1
+            kind: ClusterServiceVersion
+            name: "{{ lca_subscription.resources[0].status.currentCSV }}"
+            namespace: openshift-lifecycle-agent
+            kubeconfig: "{{ kfile }}"
+          register: lca_csv
+          until: 
+            - lca_csv.resources | length > 0
+            - lca_csv.resources[0].status.phase == "Succeeded"
+          retries: 50
+          delay: 10
+    
+        - name: Confirm the Lifecycle Agent controller pods are ready
+          kubernetes.core.k8s_info:
+            api_version: apps/v1
+            kind: Deployment
+            name: lifecycle-agent-controller-manager
+            namespace: openshift-lifecycle-agent
+            kubeconfig: "{{ kfile }}"
+          register: lca_deployment
+          until:
+            - lca_deployment.resources[0].status.readyReplicas is defined
+            - lca_deployment.resources[0].status.readyReplicas >= 1
+          retries: 20
+          delay: 10
+
+    - name: Apply seed generator stuff
+      delegate_to: localhost
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ kfile }}"
+        oc apply -f "{{ tempfolder }}/{{ my_node }}/seedgenerator.yaml" 
+      
