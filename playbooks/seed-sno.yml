@@ -81,3 +81,28 @@
         export KUBECONFIG="{{ kfile }}"
         oc apply -f "{{ tempfolder }}/{{ my_node }}/seedgenerator.yaml" 
       
+    - name: Monitor SeedGenerator for completion
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ kfile }}"
+        api_version: lca.openshift.io/v1alpha1
+        kind: SeedGenerator
+        name: seedimage
+      register: seed_gen
+      # We retry until it is either Completed or Failed
+      until: 
+        - seed_gen.resources | length > 0
+        - >-
+          (seed_gen.resources[0].status.conditions | default([]) | selectattr('type', 'equalto', 'SeedGenCompleted') | map(attribute='status') | first | default('False') == 'True') or
+          (seed_gen.resources[0].status.conditions | default([]) | selectattr('type', 'equalto', 'SeedGenFailed') | map(attribute='status') | first | default('False') == 'True')
+      retries: 60  # Seed generation can take 10-20 minutes depending on image size/network
+      delay: 30
+    
+    - name: Fail if SeedGenerator failed
+      ansible.builtin.fail:
+        msg: "Seed generation failed! Check logs: oc logs -n openshift-lifecycle-agent -l app.kubernetes.io/name=lifecycle-agent"
+      when: >-
+        seed_gen.resources[0].status.conditions | selectattr('type', 'equalto', 'SeedGenFailed') | map(attribute='status') | first | default('False') == 'True'
+    
+    - name: Success message
+      ansible.builtin.debug:
+        msg: "Seed image has been successfully pushed to {{ seed_gen.resources[0].spec.seedImage }}"
