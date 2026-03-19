@@ -7,8 +7,8 @@
   become_user: michele
   vars:
     mcgtempfolder: "~/sno-mcg"
-    gitrepo: https://github.com/mbaldessari/multicloud-gitops
-    gitbranch: clustergroup_race
+    gitrepo: https://github.com/validatedpatterns/multicloud-gitops
+    gitbranch: main
     hub: sno1
     spoke: sno2
   tasks:
@@ -28,10 +28,10 @@
         label: "{{ item.stat.path }}"
       failed_when: not item.stat.exists
 
-    - name: Delete temporary folder
-      ansible.builtin.file:
-        path: "{{ mcgtempfolder }}"
-        state: absent
+    # - name: Delete temporary folder
+    #   ansible.builtin.file:
+    #     path: "{{ mcgtempfolder }}"
+    #     state: absent
 
     - name: Create temporary folder
       ansible.builtin.file:

@@ -11,6 +11,94 @@
       ansible.builtin.debug:
         msg: "{{ tempfolder }} - {{ my_node }}"
 
+    - name: Check if Shared Container Storage is already applied and active
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ kfile }}"
+        api_version: machineconfiguration.openshift.io/v1
+        kind: MachineConfig
+        name: 01-container-shared-storage
+      register: mc_check
+    
+    - name: Check if MachineConfigPool is already Updated
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ kfile }}"
+        api_version: machineconfiguration.openshift.io/v1
+        kind: MachineConfigPool
+        name: master
+      register: mcp_check
+    
+    - name: Set skip flag if already configured
+      set_fact:
+        skip_storage_reboot: "{{ mc_check.resources | length > 0 and mcp_check.resources[0].status.phase == 'Updated' }}"    
+
+    - name: Define the storage.conf content
+      ansible.builtin.set_fact:
+        storage_conf_raw: |
+          [storage]
+          driver = "overlay"
+
+          [storage.options]
+          additionalimagestores = [
+            "/var/lib/shared"
+          ]
+          [storage.options.overlay]
+          mountopt = "metacopy=on"
+
+    - name: Apply MachineConfig for Shared Container Storage
+      when: not skip_storage_reboot | bool
+      kubernetes.core.k8s:
+        kubeconfig: "{{ kfile }}"
+        state: present
+        definition:
+          apiVersion: machineconfiguration.openshift.io/v1
+          kind: MachineConfig
+          metadata:
+            labels:
+              machineconfiguration.openshift.io/role: master
+            name: 01-container-shared-storage
+          spec:
+            config:
+              ignition:
+                version: 3.2.0
+              storage:
+                files:
+                - contents:
+                    # This is the URL-encoded version of the storage.conf file
+                    source: "data:,{{ storage_conf_raw | urlencode }}"
+                  mode: 420
+                  overwrite: true
+                  path: /etc/containers/storage.conf
+    
+    - name: Wait for MachineConfigPool to start updating
+      when: not skip_storage_reboot | bool
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ kfile }}"
+        api_version: machineconfiguration.openshift.io/v1
+        kind: MachineConfigPool
+        name: master
+      register: mcp_status
+      until: 
+        - mcp_status.resources[0].status.updatingConfig is defined
+        - mcp_status.resources[0].status.phase == "Updating"
+      retries: 20
+      delay: 10
+      ignore_errors: yes # SNO might drop the connection mid-update as it reboots
+    
+    - name: Wait for SNO Node to finish reboot and reach Updated state
+      when: not skip_storage_reboot | bool
+      kubernetes.core.k8s_info:
+        kubeconfig: "{{ kfile }}"
+        api_version: machineconfiguration.openshift.io/v1
+        kind: MachineConfigPool
+        name: master
+      register: mcp_result
+      until:
+        - mcp_result.resources[0].status.updatedMachineCount == 1
+        - mcp_result.resources[0].status.unavailableMachineCount == 0
+        - mcp_result.resources[0].status.phase == "Updated"
+      retries: 60  # Give it 10 minutes (60 * 10s) to reboot and stabilize
+      delay: 10
+
     - name: Template Seedgenerator
       delegate_to: localhost
       ansible.builtin.template:
