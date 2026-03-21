@@ -61,18 +61,14 @@
       args:
         chdir: "{{ ca_folder }}"
 
-    - name: Delete exiting CAs from SNOs
+    - name: Purge all SNO certs from local firefox profile
       delegate_to: localhost
       ansible.builtin.shell: |
         set -e -o pipefail
-        rm -f {{ remote_ca_dir }}/sno-ca/{{ item }}-cert*pem
-        awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ remote_ca_dir }}/sno-ca/{{ item }}-ca-kube
-        for i in {{ item }}-cert*; do
-          certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" || true
+        certutil -L -d sql:"{{ firefox_profile }}" | awk 'NR>4 {sub(/\s*[A-Z,]*\s*$/, ""); print}' | while IFS= read -r nick; do
+          echo "Deleting $nick"
+          certutil -D -n "$nick" -d sql:"{{ firefox_profile }}"
         done
-      args:
-        chdir: "{{ remote_ca_dir }}/sno-ca"
-      with_items: "{{ changed_snos }}"
       when: changed_snos | length > 0
 
     - name: Import all CAs into my firefox profile
@@ -80,20 +76,20 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         rm -f {{ remote_ca_dir }}/sno-ca/{{ item }}-cert*pem
-        certutil -L -d sql:"{{ firefox_profile }}" | \
-        grep "{{ item }}" | sed 's/\s*[A-Z,]*\s*$//' | while IFS= read -r nick; do
-          certutil -D -n "$nick" -d sql:"{{ firefox_profile }}"
-        done 2>/dev/null || true
         awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ remote_ca_dir }}/sno-ca/{{ item }}-ca-kube
         for i in {{ item }}-cert*; do
-          certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" 2>/dev/null || true   
-          certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
+          if ! certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C" -i "$i" -d sql:"{{ firefox_profile }}" 2>/dev/null; then
+            serial=$(openssl x509 -in "$i" -noout -serial | cut -d= -f2)
+            certutil -L -d sql:"{{ firefox_profile }}" | awk 'NR>4 {sub(/\s*[A-Z,]*\s*$/, ""); print}' | while IFS= read -r nick; do
+              existing=$(certutil -L -d sql:"{{ firefox_profile }}" -n "$nick" -a 2>/dev/null | openssl x509 -noout -serial 2>/dev/null | cut -d= -f2)
+              if [ "$existing" = "$serial" ]; then
+                certutil -D -n "$nick" -d sql:"{{ firefox_profile }}"
+              fi
+            done
+            certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C" -i "$i" -d sql:"{{ firefox_profile }}"
+          fi
         done
       args:
         chdir: "{{ remote_ca_dir }}/sno-ca"
       with_items: "{{ changed_snos }}"
-      retries: 2
-      delay: 5
-      register: pki_import
-      until: pki_import is not failed
       when: changed_snos | length > 0
