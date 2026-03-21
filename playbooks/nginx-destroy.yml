@@ -12,7 +12,7 @@
     - name: Destroy {{ item }}
       ansible.builtin.shell: |
         virsh destroy {{ item }}
-        virsh undefine --nvram --remove-all-storage {{ item }}
+        virsh undefine --nvram --remove-all-storage --snapshots-metadata {{ item }}
       when: 'item in all_vms.list_vms'
       with_items:
       - nginx
