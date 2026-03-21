@@ -1,0 +1,9 @@
+#cloud-config
+users:
+  - name: michele
+    sudo: ALL=(ALL) NOPASSWD:ALL
+    ssh_authorized_keys:
+      - {{ sshkey }}
+{% if sshkey2 %}
+      - {{ sshkey2 }}
+{% endif %}

@@ -10,6 +10,12 @@
         dest: "/var/lib/libvirt/images/fedora-cloud-base.qcow2"
         mode: "0644"
 
+    - name: Template cloud-init user-data
+      ansible.builtin.template:
+        src: ../templates/chela-cloud-init.yaml.j2
+        dest: "/tmp/chela-cloud-init.yaml"
+        mode: "0644"
+
     - name: Create disk from cloud image
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -31,7 +37,7 @@
         --vcpus {{ chelas[item].cpus }},sockets=1,cores={{ chelas[item].cpus }},threads=1
         --ram {{ chelas[item].ram }}
         --disk "/var/lib/libvirt/images/{{ item }}.qcow2",format=qcow2,bus=virtio,cache={{ chelas[item].cache }}
-        --cloud-init root-ssh-key=/root/.ssh/id_rsa.pub,disable=on
+        --cloud-init user-data=/tmp/chela-cloud-init.yaml,disable=on
         --graphics spice,listen=127.0.0.1
         --noautoconsole
         --boot menu=on,useserial=on,uefi
@@ -42,6 +48,51 @@
       until: vm_creation is not failed
 
 - name: Wait for chela VM
+  hosts: chelas
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Wait for connection
+      ansible.builtin.wait_for_connection:
+
+    - name: Remove all existing repo files
+      ansible.builtin.shell: rm -f /etc/yum.repos.d/*.repo
+
+    - name: Copy local fedora repo config
+      ansible.builtin.copy:
+        src: /etc/yum.repos.d/fedora.repo
+        dest: /etc/yum.repos.d/fedora.repo
+        mode: "0644"
+
+    - name: Update all packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: Shut down VM
+      ansible.builtin.command: shutdown -h now
+      ignore_errors: true
+
+- name: Reboot chela VM
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Wait for VM to be stopped
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        virsh list --all | grep -w "{{ item }}" | grep -v running
+      register: stopped
+      retries: 60
+      delay: 10
+      until: stopped is not failed
+      with_items: "{{ chelas | list }}"
+
+    - name: Start VM
+      ansible.builtin.command: virsh start "{{ item }}"
+      with_items: "{{ chelas | list }}"
+
+- name: Wait for chela VM to come back
   hosts: chelas
   gather_facts: false
   become: true
