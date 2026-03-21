@@ -80,15 +80,20 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         rm -f {{ remote_ca_dir }}/sno-ca/{{ item }}-cert*pem
+        certutil -L -d sql:"{{ firefox_profile }}" | \
+        grep "{{ item }}" | sed 's/\s*[A-Z,]*\s*$//' | while IFS= read -r nick; do
+          certutil -D -n "$nick" -d sql:"{{ firefox_profile }}"
+        done 2>/dev/null || true
         awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ remote_ca_dir }}/sno-ca/{{ item }}-ca-kube
         for i in {{ item }}-cert*; do
+          certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" 2>/dev/null || true   
           certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
         done
       args:
         chdir: "{{ remote_ca_dir }}/sno-ca"
       with_items: "{{ changed_snos }}"
-      retries: 10
-      delay: 10
+      retries: 2
+      delay: 5
       register: pki_import
       until: pki_import is not failed
       when: changed_snos | length > 0

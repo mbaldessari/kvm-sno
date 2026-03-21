@@ -368,3 +368,32 @@
   until: uri is not failed
   retries: 150
   delay: 30
+
+- name: Shut down VM for snapshot
+  ansible.builtin.command: virsh shutdown "{{ item }}"
+  with_items: "{{ inventory_hostname_short }}"
+  when: sno_snapshot | bool
+
+- name: Wait for VM to be stopped
+  ansible.builtin.shell: |
+    set -e -o pipefail
+    virsh list --all | grep -w "{{ item }}" | grep -v running
+  register: stopped
+  retries: 60
+  delay: 10
+  until: stopped is not failed
+  with_items: "{{ inventory_hostname_short }}"
+  when: sno_snapshot | bool
+
+- name: Take VM snapshot
+  ansible.builtin.command: >-
+    virsh snapshot-create-as "{{ item }}"
+    --name "{{ item }}-post-install"
+    --description "Post-install snapshot"
+  with_items: "{{ inventory_hostname_short }}"
+  when: sno_snapshot | bool
+
+- name: Start VM after snapshot
+  ansible.builtin.command: virsh start "{{ item }}"
+  with_items: "{{ inventory_hostname_short }}"
+  when: sno_snapshot | bool

@@ -1,2 +1,3 @@
 ---
 # defaults file for sno_install
+sno_snapshot: false

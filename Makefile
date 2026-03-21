@@ -55,6 +55,10 @@ sno: ## Install an SNO vm on kuemper host
 sno-direct: ## Install an SNO vm on kuemper host and force a non-disconnected install
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' --extra-vars='{enable_disconnected: False}' $(EXTRA_VARS) playbooks/sno-install.yml
 
+.PHONY: sno-restore
+sno-restore: ## Restore SNO vms from snapshot
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-restore.yml
+
 .PHONY: sno-seed
 sno-seed: ## Create a SEED container from SNOs
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/seed-sno.yml
