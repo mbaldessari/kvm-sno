@@ -47,6 +47,14 @@
       with_items: "{{ inventory_hostname_short }}"
       failed_when: false
 
+    - name: Delete stale service-ca leader election lease
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        {{ oc_bin }} delete lease service-ca-controller-lock -n openshift-service-ca --ignore-not-found
+      with_items: "{{ inventory_hostname_short }}"
+      failed_when: false
+
     - name: Restart service-ca controller to regenerate serving certs
       ansible.builtin.shell: |
         set -e -o pipefail
