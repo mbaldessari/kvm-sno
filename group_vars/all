@@ -498,6 +498,13 @@ giteas:
     cache2: unsafe
     wwn2: "0x5000c50015eb81ab"
     network: 192.168.66.0/24
+chelas:
+  chela:
+    cpus: 4
+    ram: 32768
+    mac: "52:54:00:66:66:04"
+    disk: 64
+    cache: unsafe
 rhels:
   rhel1:
     version: "{{ rhel_version }}"

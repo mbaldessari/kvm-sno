@@ -1,0 +1,50 @@
+---
+- name: Install chela Fedora VM
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Download Fedora cloud image
+      ansible.builtin.get_url:
+        url: "{{ vm_image }}"
+        dest: "/var/lib/libvirt/images/fedora-cloud-base.qcow2"
+        mode: "0644"
+
+    - name: Create disk from cloud image
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        qemu-img create -f qcow2 -b /var/lib/libvirt/images/fedora-cloud-base.qcow2 -F qcow2 \
+          "/var/lib/libvirt/images/{{ item }}.qcow2" "{{ chelas[item].disk }}G"
+      with_items: "{{ chelas | list }}"
+
+    - name: Create chela VM
+      ansible.builtin.command: >-
+        virt-install
+        --name {{ item }}
+        --cpu host-passthrough
+        --hvm
+        --virt-type kvm
+        --arch {{ arch }}
+        --os-variant fedora-unknown
+        --import
+        --network bridge="{{ bridge_interface }}",model=virtio,mac="{{ chelas[item].mac }}"
+        --vcpus {{ chelas[item].cpus }},sockets=1,cores={{ chelas[item].cpus }},threads=1
+        --ram {{ chelas[item].ram }}
+        --disk "/var/lib/libvirt/images/{{ item }}.qcow2",format=qcow2,bus=virtio,cache={{ chelas[item].cache }}
+        --cloud-init root-ssh-key=/root/.ssh/id_rsa.pub,disable=on
+        --graphics spice,listen=127.0.0.1
+        --noautoconsole
+        --boot menu=on,useserial=on,uefi
+      with_items: "{{ chelas | list }}"
+      retries: 2
+      delay: 10
+      register: vm_creation
+      until: vm_creation is not failed
+
+- name: Wait for chela VM
+  hosts: chelas
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Wait for connection
+      ansible.builtin.wait_for_connection:

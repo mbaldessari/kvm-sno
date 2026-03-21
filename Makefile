@@ -88,6 +88,14 @@ nginx: ## Create RHEL nginx vm
 nginx-destroy: ## Destroy installed nginx VM
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/nginx-destroy.yml
 
+.PHONY: chela
+chela: ## Create chela Fedora VM
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/chela.yml
+
+.PHONY: chela-destroy
+chela-destroy: ## Destroy chela VM
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/chela-destroy.yml
+
 .PHONY: gitea
 gitea: ## Create RHEL vms
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/gitea.yml
