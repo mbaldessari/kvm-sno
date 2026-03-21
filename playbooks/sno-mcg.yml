@@ -9,6 +9,8 @@
     mcgtempfolder: "~/sno-mcg"
     gitrepo: https://github.com/validatedpatterns/multicloud-gitops
     gitbranch: main
+    #gitrepo: https://github.com/mbaldessari/multicloud-gitops
+    #gitbranch: different_workaround
     hub: sno1
     spoke: sno2
   tasks:
