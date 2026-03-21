@@ -31,6 +31,30 @@
       retries: 100
       delay: 20
 
+    - name: Approve any pending CSRs
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        {{ oc_bin }} get csr -o go-template='{% raw %}{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+      with_items: "{{ inventory_hostname_short }}"
+      failed_when: false
+
+    - name: Approve any pending CSRs (second pass)
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        {{ oc_bin }} get csr -o go-template='{% raw %}{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+      with_items: "{{ inventory_hostname_short }}"
+      failed_when: false
+
+    - name: Restart service-ca controller to regenerate serving certs
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ tempfolder }}/{{ item }}/auth/kubeconfig"
+        {{ oc_bin }} delete pods -n openshift-service-ca --all
+      with_items: "{{ inventory_hostname_short }}"
+      failed_when: false
+
     - name: Wait for all clusteroperators to be available
       ansible.builtin.shell: |
         set -e -o pipefail
