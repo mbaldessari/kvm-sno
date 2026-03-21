@@ -69,15 +69,24 @@
         name: "*"
         state: latest
 
-    - name: Shut down VM
-      ansible.builtin.command: shutdown -h now
-      ignore_errors: true
+    - name: Install npm and git
+      ansible.builtin.dnf:
+        name:
+          - npm
+          - git
+          - tmux
+          - neovim
+        state: present
 
 - name: Reboot chela VM
   hosts: kvm
   gather_facts: false
   become: true
   tasks:
+    - name: Shut down VM
+      ansible.builtin.command: virsh shutdown "{{ item }}"
+      with_items: "{{ chelas | list }}"
+
     - name: Wait for VM to be stopped
       ansible.builtin.shell: |
         set -e -o pipefail
