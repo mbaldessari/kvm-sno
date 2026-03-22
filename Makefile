@@ -80,6 +80,10 @@ rhels: ## Create RHEL vms
 rhels-destroy: ## Destroy installed RHELs VMS
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/rhels-destroy.yml
 
+.PHONY: rhels-restore
+rhels-restore: ## Restore RHEL VMs from snapshot
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/rhels-restore.yml
+
 .PHONY: nginx
 nginx: ## Create RHEL nginx vm
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/nginx.yml

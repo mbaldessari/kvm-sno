@@ -1,0 +1,28 @@
+---
+- name: Restore RHEL VMs from snapshot
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Destroy VM
+      ansible.builtin.command: virsh destroy "{{ item }}"
+      with_items: "{{ rhels }}"
+      failed_when: false
+
+    - name: Restore snapshot
+      ansible.builtin.command: >-
+        virsh snapshot-revert "{{ item }}"
+        --snapshotname "{{ item }}-post-install"
+      with_items: "{{ rhels }}"
+
+    - name: Start VM
+      ansible.builtin.command: virsh start "{{ item }}"
+      with_items: "{{ rhels }}"
+
+- name: Wait for RHEL boxes
+  hosts: rhels
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Wait for boxes
+      ansible.builtin.wait_for_connection:
