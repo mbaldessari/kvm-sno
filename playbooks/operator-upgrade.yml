@@ -9,7 +9,7 @@
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/validatedpatterns/patterns-operator
     upgrade_from: "0.0.66"
-    gitrepo_to: https://github.com/sector2000/validatedpatterns-patterns-operator/
+    gitrepo_to: https://github.com/mbaldessari/validatedpatterns-patterns-operator/
     upgrade_to: disable-default-argocd-instance
     hub: sno1
     spoke: sno2
@@ -263,5 +263,22 @@
         oc patch -n patterns-operator subscription.operators.coreos.com/patterns-operator --type=json -p '[{"op": "replace", "path": "/spec/source", "value": "test-pattern-operator"}]'
       args:
         chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
+      tags:
+        - operator-upgrade
+
+    - name: Wait for all argo apps to be green on all clusters
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        ./pattern.sh make argo-healthcheck
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 10
+      delay: 20
+      register: allargos
+      until: allargos is not failed
+      with_items:
+        - "{{ hub }}"
+        - "{{ spoke }}"
       tags:
         - operator-upgrade
