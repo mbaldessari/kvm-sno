@@ -8,17 +8,17 @@
   vars:
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.65"
-    gitrepo_to: https://github.com/validatedpatterns/patterns-operator
-    upgrade_to: main
+    upgrade_from: "0.0.66"
+    gitrepo_to: https://github.com/sector2000/validatedpatterns-patterns-operator/
+    upgrade_to: disable-default-argocd-instance
     hub: sno1
     spoke: sno2
     from_version: 6.6.6
     to_version: 6.6.7
     registry: kuemper.int.rhx/bandini
     mcgtempfolder: "~/sno-mcg"
-    mcggitrepo: https://github.com/validatedpatterns/multicloud-gitops
-    mcggitbranch: main
+    mcggitrepo: https://github.com/mbaldessari/multicloud-gitops
+    mcggitbranch: disable-default-argocd-instance
   tasks:
     - name: Print versions
       ansible.builtin.debug:
@@ -80,11 +80,24 @@
         set -e
         export KUBECONFIG=~/{{ hub }}-kubeconfig
         cat > /tmp/vp-sub.yaml<<EOF
+        ---
+        apiVersion: v1
+        kind: Namespace
+        metadata:
+          name: patterns-operator
+        ---
+        apiVersion: operators.coreos.com/v1
+        kind: OperatorGroup
+        metadata:
+          name: patterns-operator-group
+          namespace: patterns-operator
+        spec:
+        ---
         apiVersion: operators.coreos.com/v1alpha1
         kind: Subscription
         metadata:
           name: patterns-operator
-          namespace: openshift-operators
+          namespace: patterns-operator
           labels:
             operators.coreos.com/patterns-operator.openshift-operators: ""
         spec:
@@ -113,7 +126,7 @@
       ansible.builtin.shell: |
         export KUBECONFIG=~/{{ hub }}-kubeconfig
         set -e -o pipefail
-        oc get installplan -n openshift-operators $(oc get installplan -A |grep patterns-operator |awk '{ print $2 }') -o jsonpath='{.status.phase}'
+        oc get installplan -n patterns-operator $(oc get installplan -A |grep patterns-operator |awk '{ print $2 }') -o jsonpath='{.status.phase}'
       retries: 20
       delay: 10
       register: installplan_ret

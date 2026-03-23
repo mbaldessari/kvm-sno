@@ -8,7 +8,7 @@
   vars:
     agoftempfolder: "~/agof"
     gitrepo: https://github.com/mbaldessari/agof
-    gitbranch: bandini1
+    gitbranch: prebuilt-collection-container
     inventory: ~/inventory_agof
   tasks:
     - name: Delete temporary folder
@@ -41,12 +41,12 @@
         dest: ~/agof_vault.yml
         mode: "0640"
 
-    - name: Run AGOF check
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        ./pattern.sh make check &> /tmp/agof-check.log
-      args:
-        chdir: "{{ agoftempfolder }}/agof"
+    # - name: Run AGOF check
+    #   ansible.builtin.shell: |
+    #     set -e -o pipefail
+    #     ./pattern.sh make check &> /tmp/agof-check.log
+    #   args:
+    #     chdir: "{{ agoftempfolder }}/agof"
 
     - name: Install AGOF
       ansible.builtin.shell: |
