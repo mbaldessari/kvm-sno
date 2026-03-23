@@ -224,23 +224,23 @@
     - name: Prepare catalog/template.yaml
       ansible.builtin.shell: |
         cat > catalog/template.yaml<<EOF
-        schema: olm.package
-        name: patterns-operator
-        defaultChannel: fast
         ---
-        schema: olm.channel
-        package: patterns-operator
-        name: fast
+        schema: olm.template.basic
         entries:
-        - name: patterns-operator.v{{ from_version }}
-        - name: patterns-operator.v\$VERSION
-          replaces: patterns-operator.v{{ from_version }}
-        ---
-        schema: olm.bundle
-        image: {{ registry }}/patterns-operator-bundle:v{{ from_version }}
-        ---
-        schema: olm.bundle
-        image: \$BUNDLE_IMG
+          - schema: olm.package
+            name: patterns-operator
+            defaultChannel: fast
+          - schema: olm.channel
+            package: patterns-operator
+            name: fast
+            entries:
+            - name: patterns-operator.v{{ from_version }}
+            - name: patterns-operator.v{{ to_version }}
+              replaces: patterns-operator.v{{ from_version }}
+          - schema: olm.bundle
+            image: kuemper.int.rhx/bandini/patterns-operator-bundle:v{{ from_version }}
+          - schema: olm.bundle
+            image: kuemper.int.rhx/bandini/patterns-operator-bundle:v{{ to_version }}
         EOF
       args:
         chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
@@ -260,7 +260,7 @@
     - name: Patch subscription to make sure we're using the right catalog source
       ansible.builtin.shell: |
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        oc patch -n openshift-operators subscription.operators.coreos.com/patterns-operator --type=json -p '[{"op": "replace", "path": "/spec/source", "value": "test-pattern-operator"}]'
+        oc patch -n patterns-operator subscription.operators.coreos.com/patterns-operator --type=json -p '[{"op": "replace", "path": "/spec/source", "value": "test-pattern-operator"}]'
       args:
         chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
       tags:
