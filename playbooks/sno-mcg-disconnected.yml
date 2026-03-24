@@ -60,7 +60,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        make argo-healthcheck
+        ./pattern.sh make argo-healthcheck
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
       retries: 100
@@ -109,7 +109,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ item }}-kubeconfig
-        make argo-healthcheck
+        ./pattern.sh make argo-healthcheck
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
       retries: 100
