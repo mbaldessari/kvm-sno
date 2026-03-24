@@ -370,7 +370,7 @@
       ansible.builtin.set_fact:
         secret_migration_info:
           clone_addr: "{{ upstream_repo }}"
-          uid: "{{ secret_user_out.json.id }}"
+          uid: "{{ secret_user_out.json.id | int }}"
           repo_name: "secret-mcg"
           mirror: true
           private: true
