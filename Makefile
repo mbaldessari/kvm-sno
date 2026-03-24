@@ -104,6 +104,10 @@ chela-destroy: ## Destroy chela VM
 gitea: ## Create RHEL vms
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/gitea.yml
 
+.PHONY: gitea-restore
+gitea-restore: ## Restore Gitea VMs from snapshot
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/gitea-restore.yml
+
 .PHONY: gitea-destroy
 gitea-destroy: ## Destroy installed RHELs VMS
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/gitea-destroy.yml
