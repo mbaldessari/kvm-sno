@@ -6,7 +6,7 @@
   tasks:
     - name: Set root_wwn to be sure sda is the right disk
       ansible.builtin.set_fact:
-        root_wwn: "disk/by-id/wwn-{{ giteas['gitea'].wwn }}"
+        root_wwn: disk/by-id/wwn-{{ giteas['gitea'].wwn }}
 
     - name: Template kickstart file to the firewall where it is hosted
       ansible.builtin.template:
@@ -98,7 +98,7 @@
   tasks:
     - name: Set extra_wwn to be sure sdb is the right disk
       ansible.builtin.set_fact:
-        extra_wwn: "disk/by-id/wwn-{{ giteas['gitea'].wwn2 }}"
+        extra_wwn: disk/by-id/wwn-{{ giteas['gitea'].wwn2 }}
 
     - name: Wait for boxes
       ansible.builtin.wait_for_connection:
@@ -153,7 +153,7 @@
       ansible.posix.mount:
         state: present
         path: /mnt/data
-        src: /dev/"{{ extra_wwn }}"
+        src: "/dev/{{ extra_wwn }}"
         fstype: xfs
 
     - name: Create minio folders
