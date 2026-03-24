@@ -333,6 +333,65 @@
       delay: 10
       until: migrate_out is not failed
 
+    - name: Create secret-user
+      ansible.builtin.uri:
+        url: "{{ gitea.url }}/api/v1/admin/users"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: token {{ gitea_token.stdout }}
+        body_format: json
+        body:
+          email: "secret@secret.secret"
+          full_name: "Secret User"
+          login_name: "secret-user"
+          must_change_password: false
+          password: "{{ gitea.admin_pass }}"
+          source_id: 0
+          username: "secret-user"
+          visibility: "private"
+        return_content: true
+        status_code: [201, 422]
+      register: secret_user_out
+      retries: 10
+      delay: 10
+      until: secret_user_out is not failed
+
+    - name: Generate an access token for secret-user
+      become: true
+      become_user: git
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        /usr/local/bin/gitea  -c /etc/gitea/app.ini admin user generate-access-token \
+        --username "secret-user" --scopes 'write:repository,read:repository' --raw
+      register: secret_user_token
+
+    - name: Set secret migration info
+      ansible.builtin.set_fact:
+        secret_migration_info:
+          clone_addr: "{{ upstream_repo }}"
+          uid: "{{ secret_user_out.json.id }}"
+          repo_name: "secret-mcg"
+          mirror: true
+          private: true
+          description: "Private mirror"
+
+    - name: Create secret-mcg repo
+      ansible.builtin.uri:
+        url: "{{ gitea.url }}/api/v1/repos/migrate"
+        method: POST
+        headers:
+          Content-Type: application/json
+          Authorization: token {{ secret_user_token.stdout }}
+        body_format: json
+        body: "{{ secret_migration_info }}"
+        return_content: true
+        status_code: [201, 409]
+      register: secret_migrate_out
+      retries: 10
+      delay: 10
+      until: secret_migrate_out is not failed
+
     - name: Set ssh key facts
       ansible.builtin.set_fact:
         ssh_info:
