@@ -282,3 +282,15 @@
         - "{{ spoke }}"
       tags:
         - operator-upgrade
+
+    - name: Check that pattern-operator controller has completed reconciliation
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        oc logs -n patterns-operator $(oc get pods -n patterns-operator -l control-plane=controller-manager -o jsonpath='{.items[0].metadata.name}') -c manager | grep "Reconcile complete"
+      retries: 20
+      delay: 15
+      register: reconcile_ret
+      until: reconcile_ret is not failed
+      tags:
+        - operator-upgrade
