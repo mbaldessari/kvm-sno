@@ -19,6 +19,7 @@
     mcgtempfolder: "~/sno-mcg"
     mcggitrepo: https://github.com/mbaldessari/multicloud-gitops
     mcggitbranch: disable-default-argocd-instance
+    min_age_minutes: 5
   tasks:
     - name: Print versions
       ansible.builtin.debug:
@@ -294,3 +295,59 @@
       until: reconcile_ret is not failed
       tags:
         - operator-upgrade
+
+    - name: Check for nil pointer dereference in pattern-operator controller logs
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        POD=$(oc get pods -n patterns-operator -l control-plane=controller-manager -o jsonpath='{.items[0].metadata.name}')
+        LOGS=$(oc logs -n patterns-operator "${POD}" -c manager 2>&1)
+        if echo "${LOGS}" | grep -q "nil pointer dereference"; then
+          echo "ERROR: Found nil pointer dereference in controller logs:"
+          echo "${LOGS}" | grep -B2 -A5 "nil pointer dereference"
+          exit 1
+        fi
+        echo "No nil pointer dereference found in controller logs"
+      register: nil_pointer_ret
+      tags:
+        - operator-upgrade
+        - post-checks
+
+    - name: Check that ArgoCD objects are not being recreated on {{ item }}
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        NOW=$(date +%s)
+        ERRORS=""
+        while IFS= read -r line; do
+          NAME=$(echo "${line}" | awk '{print $1}')
+          NS=$(echo "${line}" | awk '{print $2}')
+          CREATED=$(echo "${line}" | awk '{print $3}')
+          CREATED_EPOCH=$(date -d "${CREATED}" +%s)
+          AGE_MINUTES=$(( (NOW - CREATED_EPOCH) / 60 ))
+          if [ "${AGE_MINUTES}" -lt "{{ min_age_minutes }}" ]; then
+            ERRORS="${ERRORS}ArgoCD ${NS}/${NAME} is only ${AGE_MINUTES} minutes old (created: ${CREATED})\n"
+          fi
+        done < <(oc get argocds -A -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.metadata.namespace}{" "}{.metadata.creationTimestamp}{"\n"}{end}')
+        while IFS= read -r line; do
+          NAME=$(echo "${line}" | awk '{print $1}')
+          NS=$(echo "${line}" | awk '{print $2}')
+          CREATED=$(echo "${line}" | awk '{print $3}')
+          CREATED_EPOCH=$(date -d "${CREATED}" +%s)
+          AGE_MINUTES=$(( (NOW - CREATED_EPOCH) / 60 ))
+          if [ "${AGE_MINUTES}" -lt "{{ min_age_minutes }}" ]; then
+            ERRORS="${ERRORS}Application ${NS}/${NAME} is only ${AGE_MINUTES} minutes old (created: ${CREATED})\n"
+          fi
+        done < <(oc get applications.argoproj.io -A -o jsonpath='{range .items[*]}{.metadata.name}{" "}{.metadata.namespace}{" "}{.metadata.creationTimestamp}{"\n"}{end}')
+        if [ -n "${ERRORS}" ]; then
+          echo -e "ERROR: The following objects were created less than {{ min_age_minutes }} minutes ago:\n${ERRORS}"
+          exit 1
+        fi
+        echo "All ArgoCD and Application objects are older than {{ min_age_minutes }} minutes"
+      with_items:
+        - "{{ hub }}"
+        - "{{ spoke }}"
+      register: argocd_age_ret
+      tags:
+        - operator-upgrade
+        - post-checks
