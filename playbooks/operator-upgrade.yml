@@ -8,17 +8,20 @@
   vars:
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.66"
+    upgrade_from: "0.0.68"
     gitrepo_to: https://github.com/validatedpatterns/patterns-operator
-    upgrade_to: main
-    hub: sno1
-    spoke: sno2
+    upgrade_to: "main"
+    hub: sno3
+    spoke: sno4
     from_version: 6.6.6
     to_version: 6.6.7
     registry: kuemper.int.rhx/bandini
     mcgtempfolder: "~/sno-mcg"
-    mcggitrepo: https://github.com/mbaldessari/multicloud-gitops
-    mcggitbranch: disable-default-argocd-instance
+    #mcgtoken: "{{ lookup('file', '~/.mcg-private-token' | expanduser) }}"
+    #mcggitrepo: https://github.com/mbaldessari/mcg-private
+    mcggitrepo: https://github.com/validatedpatterns/multicloud-gitops
+    #mcggitrepo_pat: "https://{{ mcgtoken }}@github.com/mbaldessari/mcg-private"
+    mcggitbranch: main
   tasks:
     - name: Print versions
       ansible.builtin.debug:
@@ -31,6 +34,39 @@
         - "{{ hub }}"
         - "{{ spoke }}"
       register: kubeconfig_files
+
+    - name: Clone mcg git repo
+      ansible.builtin.git:
+        repo: "{{ mcggitrepo }}"
+        version: "{{ mcggitbranch }}"
+        dest: "{{ mcgtempfolder }}/multicloud-gitops"
+        clone: true
+      tags:
+        - gitrepo
+
+    # - name: Create private secret
+    #   ansible.builtin.shell: |
+    #     set -e
+    #     export KUBECONFIG=~/{{ hub }}-kubeconfig
+    #     cat > /tmp/vp-private.yaml<<EOF
+    #     apiVersion: v1
+    #     kind: Secret
+    #     metadata:
+    #       name: pat-secret
+    #       namespace: patterns-operator
+    #       labels:
+    #         argocd.argoproj.io/secret-type: repository
+    #     stringData:
+    #       type: git
+    #       url: "{{ mcggitrepo }}"
+    #       # For GitHub PATs, the username can be anything (e.g., 'token'), 
+    #       # but the password MUST be the PAT
+    #       username: bandini
+    #       password: "{{ mcgtoken }}"
+    #     EOF
+    #     oc apply -f /tmp/vp-private.yaml
+    #   tags:
+    #     - gitrepo
 
     - name: Verifying if files exists
       ansible.builtin.debug:
@@ -132,19 +168,11 @@
       register: installplan_ret
       until: installplan_ret.stdout == "Complete"
 
-    - name: Clone mcg git repo
-      ansible.builtin.git:
-        repo: "{{ mcggitrepo }}"
-        version: "{{ mcggitbranch }}"
-        dest: "{{ mcgtempfolder }}/multicloud-gitops"
-        clone: true
-      tags:
-        - operator-install
-
     - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
+        #./pattern.sh make TOKEN_SECRET=pat-secret TOKEN_NAMESPACE=patterns-operator install
         ./pattern.sh make install
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
