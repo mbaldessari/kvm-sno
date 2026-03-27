@@ -8,9 +8,9 @@
   vars:
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.68"
-    gitrepo_to: https://github.com/validatedpatterns/patterns-operator
-    upgrade_to: "main"
+    upgrade_from: "0.0.69"
+    gitrepo_to: https://github.com/mbaldessari/patterns-operator
+    upgrade_to: "ourown-gitops"
     hub: sno3
     spoke: sno4
     from_version: 6.6.6
@@ -20,8 +20,13 @@
     #mcgtoken: "{{ lookup('file', '~/.mcg-private-token' | expanduser) }}"
     #mcggitrepo: https://github.com/mbaldessari/mcg-private
     mcggitrepo: https://github.com/validatedpatterns/multicloud-gitops
-    #mcggitrepo_pat: "https://{{ mcgtoken }}@github.com/mbaldessari/mcg-private"
     mcggitbranch: main
+    #mcggitrepo_pat: "https://{{ mcgtoken }}@github.com/mbaldessari/mcg-private"
+    mcgchangerepo: true
+    mcggitrepo2: https://github.com/mbaldessari/multicloud-gitops
+    mcggitbranch2: ourown-gitops
+    clustergrouprepo2: https://github.com/mbaldessari/clustergroup-chart
+    clustergroupbranch2: ourown-gitops
     min_age_minutes: 5
   tasks:
     - name: Print versions
@@ -302,8 +307,8 @@
         ./pattern.sh make argo-healthcheck
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      retries: 10
-      delay: 20
+      retries: 20
+      delay: 30
       register: allargos
       until: allargos is not failed
       with_items:
@@ -379,3 +384,30 @@
       tags:
         - operator-upgrade
         - post-checks
+
+    - name: Create a potential mcg upgrade CR
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        cat > /tmp/upgrade-mcg.yaml<<EOF
+        apiVersion: gitops.hybrid-cloud-patterns.io/v1alpha1
+        kind: Pattern
+        metadata:
+          finalizers:
+            - foregroundDeletePattern
+          name: multicloud-gitops
+          namespace: patterns-operator
+        spec:
+          analyticsUUID: vp-team-bandini
+          clusterGroupName: hub
+          gitSpec:
+            inClusterGitServer: false
+            targetRepo: "{{ mcggitrepo2 }}"
+            targetRevision: "{{ mcggitbranch2 }}"
+          multiSourceConfig:
+            clusterGroupGitRepoUrl: "{{ clustergrouprepo2 }}"
+            clusterGroupChartGitRevision: "{{ ourown-gitops }}"
+            enabled: true      
+        EOF
+        oc apply -f /tmp/upgrade-mcg.yaml
+      when: mcgchangerepo
