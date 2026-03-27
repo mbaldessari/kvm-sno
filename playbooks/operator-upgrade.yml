@@ -411,3 +411,28 @@
         EOF
         oc apply -f /tmp/upgrade-mcg.yaml
       when: mcgchangerepo
+      tags:
+        - operator-postupgrade
+
+    - name: Wait for the pattern change to propagate
+      ansible.builtin.pase:
+        minutes: 3
+      tags:
+        - operator-postupgrade
+
+    - name: Wait for all argo apps to be green on all clusters (2)
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ item }}-kubeconfig
+        ./pattern.sh make argo-healthcheck
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+      retries: 20
+      delay: 30
+      register: allargos
+      until: allargos is not failed
+      with_items:
+        - "{{ hub }}"
+        - "{{ spoke }}"
+      tags:
+        - operator-postupgrade
