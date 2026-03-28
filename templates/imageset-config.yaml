@@ -35,7 +35,6 @@ mirror:
       - name: openshift-gitops-operator
         channels:
           - name: gitops-1.18
-          - name: gitops-1.20
   - catalog: registry.redhat.io/redhat/community-operator-index:v{{ ocp_maj_min_version }}
     packages:
       - name: patterns-operator
