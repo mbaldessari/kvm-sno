@@ -415,7 +415,7 @@
         - operator-postupgrade
 
     - name: Wait for the pattern change to propagate
-      ansible.builtin.pase:
+      ansible.builtin.pause:
         minutes: 3
       tags:
         - operator-postupgrade
