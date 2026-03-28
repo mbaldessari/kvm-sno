@@ -19,6 +19,8 @@ mirror:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v{{ ocp_maj_min_version }}
     packages:
       - name: openshift-external-secrets-operator
+        channels:
+          - name: stable-v1
       - name: lvms-operator
         channels:
           - name: stable-{{ ocp_maj_min_version }}
@@ -28,6 +30,8 @@ mirror:
         channels:
           - name: release-2.16
       - name: multicluster-engine
+        channels:
+          - name: stable-2.11
       - name: openshift-gitops-operator
         channels:
           - name: gitops-1.18
