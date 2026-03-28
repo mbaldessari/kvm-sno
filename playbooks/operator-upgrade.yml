@@ -406,7 +406,7 @@
             targetRevision: "{{ mcggitbranch2 }}"
           multiSourceConfig:
             clusterGroupGitRepoUrl: "{{ clustergrouprepo2 }}"
-            clusterGroupChartGitRevision: "{{ ourown-gitops }}"
+            clusterGroupChartGitRevision: "{{ clustergroupbranch2 }}"
             enabled: true      
         EOF
         oc apply -f /tmp/upgrade-mcg.yaml

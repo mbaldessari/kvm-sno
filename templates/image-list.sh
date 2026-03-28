@@ -4,7 +4,7 @@ set -euo pipefail
 CATALOG_IMAGE="quay.io/openshift-storage-scale/openshift-fusion-access-catalog:latest"
 TMP_DIR=$(mktemp -d)
 BUNDLE_LIST_FILE="bundle-images.txt"
-ALL_IMAGES_FILE="/tmp/all-images.txt"
+ALL_IMAGES_FILE="/tmp/all-fusion-images.txt"
 
 # Step 1: Pull the catalog image (assumes it's locally accessible)
 podman pull "$CATALOG_IMAGE"

@@ -36,14 +36,15 @@
         - image-list.sh
         - patterns-image-list.sh
 
-    - name: Fetch all fusion access images
+    - name: Fetch helm quay images
       ansible.builtin.shell: |
-        /tmp/image-list.sh
+        set -e -o pipefail
+        #/tmp/image-list.sh
         /tmp/patterns-image-list.sh > /tmp/pattern-images.txt
 
     - name: Read all images
       ansible.builtin.shell: |
-        cat /tmp/all-images.txt
+        #cat /tmp/all-fusion-images.txt
         cat /tmp/pattern-images.txt
       register: all_images
 
