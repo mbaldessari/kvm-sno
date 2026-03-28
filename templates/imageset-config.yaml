@@ -49,17 +49,14 @@ mirror:
   - name: registry.connect.redhat.com/hashicorp/vault:1.21.4-ubi
   - name: registry.access.redhat.com/ubi10/httpd-24:10.0-1755779646
   - name: registry.redhat.io/openshift4/ose-kube-rbac-proxy-rhel9@sha256:29201e85bd41642b72c7c0ce915e40aad90823d0efc3e7bbab9c351c92c74341
-  - name: ghcr.io/external-secrets/external-secrets:v0.10.2-ubi
-  - name: ghcr.io/external-secrets/external-secrets:v0.19.2-ubi
-  - name: oci.external-secrets.io/external-secrets/external-secrets:v0.19.2-ubi
   - name: registry.redhat.io/ansible-automation-platform-24/ee-supported-rhel9:latest
   - name: quay.io/validatedpatterns/utility-container:latest
   - name: quay.io/validatedpatterns/imperative-container:v1
   - name: docker.io/gitea/gitea:1.22.6-rootless
   - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
-  - name: quay.io/containerdisks/centos-stream:9
-  - name: quay.io/containerdisks/centos-stream:10
-  - name: quay.io/containerdisks/fedora:latest
+  # - name: quay.io/containerdisks/centos-stream:9
+  # - name: quay.io/containerdisks/centos-stream:10
+  # - name: quay.io/containerdisks/fedora:latest
   # - name: quay.io/rhn_support_mbaldess/multipath-daemon:latest
   # - name: quay.io/rhn_support_mbaldess/multipath-operator:latest
   # # 5.2.3.1
