@@ -19,6 +19,17 @@ networking:
   - 172.30.0.0/16
 platform:
   none: {}
+{% if enable_disconnected %}
+capabilities:
+  baselineCapabilitySet: None
+  additionalEnabledCapabilities:
+    - MachineAPI
+    - OperatorLifecycleManager
+    - Ingress
+    - Console
+    - NodeTuning
+    - Storage
+{% endif %}
 bootstrapInPlace:
   installationDisk: /dev/disk/by-id/virtio-{{ diskserial }} 
 pullSecret: '{{ pullsecret | regex_replace('\'', '"') }}'

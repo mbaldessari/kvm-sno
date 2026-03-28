@@ -43,6 +43,14 @@
   with_items: "{{ inventory_hostname_short }}"
   when: enable_disconnected
 
+- name: Disable telemeter client at install time
+  ansible.builtin.copy:
+    src: ./templates/disable-monitoring.yaml
+    dest: "{{ tempfolder }}/{{ item }}/manifests/disable-monitoring.yaml"
+    mode: "0644"
+  with_items: "{{ inventory_hostname_short }}"
+  when: enable_disconnected
+
 # Not working yet?!
 - name: Template machineconfig for kernel args
   ansible.builtin.template:
