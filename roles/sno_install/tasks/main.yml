@@ -35,6 +35,14 @@
     chdir: "{{ tempfolder }}"
   with_items: "{{ inventory_hostname_short }}"
 
+- name: Disable default catalog sources at install time
+  ansible.builtin.copy:
+    src: ./templates/disable-default-catalogsources.yaml
+    dest: "{{ tempfolder }}/{{ item }}/manifests/disable-default-catalogsources.yaml"
+    mode: "0644"
+  with_items: "{{ inventory_hostname_short }}"
+  when: enable_disconnected
+
 # Not working yet?!
 - name: Template machineconfig for kernel args
   ansible.builtin.template:
