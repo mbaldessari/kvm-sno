@@ -323,6 +323,12 @@
         --username "secret-user" --scopes 'write:repository,read:repository' --raw
       register: secret_user_token
 
+    - name: Write secret user token to /tmp/secret_gitea_token
+      ansible.builtin.copy:
+        content: "{{ secret_user_token.stdout }}"
+        dest: /tmp/secret_gitea_token
+        mode: "0600"
+
     - ansible.builtin.include_tasks: gitea-migrate-repo.yml
       loop: "{{ repos }}"
 
