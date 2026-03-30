@@ -286,9 +286,6 @@
         --username "{{ gitea.admin_user }}" --scopes 'write:repository,write:admin,write:user' --raw
       register: gitea_token
 
-    - ansible.builtin.include_tasks: gitea-migrate-repo.yml
-      loop: "{{ repos }}"
-
     - name: Create secret-user
       ansible.builtin.uri:
         url: "{{ gitea.url }}/api/v1/admin/users"
@@ -313,6 +310,10 @@
       delay: 10
       until: secret_user_out is not failed
 
+    - name: Set secret user id fact
+      ansible.builtin.set_fact:
+        secret_uid: "{{ secret_user_out.json.id | int }}"
+
     - name: Generate an access token for secret-user
       become: true
       become_user: git
@@ -322,31 +323,8 @@
         --username "secret-user" --scopes 'write:repository,read:repository' --raw
       register: secret_user_token
 
-    - name: Set secret migration info
-      ansible.builtin.set_fact:
-        secret_migration_info: >-
-          {{ {'clone_addr': upstream_repo,
-              'uid': secret_user_out.json.id | int,
-              'repo_name': 'secret-mcg',
-              'mirror': true,
-              'private': true,
-              'description': 'Private mirror'} }}
-
-    - name: Create secret-mcg repo
-      ansible.builtin.uri:
-        url: "{{ gitea.url }}/api/v1/repos/migrate"
-        method: POST
-        headers:
-          Content-Type: application/json
-          Authorization: token {{ secret_user_token.stdout }}
-        body_format: json
-        body: "{{ secret_migration_info }}"
-        return_content: true
-        status_code: [201, 409]
-      register: secret_migrate_out
-      retries: 10
-      delay: 10
-      until: secret_migrate_out is not failed
+    - ansible.builtin.include_tasks: gitea-migrate-repo.yml
+      loop: "{{ repos }}"
 
     - name: Set ssh key facts
       ansible.builtin.set_fact:
