@@ -58,9 +58,9 @@
     - name: Remove all existing repo files
       ansible.builtin.shell: rm -f /etc/yum.repos.d/*.repo
 
-    - name: Copy local fedora repo config
-      ansible.builtin.copy:
-        src: /etc/yum.repos.d/fedora.repo
+    - name: Template fedora repo config
+      ansible.builtin.template:
+        src: ../templates/fedora-repo.j2
         dest: /etc/yum.repos.d/fedora.repo
         mode: "0644"
 
