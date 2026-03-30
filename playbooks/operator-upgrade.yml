@@ -6,9 +6,10 @@
   become: true
   become_user: michele
   vars:
+    patterns_operator_ns: openshift-operators
     vp_operator_tempfolder: "~/sno-vp-operator"
-    gitrepo_from: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.69"
+    gitrepo_from: https://github.com/mbaldessari/patterns-operator
+    upgrade_from: "0.0.65-wtf"
     gitrepo_to: https://github.com/mbaldessari/patterns-operator
     upgrade_to: "ourown-gitops"
     hub: sno3
@@ -117,7 +118,7 @@
       tags:
         - operator-install
 
-    - name: Install the subscription and operator
+    - name: Install the subscription and operator (ns patterns-operator)
       ansible.builtin.shell: |
         set -e
         export KUBECONFIG=~/{{ hub }}-kubeconfig
@@ -150,6 +151,32 @@
           sourceNamespace: openshift-marketplace
         EOF
         oc apply -f /tmp/vp-sub.yaml
+      when: patterns_operator_ns == "patterns-operator"
+      tags:
+        - operator-install
+
+    - name: Install the subscription and operator (ns openshift-operators)
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG=~/{{ hub }}-kubeconfig
+        cat > /tmp/vp-sub.yaml<<EOF
+        ---
+        apiVersion: operators.coreos.com/v1alpha1
+        kind: Subscription
+        metadata:
+          name: patterns-operator
+          namespace: openshift-operators
+          labels:
+            operators.coreos.com/patterns-operator.openshift-operators: ""
+        spec:
+          channel: fast
+          installPlanApproval: Automatic
+          name: patterns-operator
+          source: test-pattern-operator
+          sourceNamespace: openshift-marketplace
+        EOF
+        oc apply -f /tmp/vp-sub.yaml
+      when: patterns_operator_ns == "openshift-operators"
       tags:
         - operator-install
 
@@ -168,7 +195,7 @@
       ansible.builtin.shell: |
         export KUBECONFIG=~/{{ hub }}-kubeconfig
         set -e -o pipefail
-        oc get installplan -n patterns-operator $(oc get installplan -A |grep patterns-operator |awk '{ print $2 }') -o jsonpath='{.status.phase}'
+        oc get installplan -n {{ patterns_operator_ns }} $(oc get installplan -A |grep patterns-operator |awk '{ print $2 }') -o jsonpath='{.status.phase}'
       retries: 20
       delay: 10
       register: installplan_ret
@@ -293,8 +320,9 @@
 
     - name: Patch subscription to make sure we're using the right catalog source
       ansible.builtin.shell: |
+        set -e
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        oc patch -n patterns-operator subscription.operators.coreos.com/patterns-operator --type=json -p '[{"op": "replace", "path": "/spec/source", "value": "test-pattern-operator"}]'
+        oc patch -n {{ patterns_operator_ns }} subscription.operators.coreos.com/patterns-operator --type=json -p '[{"op": "replace", "path": "/spec/source", "value": "test-pattern-operator"}]'
       args:
         chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
       tags:
@@ -321,7 +349,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        oc logs -n patterns-operator $(oc get pods -n patterns-operator -l control-plane=controller-manager -o jsonpath='{.items[0].metadata.name}') -c manager | grep "Reconcile complete"
+        oc logs -n {{ patterns_operator_ns }} $(oc get pods -n {{ patterns_operator_ns }} -l control-plane=controller-manager -o jsonpath='{.items[0].metadata.name}') -c manager | grep "Reconcile complete"
       retries: 20
       delay: 15
       register: reconcile_ret
@@ -333,8 +361,8 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        POD=$(oc get pods -n patterns-operator -l control-plane=controller-manager -o jsonpath='{.items[0].metadata.name}')
-        LOGS=$(oc logs -n patterns-operator "${POD}" -c manager 2>&1)
+        POD=$(oc get pods -n {{ patterns_operator_ns }} -l control-plane=controller-manager -o jsonpath='{.items[0].metadata.name}')
+        LOGS=$(oc logs -n {{ patterns_operator_ns }} "${POD}" -c manager 2>&1)
         if echo "${LOGS}" | grep -q "nil pointer dereference"; then
           echo "ERROR: Found nil pointer dereference in controller logs:"
           echo "${LOGS}" | grep -B2 -A5 "nil pointer dereference"
@@ -396,7 +424,7 @@
           finalizers:
             - foregroundDeletePattern
           name: multicloud-gitops
-          namespace: patterns-operator
+          namespace: {{ patterns_operator_ns }}
         spec:
           analyticsUUID: vp-team-bandini
           clusterGroupName: hub

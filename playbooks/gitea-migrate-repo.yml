@@ -1,0 +1,51 @@
+- name: Set migration info {{ item.upstream }}
+  ansible.builtin.set_fact:
+    migration_info:
+      clone_addr: "{{ item.upstream }}"
+      uid: 1
+      repo_name: "{{ item.downstream }}"
+      mirror: true
+      private: false
+      description: "Mirror of {{ item.upstream }}"
+
+- name: Create repo for {{ item.upstream }}
+  ansible.builtin.uri:
+    url: "{{ gitea.url }}/api/v1/repos/migrate"
+    method: POST
+    headers:
+      Content-Type: application/json
+      Authorization: token {{ gitea_token.stdout }}
+    body_format: json
+    body: "{{ migration_info }}"
+    return_content: true
+    status_code: [201, 409]
+  register: migrate_out
+  retries: 10
+  delay: 10
+  until: migrate_out is not failed
+
+- name: Set secret migration info {{ item.upstream }}
+  ansible.builtin.set_fact:
+    secret_migration_info: >-
+      {{ {'clone_addr': item.upstream,
+          'uid': secret_uid,
+          'repo_name': item.downstream + '-secret',
+          'mirror': true,
+          'private': true,
+          'description': 'Private mirror for ' + item.upstream } }}
+
+- name: Create secret repo {{ item.upstream }}
+  ansible.builtin.uri:
+    url: "{{ gitea.url }}/api/v1/repos/migrate"
+    method: POST
+    headers:
+      Content-Type: application/json
+      Authorization: token {{ secret_user_token.stdout }}
+    body_format: json
+    body: "{{ secret_migration_info }}"
+    return_content: true
+    status_code: [201, 409]
+  register: secret_migrate_out
+  retries: 10
+  delay: 10
+  until: secret_migrate_out is not failed

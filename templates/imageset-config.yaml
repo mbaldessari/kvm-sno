@@ -53,7 +53,7 @@ mirror:
   - name: quay.io/validatedpatterns/utility-container:latest
   - name: quay.io/validatedpatterns/imperative-container:v1
   - name: docker.io/gitea/gitea:1.22.6-rootless
-  - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
+  # - name: gcr.io/kubebuilder/kube-rbac-proxy:v0.16.0
   # - name: quay.io/containerdisks/centos-stream:9
   # - name: quay.io/containerdisks/centos-stream:10
   # - name: quay.io/containerdisks/fedora:latest
