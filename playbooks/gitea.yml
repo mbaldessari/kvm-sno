@@ -91,10 +91,15 @@
     minio_client_file: "mcli-20240418164529.0.0-1.x86_64.rpm"
     minio_url: "http://fw.int.rhx/{{ minio_file }}"
     minio_client_url: "http://fw.int.rhx/{{ minio_client_file }}"
-    upstream_repo: "https://github.com/mbaldessari/multicloud-gitops"
-    downstream_name: "mcg"
-    upstream_repo2: "https://github.com/mbaldessari/argocd-tests"
-    downstream_name2: "argocd-tests"
+    repos:
+      - upstream: https://github.com/mbaldessari/multicloud-gitops
+        downstream: mcg
+      - upstream: https://github.com/mbaldessari/clustergroup-chart
+        downstream: clustergroup-chart
+      - upstream: https://github.com/mbaldessari/acm-chart
+        downstream: acm-chart
+      - upstream: https://github.com/mbaldessari/argocd-tests
+        downstream: argocd-tests
   tasks:
     - name: Set extra_wwn to be sure sdb is the right disk
       ansible.builtin.set_fact:
@@ -281,57 +286,8 @@
         --username "{{ gitea.admin_user }}" --scopes 'write:repository,write:admin,write:user' --raw
       register: gitea_token
 
-    - name: Set migration info
-      ansible.builtin.set_fact:
-        migration_info:
-          clone_addr: "{{ upstream_repo }}"
-          uid: 1
-          repo_name: "{{ downstream_name }}"
-          mirror: true
-          private: false
-          description: "Mirror"
-
-    - name: Create repo
-      ansible.builtin.uri:
-        url: "{{ gitea.url }}/api/v1/repos/migrate"
-        method: POST
-        headers:
-          Content-Type: application/json
-          Authorization: token {{ gitea_token.stdout }}
-        body_format: json
-        body: "{{ migration_info }}"
-        return_content: true
-        status_code: [201, 409]
-      register: migrate_out
-      retries: 10
-      delay: 10
-      until: migrate_out is not failed
-
-    - name: Set migration info2
-      ansible.builtin.set_fact:
-        migration_info2:
-          clone_addr: "{{ upstream_repo2 }}"
-          uid: 1
-          repo_name: "{{ downstream_name2 }}"
-          mirror: true
-          private: false
-          description: "Mirror"
-
-    - name: Create repo2
-      ansible.builtin.uri:
-        url: "{{ gitea.url }}/api/v1/repos/migrate"
-        method: POST
-        headers:
-          Content-Type: application/json
-          Authorization: token {{ gitea_token.stdout }}
-        body_format: json
-        body: "{{ migration_info2 }}"
-        return_content: true
-        status_code: [201, 409]
-      register: migrate_out
-      retries: 10
-      delay: 10
-      until: migrate_out is not failed
+    - ansible.builtin.include_tasks: gitea-migrate-repo.yml
+      loop: "{{ repos }}"
 
     - name: Create secret-user
       ansible.builtin.uri:
