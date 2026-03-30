@@ -90,6 +90,12 @@
         dest: /etc/yum.repos.d/fedora.repo
         mode: "0644"
 
+    - name: Install internal CA certificate
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        curl -L -o /etc/pki/ca-trust/source/anchors/rhx-ca.crt http://fw.int.rhx/ca-bundle.crt
+        update-ca-trust
+
     - name: Update all packages
       ansible.builtin.dnf:
         name: "*"
@@ -259,9 +265,10 @@
         state: started
         enabled: true
 
-    - name: Give the service some time
-      ansible.builtin.pause:
-        seconds: 30
+    - name: Wait for gitea to listen on port 443
+      ansible.builtin.wait_for:
+        port: 443
+        timeout: 60
 
     - name: Create gitea admin user
       become: true
