@@ -280,7 +280,7 @@
     - ocp_version is not match("4.12.*")
   register: mirroring
   until: mirroring is not failed
-  retries: 50
+  retries: 15
   delay: 30
 
 - name: Disable default catalog sources

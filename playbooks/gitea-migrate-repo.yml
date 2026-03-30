@@ -28,7 +28,7 @@
   ansible.builtin.set_fact:
     secret_migration_info: >-
       {{ {'clone_addr': item.upstream,
-          'uid': secret_uid,
+          'uid': secret_uid | int,
           'repo_name': item.downstream + '-secret',
           'mirror': true,
           'private': true,
