@@ -488,17 +488,15 @@ gitea:
   JWT_SECRET:  "{{ lookup('ansible.builtin.ini', 'JWT_SECRET', section='secrets', file='~/.giteasecrets.ini') }}"
 giteas:
   gitea:
-    version: "{{ rhel_version }}"
     cpus: 4
     ram: 32768
-    mac_nr: 90
+    mac: "52:54:00:66:66:05"
     disk: 64
     cache: unsafe
     wwn: "0x5000c50015eb81aa"
     disk2: 50
     cache2: unsafe
     wwn2: "0x5000c50015eb81ab"
-    network: 192.168.66.0/24
 chelas:
   chela:
     cpus: 4

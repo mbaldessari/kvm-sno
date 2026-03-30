@@ -4,81 +4,58 @@
   gather_facts: false
   become: true
   tasks:
-    - name: Set root_wwn to be sure sda is the right disk
-      ansible.builtin.set_fact:
-        root_wwn: disk/by-id/wwn-{{ giteas['gitea'].wwn }}
-
-    - name: Template kickstart file to the firewall where it is hosted
-      ansible.builtin.template:
-        src: ../templates/rhel-ks.yaml.j2
-        dest: "/var/www/html/rhel-gitea.ks"
+    - name: Download Fedora cloud image
+      ansible.builtin.get_url:
+        url: "{{ vm_image }}"
+        dest: "/var/lib/libvirt/images/fedora-cloud-base.qcow2"
         mode: "0644"
-      delegate_to: fw
 
-    - name: Copy non-secure boot vars on rhel7
-      ansible.builtin.command: |
-        cp -f /usr/share/edk2/ovmf/OVMF_VARS.fd "/var/lib/libvirt/qemu/nvram/{{ item }}.fd"
-      with_items: "{{ giteas }}"
-      when: rhel_version is match("7.*")
+    - name: Template cloud-init user-data
+      ansible.builtin.template:
+        src: ../templates/gitea-cloud-init.yaml.j2
+        dest: "/tmp/gitea-cloud-init.yaml"
+        mode: "0644"
 
-    - name: Set bootloader fact
-      ansible.builtin.set_fact:
-        bootlines: "{{ bootlines | default({}) | combine({item: '--boot menu=on,useserial=on,uefi'}) }}"
-      when: rhel_version is not match("7.*")
-      with_items: "{{ giteas }}"
+    - name: Create disk from cloud image
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        qemu-img create -f qcow2 -b /var/lib/libvirt/images/fedora-cloud-base.qcow2 -F qcow2 \
+          "/var/lib/libvirt/images/{{ item }}.qcow2" "{{ giteas[item].disk }}G"
+      with_items: "{{ giteas | list }}"
 
-    - name: Set bootloader fact on rhel7
-      ansible.builtin.set_fact:
-        bootlines: "{{ bootlines | default({}) | combine({item: '--boot loader=/usr/share/edk2/ovmf/OVMF_CODE.secboot.fd,loader.readonly=yes,loader.secure=no,loader.type=pflash,nvram=/var/lib/libvirt/qemu/nvram/.fd'}) }}"
-      when: rhel_version is match("7.*")
-      with_items: "{{ giteas }}"
+    - name: Create extra disk for minio
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        qemu-img create -f qcow2 \
+          "/var/lib/libvirt/images/{{ item }}-minio.qcow2" "{{ giteas[item].disk2 }}G"
+      with_items: "{{ giteas | list }}"
 
     - name: Create Gitea VMs
       ansible.builtin.command: >-
         virt-install
         --name {{ item }}
+        --cpu host-passthrough
         --hvm
         --virt-type kvm
-        --cpu host-passthrough
         --arch {{ arch }}
-        --location {{ rhel_isos[giteas[item].version] }}
-        --os-variant {{ rhel_variants[giteas[item].version] }}
-        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ giteas[item].mac_nr }}"
-        --vcpus {{ giteas[item].cpus }}
+        --os-variant fedora-unknown
+        --import
+        --network bridge="{{ bridge_interface }}",model=virtio,mac="{{ giteas[item].mac }}"
+        --vcpus {{ giteas[item].cpus }},sockets=1,cores={{ giteas[item].cpus }},threads=1
         --ram {{ giteas[item].ram }}
-        --disk pool={{ rhel_pool }},size={{ giteas[item].disk }},format=qcow2,bus=scsi,cache={{ giteas[item].cache }},wwn={{ giteas[item].wwn }}
-        --disk pool={{ rhel_pool }},size={{ giteas[item].disk2 }},format=qcow2,bus=scsi,cache={{ giteas[item].cache2 }},wwn={{ giteas[item].wwn2 }}
-        --check disk_size=off
+        --disk "/var/lib/libvirt/images/{{ item }}.qcow2",format=qcow2,bus=virtio,cache={{ giteas[item].cache }},serial={{ giteas[item].wwn }}
+        --disk "/var/lib/libvirt/images/{{ item }}-minio.qcow2",format=qcow2,bus=virtio,cache={{ giteas[item].cache2 }},serial={{ giteas[item].wwn2 }}
+        --cloud-init user-data=/tmp/gitea-cloud-init.yaml,disable=on
         --graphics spice,listen=127.0.0.1
         --noautoconsole
-        --extra-args "inst.ks=http://fw.int.rhx/rhel-gitea.ks"
-        {{ bootlines[item] }}
-      with_items: "{{ giteas }}"
+        --boot menu=on,useserial=on,uefi
+      with_items: "{{ giteas | list }}"
       retries: 2
       delay: 10
       register: vm_creation
       until: vm_creation is not failed
 
-    - name: Wait for vm to be stopped
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        virsh list --all | grep -w "{{ item }}" | grep -v running
-      register: running
-      retries: 100
-      delay: 20
-      until: running is not failed
-      with_items: "{{ giteas }}"
-
-    - name: Start "{{ item }}"
-      ansible.builtin.command: |
-        virsh start "{{ item }}"
-      with_items: "{{ giteas }}"
-      retries: 3
-      delay: 10
-      register: restart
-      until: restart is not failed
-
-- name: Wait for RHEL boxes
+- name: Wait for Fedora boxes
   hosts: giteas
   gather_facts: false
   become: true
@@ -101,12 +78,28 @@
       - upstream: https://github.com/mbaldessari/argocd-tests
         downstream: argocd-tests
   tasks:
-    - name: Set extra_wwn to be sure sdb is the right disk
-      ansible.builtin.set_fact:
-        extra_wwn: disk/by-id/wwn-{{ giteas['gitea'].wwn2 }}
-
-    - name: Wait for boxes
+    - name: Wait for connection
       ansible.builtin.wait_for_connection:
+
+    - name: Remove all existing repo files
+      ansible.builtin.shell: rm -f /etc/yum.repos.d/*.repo
+
+    - name: Copy local fedora repo config
+      ansible.builtin.copy:
+        src: /etc/yum.repos.d/fedora.repo
+        dest: /etc/yum.repos.d/fedora.repo
+        mode: "0644"
+
+    - name: Update all packages
+      ansible.builtin.dnf:
+        name: "*"
+        state: latest
+
+    - name: Install required packages
+      ansible.builtin.dnf:
+        name:
+          - git
+        state: present
 
     - name: Download minio binary
       ansible.builtin.get_url:
@@ -148,17 +141,17 @@
     - name: Create disks and mount
       ansible.builtin.shell: |
         set -e
-        mkfs.xfs "/dev/{{ extra_wwn }}"
+        mkfs.xfs /dev/vdb
         mkdir /mnt/data
-        mount "/dev/{{ extra_wwn }}" /mnt/data
+        mount /dev/vdb /mnt/data
         mkdir -p /mnt/data/disk{1,2,3,4}
         chown -R minio-user: /mnt/data/disk{1,2,3,4}
 
-    - name: Add {{ extra_wwn }} in fstab
+    - name: Add vdb in fstab
       ansible.posix.mount:
         state: present
         path: /mnt/data
-        src: "/dev/{{ extra_wwn }}"
+        src: /dev/vdb
         fstype: xfs
 
     - name: Create minio folders
@@ -214,7 +207,6 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         mv /tmp/{{ gitea_file }} /usr/local/bin/gitea
-        restorecon -v /usr/local/bin/gitea
         setcap CAP_NET_BIND_SERVICE=+eip /usr/local/bin/gitea
 
     - name: Add git user
