@@ -490,7 +490,7 @@ giteas:
   gitea:
     cpus: 4
     ram: 32768
-    mac: "52:54:00:66:66:05"
+    mac: "52:54:00:00:01:90"
     disk: 64
     cache: unsafe
     wwn: "0x5000c50015eb81aa"
