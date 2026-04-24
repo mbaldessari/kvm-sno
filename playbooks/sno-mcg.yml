@@ -118,3 +118,13 @@
       until: argoregional is not failed
       with_items:
         - "{{ spoke }}"
+
+    - name: Verify amq-broker-rhel8 Subscription exists on spoke
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG=~/{{ spoke }}-kubeconfig
+        oc get subscription.operators.coreos.com amq-broker-rhel8 -n amqbroker
+      retries: 50
+      delay: 20
+      register: amq_subscription
+      until: amq_subscription is not failed
