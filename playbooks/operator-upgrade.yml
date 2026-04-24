@@ -6,13 +6,12 @@
   become: true
   become_user: michele
   vars:
-    patterns_operator_ns: openshift-operators
+    patterns_operator_ns: patterns-operator
     vp_operator_tempfolder: "~/sno-vp-operator"
-    gitrepo_from: https://github.com/mbaldessari/patterns-operator
-    upgrade_from: "0.0.65-wtf"
-    #upgrade_from: "main"
+    gitrepo_from: https://github.com/validatedpatterns/patterns-operator
+    upgrade_from: "main"
     gitrepo_to: https://github.com/mbaldessari/patterns-operator
-    upgrade_to: "ourown-gitops"
+    upgrade_to: "gitops-1.20"
     hub: sno1
     spoke: sno2
     from_version: 6.6.6
@@ -25,8 +24,8 @@
     mcggitbranch: main
     #mcggitrepo_pat: "https://{{ mcgtoken }}@github.com/mbaldessari/mcg-private"
     mcgchangerepo: true
-    mcggitrepo2: https://github.com/validatedpatterns/multicloud-gitops
-    mcggitbranch2: main
+    mcggitrepo2: https://github.com/mbaldessari/multicloud-gitops
+    mcggitbranch2: gitops-1.20
     #clustergrouprepo2: https://github.com/mbaldessari/clustergroup-chart
     #clustergroupbranch2: ourown-gitops
     min_age_minutes: 5
@@ -313,7 +312,7 @@
       ansible.builtin.shell: |
         export KUBECONFIG=~/{{ hub }}-kubeconfig
         make VERSION={{ to_version }} UPLOADREGISTRY={{ registry }} USE_IMAGE_DIGESTS="" \
-            CHANNELS=fast bundle generate docker-build docker-push bundle-build bundle-push catalog-build catalog-push catalog-install
+            CHANNELS=fast bundle generate docker-build docker-push bundle-build bundle-push console-build-amd64 console-push catalog-build catalog-push catalog-install
       args:
         chdir: "{{ vp_operator_tempfolder }}/patterns-operator"
       tags:

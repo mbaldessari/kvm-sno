@@ -4,7 +4,7 @@ ocp_versions:
   - "4.18.35"
   - "4.19.26"
   - "4.20.19"
-  - "4.21.11"
+  - "4.21.10"
   - "4.22.0-ec.5"
 
 ocp_version: "4.21.10"
@@ -449,14 +449,12 @@ coreos:
   bios: "rhcos-metal.x86_64.raw.gz"
 
 rhel_isos:
-  "9.5": "/var/lib/libvirt/images/rhel-9.5-x86_64-dvd.iso"
   "9.6": "/var/lib/libvirt/images/rhel-9.6-x86_64-dvd.iso"
-  "10.0": "/var/lib/libvirt/images/rhel-10.0-x86_64-dvd.iso"
+  "10.1": "/var/lib/libvirt/images/rhel-10.1-x86_64-dvd.iso"
 
 rhel_variants:
-  "9.5": "rhel9.5"
   "9.6": "rhel9-unknown"
-  "10.0": "rhel10.0"
+  "10.1": "rhel10.0"
 
 rhel_pool: "default"
 fast_pool: "fast"
@@ -465,7 +463,7 @@ ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3Yh
 rhn_org: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key: "{{ lookup('file', '~/.rhn_activation_key') }}"
     
-rhel_version: "9.6"
+rhel_version: "10.1"
 minio:
   fqdn: "nginx.cluster.{{ domain }}"
   port: "9000"
