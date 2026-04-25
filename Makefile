@@ -117,9 +117,19 @@ get-remote-pki: ## Get certs installed from remote node
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/get-remote-pki.yml
 
 ##@ Day-2 Tasks
+MCG_RUNS ?= 20
+
 .PHONY: mcg
 mcg: ## Install multicloud gitops on two snos (sno1 and sno2 by default)
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml
+
+.PHONY: mcg-stress
+mcg-stress: ## Run mcg MCG_RUNS times, stopping on first failure (default: 10)
+	@for i in $$(seq 1 $(MCG_RUNS)); do \
+		echo "=== MCG run $$i/$(MCG_RUNS) ==="; \
+		ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml || { echo "FAILED on run $$i/$(MCG_RUNS)"; exit 1; }; \
+	done; \
+	echo "All $(MCG_RUNS) runs passed"
 
 .PHONY: import
 import: ## Import spoke into acm hub
