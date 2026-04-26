@@ -125,7 +125,7 @@
     - name: Join sno2 to HUB(sno1) env vars
       ansible.builtin.set_fact:
         HUBCONFIG: "{{ '~/sno1-kubeconfig' | expanduser }}"
-        REGIONCONFIG: "{{ '~/sno2-kubeconfig' | expanduser }}"
+        SPOKECONFIG: "{{ '~/sno2-kubeconfig' | expanduser }}"
 
     - name: Import sno2
       ansible.builtin.import_role:
@@ -138,7 +138,7 @@
     - name: Join sno3 to HUB(sno1) env vars
       ansible.builtin.set_fact:
         HUBCONFIG: "{{ '~/sno1-kubeconfig' | expanduser }}"
-        REGIONCONFIG: "{{ '~/sno3-kubeconfig' | expanduser }}"
+        SPOKECONFIG: "{{ '~/sno3-kubeconfig' | expanduser }}"
 
     - name: Import sno3
       ansible.builtin.import_role:

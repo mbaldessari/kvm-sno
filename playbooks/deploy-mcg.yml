@@ -102,7 +102,7 @@
     - name: Set facts for ACM import role
       ansible.builtin.set_fact:
         HUBCONFIG: "{{ hubconfig }}"
-        REGIONCONFIG: "{{ spokeconfig }}"
+        SPOKECONFIG: "{{ spokeconfig }}"
 
     - name: Import spoke cluster via ACM
       ansible.builtin.import_role:

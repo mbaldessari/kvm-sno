@@ -81,7 +81,7 @@
     - name: Add {{ spoke }}
       ansible.builtin.set_fact:
         HUBCONFIG: "{{ '~/{{ hub }}-kubeconfig' | expanduser }}"
-        REGIONCONFIG: "{{ '~/{{ spoke }}-kubeconfig' | expanduser }}"
+        SPOKECONFIG: "{{ '~/{{ spoke }}-kubeconfig' | expanduser }}"
 
     - name: Import {{ spoke }}
       ansible.builtin.import_role:
