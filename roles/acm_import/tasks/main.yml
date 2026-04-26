@@ -1,14 +1,27 @@
+- name: Assert the required variables are defined
+  ansible.builtin.assert:
+    that:
+      - SPOKECONFIG is defined
+      - SPOKECONFIG | length > 0
+      - HUBCONFIG is defined
+      - HUBCONFIG | length > 0
+
 - name: Output configs
   ansible.builtin.debug:
-    msg: "HUBCONFIG: {{ HUBCONFIG }} - REGIONCONFIG: {{ REGIONCONFIG }}"
+    msg: "HUBCONFIG: {{ HUBCONFIG }} - SPOKECONFIG: {{ SPOKECONFIG }}"
 
 - name: Fetch regional cluster info
   ansible.builtin.include_tasks:
     file: region-fetch-api.yml
     apply:
       environment:
-        KUBECONFIG: "{{ REGIONCONFIG }}"
+        KUBECONFIG: "{{ SPOKECONFIG }}"
+  when:
+    - region_cluster_name is not defined
 
 - name: Add the regional cluster to the ACM hub
   ansible.builtin.include_tasks:
     file: hub-acm-add-regional-cluster.yml
+    apply:
+      environment:
+        KUBECONFIG: "{{ HUBCONFIG }}"
