@@ -16,6 +16,9 @@
     apply:
       environment:
         KUBECONFIG: "{{ SPOKECONFIG }}"
+        K8S_AUTH_KUBECONFIG: "{{ SPOKECONFIG }}"
+  vars:
+    current_kubeconfig: "{{ SPOKECONFIG }}"
   when:
     - region_cluster_name is not defined
 
@@ -25,3 +28,6 @@
     apply:
       environment:
         KUBECONFIG: "{{ HUBCONFIG }}"
+        K8S_AUTH_KUBECONFIG: "{{ SPOKECONFIG }}"
+  vars:
+    current_kubeconfig: "{{ HUBCONFIG }}"

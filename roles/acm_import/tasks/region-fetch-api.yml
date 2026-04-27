@@ -1,5 +1,10 @@
+- name: Debug
+  ansible.builtin.debug:
+    msg: "{{ lookup('ansible.builtin.env', 'KUBECONFIG') | default('WTF') }} - {{ current_kubeconfig }}"
+
 - name: Fetch API endpoint of regional cluster
   kubernetes.core.k8s_cluster_info:
+    kubeconfig: "{{ current_kubeconfig }}"
   register: cluster_info
 
 - name: Set regional api fact
@@ -10,6 +15,7 @@
   ansible.builtin.shell:
     cmd: |
       set -o pipefail
+      export KUBECONFIG={{ current_kubeconfig }}
       oc get dns cluster -o jsonpath='{.spec.baseDomain}{"\n"}' | cut -d. -f1
     executable: /bin/bash
   register: region_cluster_oc
@@ -23,6 +29,7 @@
 # This is strictly not needed but could be useful eventually
 - name: Find regional CA
   ansible.builtin.shell: |
+    export KUBECONFIG={{ current_kubeconfig }}
     {% raw %}
     oc config view --raw -o go-template="{{ range .clusters }}{{ if and (eq .cluster.server \"${API}\") (index .cluster \"certificate-authority-data\") }}{{ index .cluster \"certificate-authority-data\" }}{{ end }}{{ end }}"
     {% endraw %}

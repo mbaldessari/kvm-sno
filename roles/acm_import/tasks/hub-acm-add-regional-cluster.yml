@@ -1,3 +1,7 @@
+- name: Debug
+  ansible.builtin.debug:
+    msg: "{{ lookup('ansible.builtin.env', 'KUBECONFIG') | default('WTF') }} - {{ current_kubeconfig }}"
+
 - name: "Verify valid cluster name"
   ansible.builtin.assert:
     that: region_cluster_name is regex('^[a-z0-9]([-a-z0-9]*[a-z0-9])?$')
@@ -8,12 +12,18 @@
   kubernetes.core.k8s:
     state: present
     template: managedcluster.yml.j2
+    kubeconfig: "{{ current_kubeconfig }}"
+  retries: 60
+  delay: 10
+  register: _acm_crd_present
+  until: _acm_crd_present is not failed
 
 - name: Ensure regional cluster namespace has been created
   kubernetes.core.k8s_info:
     api: v1
     kind: Namespace
     name: "{{ region_cluster_name }}"
+    kubeconfig: "{{ current_kubeconfig }}"
   register: _acm_namespace_status
   until:
     - _acm_namespace_status.resources | length > 0
@@ -41,6 +51,7 @@
       kubernetes.core.k8s:
         state: present
         definition: "{{ lookup('ansible.builtin.template', 'autoimport_secret.yml.j2') | from_yaml }}"
+        kubeconfig: "{{ current_kubeconfig }}"
       no_log: true
 
 # To correctly join the hub cluster, ManagedClusterJoined condition must be True.
@@ -49,6 +60,7 @@
     api: cluster.open-cluster-management.io/v1
     kind: ManagedCluster
     name: "{{ region_cluster_name }}"
+    kubeconfig: "{{ current_kubeconfig }}"
   register: _acm_managedcluster_status
   vars:
     _acm_status_query: "resources[0].status.conditions[?type=='ManagedClusterJoined'].status"
@@ -64,3 +76,4 @@
   kubernetes.core.k8s:
     state: present
     template: klusterletaddonconfig.yml.j2
+    kubeconfig: "{{ current_kubeconfig }}"
