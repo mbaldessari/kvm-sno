@@ -123,15 +123,6 @@ MCG_RUNS ?= 20
 mcg: ## Install multicloud gitops on two snos (sno1 and sno2 by default)
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml
 
-.PHONY: mcg-stress
-mcg-stress: ## Run mcg MCG_RUNS times, stopping on first failure (default: 10)
-	@for i in $$(seq 1 $(MCG_RUNS)); do \
-		echo "=== MCG run $$i/$(MCG_RUNS) ==="; \
-		ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-restore.yml || { echo "FAILED sno-restore on run $$i/$(MCG_RUNS)"; exit 1; }; \
-		ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml || { echo "FAILED on run $$i/$(MCG_RUNS)"; exit 1; }; \
-	done; \
-	echo "All $(MCG_RUNS) runs passed"
-
 .PHONY: import
 import: ## Import spoke into acm hub
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/acm-import.yml
