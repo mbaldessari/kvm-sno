@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-MCG_RUNS=20
+MCG_RUNS=40
 
 for i in $(seq 1 ${MCG_RUNS}); do
   echo "=== MCG run $i/${MCG_RUNS} ==="
