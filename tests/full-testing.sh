@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e -o pipefail
 cd /home/michele/kvm-sno
-git pull > /dev/null
+#git pull > /dev/null
 
 TODAY=$(date +%F)
 LOGDIR="/var/log/vp-testing/${TODAY}"

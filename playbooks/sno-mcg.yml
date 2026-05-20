@@ -7,12 +7,13 @@
   become_user: michele
   vars:
     mcgtempfolder: "~/sno-mcg"
-    #gitrepo: https://github.com/validatedpatterns/multicloud-gitops
-    #gitbranch: main
-    gitrepo: https://github.com/mbaldessari/multicloud-gitops
-    gitbranch: argocd-vp-plugin
-    hub: sno3
-    spoke: sno4
+    gitrepo: https://github.com/validatedpatterns/multicloud-gitops
+    gitbranch: main
+    #gitrepo: https://github.com/mbaldessari/multicloud-gitops
+    #gitbranch: reproduce_self_heal
+    #argocd-vp-plugin
+    hub: sno1
+    spoke: sno2
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:

@@ -10,10 +10,10 @@
       - "4.19"
       - "4.20"
       - "4.21"
+      - "4.22"
     ocp_candidate_url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/
     ocp_candidate_tmp_file: /tmp/ocp-candidate-versions.html
     major_candidate_versions:
-      - "4.22"
   tasks:
     - name: Fetch URL
       ansible.builtin.get_url:
@@ -50,11 +50,17 @@
           sed -e 's/<a href="//' | sed -e 's/\/">//' | awk '{$1=$1};1' | sort --version-sort | \
           grep -w -e "^{{ item }}" | tail -n1
       register: versions_output
+      when:
+        - major_candidate_versions is defined and major_candidate_versions is not none
+        - major_candidate_versions | length != 0
       with_items: "{{ major_candidate_versions }}"
 
     - name: Debug candidates
       ansible.builtin.debug:
         msg: "Major version [{{ item.item }}]: {{ item.stdout }}"
       with_items: "{{ versions_output.results }}"
+      when:
+        - major_candidate_versions is defined and major_candidate_versions is not none
+        - major_candidate_versions | length != 0
       loop_control:
         label: "{{ item.item }}"

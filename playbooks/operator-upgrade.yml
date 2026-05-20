@@ -9,9 +9,11 @@
     patterns_operator_ns: patterns-operator
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "main"
-    gitrepo_to: https://github.com/mbaldessari/patterns-operator
-    upgrade_to: "gitops-1.20"
+    upgrade_from: "0.0.72"
+    gitrepo_to: https://github.com/validatedpatterns/patterns-operator
+    upgrade_to: "main"
+    #gitrepo_to: https://github.com/mbaldessari/patterns-operator
+    #upgrade_to: "gitops-1.20"
     hub: sno1
     spoke: sno2
     from_version: 6.6.6
@@ -24,8 +26,8 @@
     mcggitbranch: main
     #mcggitrepo_pat: "https://{{ mcgtoken }}@github.com/mbaldessari/mcg-private"
     mcgchangerepo: true
-    mcggitrepo2: https://github.com/mbaldessari/multicloud-gitops
-    mcggitbranch2: gitops-1.20
+    mcggitrepo2: https://github.com/validatedpatterns/multicloud-gitops
+    mcggitbranch2: main
     #clustergrouprepo2: https://github.com/mbaldessari/clustergroup-chart
     #clustergroupbranch2: ourown-gitops
     min_age_minutes: 5
@@ -226,8 +228,8 @@
 
     - name: Add {{ spoke }}
       ansible.builtin.set_fact:
-        HUBCONFIG: "{{ '~/{{ hub }}-kubeconfig' | expanduser }}"
-        SPOKECONFIG: "{{ '~/{{ spoke }}-kubeconfig' | expanduser }}"
+        HUBCONFIG: "{{ ('~/' ~  hub ~ '-kubeconfig') | expanduser }}"
+        SPOKECONFIG: "{{ ('~/' ~ spoke ~ '-kubeconfig') | expanduser }}"
       tags:
         - operator-install
 
