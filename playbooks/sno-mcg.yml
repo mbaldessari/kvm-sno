@@ -49,6 +49,11 @@
         dest: "{{ mcgtempfolder }}/multicloud-gitops"
         clone: true
 
+    - name: Load values-global.yaml from pattern
+      ansible.builtin.include_vars:
+        file: "{{ mcgtempfolder }}/multicloud-gitops/values-global.yaml"
+        name: pattern_values
+
     - name: Install pattern on HUB/{{ hub }}
       ansible.builtin.shell: |
         set -e -o pipefail
@@ -105,6 +110,7 @@
       until: argoregional is not failed
       with_items:
         - "{{ spoke }}"
+      when: not (pattern_values.global.singleArgoCD | default(false) | bool)
 
     - name: Wait for all argo apps to be green on regional clusters
       ansible.builtin.shell: |
