@@ -10,7 +10,7 @@
     #gitrepo: https://github.com/validatedpatterns/multicloud-gitops
     #gitbranch: main
     gitrepo: https://github.com/mbaldessari/multicloud-gitops
-    gitbranch: custom-hc
+    gitbranch: single-argo-cleanedup
     #argocd-vp-plugin
     hub: sno1
     spoke: sno2
