@@ -123,6 +123,10 @@ MCG_RUNS ?= 20
 mcg: ## Install multicloud gitops on two snos (sno1 and sno2 by default)
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg.yml
 
+.PHONY: mcg-qe
+mcg-qe: ## Install multicloud gitops on two snos (sno1 and sno2 by default)
+	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/sno-mcg-qe.yml
+
 .PHONY: import
 import: ## Import spoke into acm hub
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' $(EXTRA_VARS) playbooks/acm-import.yml
