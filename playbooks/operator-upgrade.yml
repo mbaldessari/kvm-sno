@@ -9,13 +9,13 @@
     patterns_operator_ns: patterns-operator
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.73"
+    upgrade_from: "0.0.75"
     gitrepo_to: https://github.com/validatedpatterns/patterns-operator
     upgrade_to: "main"
     #gitrepo_to: https://github.com/mbaldessari/patterns-operator
     #upgrade_to: "custom-hc"
-    hub: sno1
-    spoke: sno2
+    hub: sno3
+    spoke: sno4
     from_version: 6.6.6
     to_version: 6.6.7
     registry: kuemper.int.rhx/bandini

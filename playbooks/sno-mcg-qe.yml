@@ -7,13 +7,9 @@
   become_user: michele
   vars:
     mcgtempfolder: "~/sno-mcg"
-    #gitrepo: https://github.com/validatedpatterns/multicloud-gitops
-    #gitbranch: main
-    gitrepo: https://github.com/mbaldessari/multicloud-gitops
-    gitbranch: test-single
-    #argocd-vp-plugin
     hub: sno1
     spoke: sno2
+    pipfolder: "~/pip-mcg"
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
@@ -31,107 +27,34 @@
         label: "{{ item.stat.path }}"
       failed_when: not item.stat.exists
 
-    # - name: Delete temporary folder
-    #   ansible.builtin.file:
-    #     path: "{{ mcgtempfolder }}"
-    #     state: absent
-
-    - name: Create temporary folder
-      ansible.builtin.file:
-        path: "{{ mcgtempfolder }}/multicloud-gitops"
-        state: directory
-        recurse: true
-
-    - name: Clone git repo
-      ansible.builtin.git:
-        repo: "{{ gitrepo }}"
-        version: "{{ gitbranch }}"
-        dest: "{{ mcgtempfolder }}/multicloud-gitops"
-        clone: true
-
     - name: Load values-global.yaml from pattern
       ansible.builtin.include_vars:
         file: "{{ mcgtempfolder }}/multicloud-gitops/values-global.yaml"
         name: pattern_values
 
-    - name: Install pattern on HUB/{{ hub }}
+    - name: Set up pip environment
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -rf "{{ pipfolder | expanduser }}"
+        mkdir -p "{{ pipfolder }}"
+        python3 -m virtualenv "{{ pipfolder }}"
+        source "{{ pipfolder }}/bin/activate"
+        pip install -r requirements.txt > /tmp/pip-mcg-install.log
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops/tests/interop"
+      
+
+    - name: Run qe tests
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/{{ hub }}-kubeconfig
-        ./pattern.sh make install &> "/tmp/mcg-install-{{ hub }}.log"
+        export KUBECONFIG_EDGE=~/{{ spoke }}-kubeconfig
+        export WORKSPACE=/tmp/mcg-workspace
+        export INFRA_PROVIDER=baremetal
+        export SKIP_GIT_CHANGES=true
+        export SKIP_CI_BADGE=true
+        source "{{ pipfolder }}/bin/activate"
+        ./run_tests.sh &> /tmp/mcg-qe-run-tests.log
       args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops/tests/interop"
 
-    - name: Wait for all argo apps to be green
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/{{ hub }}-kubeconfig
-        ./pattern.sh make argo-healthcheck
-      args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      retries: 100
-      delay: 20
-      register: argo
-      until: argo is not failed
-
-    - name: Wait for ManagedCluster API to show up
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/{{ hub }}-kubeconfig
-        oc api-resources | grep cluster.open-cluster-management.io/v1 | grep ManagedCluster
-      retries: 50
-      delay: 20
-      register: managedcluster_api
-      until: managedcluster_api is not failed
-
-    - name: Add {{ spoke }}
-      ansible.builtin.set_fact:
-        HUBCONFIG: "{{ ('~/' ~  hub ~ '-kubeconfig') | expanduser }}"
-        SPOKECONFIG: "{{ ('~/' ~ spoke ~ '-kubeconfig') | expanduser }}"
-
-    - name: Import {{ spoke }}
-      ansible.builtin.import_role:
-        name: acm_import
-      retries: 10
-      delay: 30
-      register: acm1
-      until: acm1 is not failed
-
-    - name: Wait for namespaced argo on spoke
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/{{ item }}-kubeconfig
-        oc get argocds -A | grep multicloud-gitops-group-one
-      args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      retries: 100
-      delay: 20
-      register: argoregional
-      until: argoregional is not failed
-      with_items:
-        - "{{ spoke }}"
-      when: not (pattern_values.global.singleArgoCD | default(false) | bool)
-
-    - name: Wait for all argo apps to be green on regional clusters
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/{{ item }}-kubeconfig
-        ./pattern.sh make argo-healthcheck
-      args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      retries: 100
-      delay: 20
-      register: argoregional
-      until: argoregional is not failed
-      with_items:
-        - "{{ spoke }}"
-
-    - name: Verify amq-broker-rhel8 Subscription exists on spoke
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/{{ spoke }}-kubeconfig
-        oc get subscription.operators.coreos.com amq-broker-rhel8 -n amqbroker
-      retries: 50
-      delay: 20
-      register: amq_subscription
-      until: amq_subscription is not failed
