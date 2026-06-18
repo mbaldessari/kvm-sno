@@ -53,6 +53,11 @@
       tags:
         - gitrepo
 
+    - name: Load values-global.yaml from pattern
+      ansible.builtin.include_vars:
+        file: "{{ mcgtempfolder }}/multicloud-gitops/values-global.yaml"
+        name: pattern_values
+
     # - name: Create private secret
     #   ansible.builtin.shell: |
     #     set -e
@@ -256,6 +261,7 @@
       until: argoregional is not failed
       with_items:
         - "{{ spoke }}"
+      when: not (pattern_values.global.singleArgoCD | default(false) | bool)
       tags:
         - operator-install
 
