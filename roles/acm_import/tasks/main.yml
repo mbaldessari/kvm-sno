@@ -28,6 +28,6 @@
     apply:
       environment:
         KUBECONFIG: "{{ HUBCONFIG }}"
-        K8S_AUTH_KUBECONFIG: "{{ SPOKECONFIG }}"
+        K8S_AUTH_KUBECONFIG: "{{ HUBCONFIG }}"
   vars:
     current_kubeconfig: "{{ HUBCONFIG }}"

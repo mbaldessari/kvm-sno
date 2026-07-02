@@ -9,7 +9,7 @@
     patterns_operator_ns: patterns-operator
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.75"
+    upgrade_from: "0.0.76"
     gitrepo_to: https://github.com/validatedpatterns/patterns-operator
     upgrade_to: "main"
     #gitrepo_to: https://github.com/mbaldessari/patterns-operator

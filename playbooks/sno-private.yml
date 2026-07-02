@@ -9,6 +9,10 @@
     mcgtempfolder: "~/sno-mcg"
     ghrepo: mbaldessari/mcg-private
     gitrepo: https://github.com/mbaldessari/mcg-private
+    gitbranch: support-case-1
+    github_pat: "{{ lookup('file', '~/.githubmcg_pat') }}"
+    pattern_operator_ns: patterns-operator
+    secret_name: mcg-secret
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
@@ -37,13 +41,10 @@
 
     - name: Clone git repo
       ansible.builtin.shell: |
-        gh repo clone {{ ghrepo }} {{ mcgtempfolder }}/multicloud-gitops
+        export GH_TOKEN={{ github_pat }}
+        gh repo clone {{ ghrepo }} {{ mcgtempfolder }}/multicloud-gitops -- --branch {{ gitbranch }}
 
     - name: Create secrets template to access gh repo
-      vars:
-        argo_ns: multicloud-gitops-hub
-        secret_name: mcg-secret
-        github_pat: "{{ lookup('file', '~/.githubmcg_pat') }}"
       ansible.builtin.template:
         src: ../templates/test-secret.yaml
         dest: "{{ mcgtempfolder }}/test-secret.yaml"
@@ -57,40 +58,15 @@
       args:
         chdir: "{{ mcgtempfolder }}/"
 
-
     - name: Install pattern on HUB/sno1
       ansible.builtin.shell: |
         set -e -o pipefail
         export KUBECONFIG=~/sno1-kubeconfig
-        ./pattern.sh make install
+        export TOKEN_SECRET={{ secret_name }}
+        export TOKEN_NAMESPACE={{ pattern_operator_ns }}
+        ./pattern.sh make install  &> "/tmp/mcg-install-sno1.log"
       args:
         chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-
-    - name: Wait for all argo apps to be green
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/sno1-kubeconfig
-        APPS=$(oc get applications -A -o jsonpath='{range .items[*]}{@.metadata.namespace}{","}{@.metadata.name}{"\n"}{end}')
-        NOTSYNCED=0
-        for i in $APPS; do
-          NS=$(echo "${i}" | cut -f1 -d,)
-          APP=$(echo "${i}" | cut -f2 -d,)
-          STATUS=$(oc get -n "${NS}" application/"${APP}" -o jsonpath='{.status.sync.status}')
-          if [ $STATUS != "Synced" ]; then
-            NOTSYNCED=$((NOTSYNCED + 1))
-          fi
-          echo "${NS} ${APP} -> ${STATUS}"
-        done
-        if [ $NOTSYNCED -gt 0 ]; then
-           echo "Applications not synced: ${NOTSYNCED}"
-           exit 1
-        fi
-      args:
-        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
-      retries: 100
-      delay: 20
-      register: argo
-      until: argo is not failed
 
     - name: Wait for ManagedCluster API to show up
       ansible.builtin.shell: |
@@ -102,26 +78,6 @@
       register: managedcluster_api
       until: managedcluster_api is not failed
 
-    - name: Create secrets template to access gh repo on the regional clusters
-      vars:
-        argo_ns: multicloud-gitops-group-one
-        secret_name: mcg-secret
-        github_pat: "{{ lookup('file', '~/.githubmcg_pat') }}"
-      ansible.builtin.template:
-        src: ../templates/test-secret.yaml
-        dest: "{{ mcgtempfolder }}/test-secret-regional.yaml"
-        mode: "0640"
-
-    - name: Install secret on sno2 and sno3
-      ansible.builtin.shell: |
-        set -e -o pipefail
-        export KUBECONFIG=~/sno2-kubeconfig
-        oc apply -f test-secret-regional.yaml
-        export KUBECONFIG=~/sno3-kubeconfig
-        oc apply -f test-secret-regional.yaml
-      args:
-        chdir: "{{ mcgtempfolder }}/"
-
     - name: Join sno2 to HUB(sno1) env vars
       ansible.builtin.set_fact:
         HUBCONFIG: "{{ '~/sno1-kubeconfig' | expanduser }}"
@@ -130,6 +86,8 @@
     - name: Import sno2
       ansible.builtin.import_role:
         name: acm_import
+      vars:
+        clustergroup_label: group-one
       retries: 10
       delay: 30
       register: acm1
@@ -143,6 +101,8 @@
     - name: Import sno3
       ansible.builtin.import_role:
         name: acm_import
+      vars:
+        clustergroup_label: group-two
       retries: 10
       delay: 30
       register: acm2

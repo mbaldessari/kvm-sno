@@ -1,4 +1,4 @@
-- name: Debug
+- name: Debug KUBECONFIG
   ansible.builtin.debug:
     msg: "{{ lookup('ansible.builtin.env', 'KUBECONFIG') | default('WTF') }} - {{ current_kubeconfig }}"
 
