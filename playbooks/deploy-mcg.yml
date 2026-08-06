@@ -9,8 +9,8 @@
     mcgtempfolder: "~/deploy-mcg"
     gitrepo: https://github.com/mbaldessari/multicloud-gitops
     gitbranch: "{{ lookup('env', 'BRANCH') | default('main', true) }}"
-    hubconfig: "{{ lookup('env', 'HUBCONFIG') }}"
-    spokeconfig: "{{ lookup('env', 'SPOKECONFIG') }}"
+    hubconfig: "{{ lookup('env', 'VP_HUBCONFIG') }}"
+    spokeconfig: "{{ lookup('env', 'VP_SPOKECONFIG') }}"
   tasks:
     - name: Record start time
       ansible.builtin.set_fact:
@@ -21,14 +21,14 @@
       ansible.builtin.debug:
         msg: "Started at: {{ deploy_start_time }}"
 
-    - name: Check that HUBCONFIG env variable is set
+    - name: Check that VP_HUBCONFIG env variable is set
       ansible.builtin.fail:
-        msg: "HUBCONFIG env variable needs to be set and pointing to the HUB kubeconfig file"
+        msg: "VP_HUBCONFIG env variable needs to be set and pointing to the HUB kubeconfig file"
       when: hubconfig is not defined or hubconfig | length == 0
 
-    - name: Check that SPOKECONFIG env variable is set
+    - name: Check that VP_SPOKECONFIG env variable is set
       ansible.builtin.fail:
-        msg: "SPOKECONFIG env variable needs to be set and pointing to the SPOKE kubeconfig file"
+        msg: "VP_SPOKECONFIG env variable needs to be set and pointing to the SPOKE kubeconfig file"
       when: spokeconfig is not defined or spokeconfig | length == 0
 
     - name: Verify hub cluster connectivity
@@ -101,8 +101,8 @@
 
     - name: Set facts for ACM import role
       ansible.builtin.set_fact:
-        HUBCONFIG: "{{ hubconfig }}"
-        SPOKECONFIG: "{{ spokeconfig }}"
+        VP_HUBCONFIG: "{{ hubconfig }}"
+        VP_SPOKECONFIG: "{{ spokeconfig }}"
 
     - name: Import spoke cluster via ACM
       ansible.builtin.import_role:

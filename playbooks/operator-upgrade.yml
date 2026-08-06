@@ -9,11 +9,11 @@
     patterns_operator_ns: patterns-operator
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.76"
-    gitrepo_to: https://github.com/validatedpatterns/patterns-operator
-    upgrade_to: "main"
-    #gitrepo_to: https://github.com/mbaldessari/patterns-operator
-    #upgrade_to: "custom-hc"
+    upgrade_from: "0.0.79"
+    #gitrepo_to: https://github.com/validatedpatterns/patterns-operator
+    #upgrade_to: "main"
+    gitrepo_to: https://github.com/mbaldessari/patterns-operator
+    upgrade_to: "fix-variant-webhook"
     hub: sno3
     spoke: sno4
     from_version: 6.6.6
@@ -233,8 +233,8 @@
 
     - name: Add {{ spoke }}
       ansible.builtin.set_fact:
-        HUBCONFIG: "{{ ('~/' ~  hub ~ '-kubeconfig') | expanduser }}"
-        SPOKECONFIG: "{{ ('~/' ~ spoke ~ '-kubeconfig') | expanduser }}"
+        VP_HUBCONFIG: "{{ ('~/' ~  hub ~ '-kubeconfig') | expanduser }}"
+        VP_SPOKECONFIG: "{{ ('~/' ~ spoke ~ '-kubeconfig') | expanduser }}"
       tags:
         - operator-install
 

@@ -3,26 +3,26 @@
   hosts: localhost
   connection: local
   pre_tasks:
-    - name: Set HUBCONFIG and SPOKECONFIG facts from env variables
+    - name: Set VP_HUBCONFIG and VP_SPOKECONFIG facts from env variables
       ansible.builtin.set_fact:
-        HUBCONFIG: "{{ lookup('env', 'HUBCONFIG') }}"
-        SPOKECONFIG: "{{ lookup('env', 'SPOKECONFIG') }}"
+        VP_HUBCONFIG: "{{ lookup('env', 'VP_HUBCONFIG') }}"
+        VP_SPOKECONFIG: "{{ lookup('env', 'VP_SPOKECONFIG') }}"
 
-    - name: Check for correct HUBCONFIG env variable
+    - name: Check for correct VP_HUBCONFIG env variable
       ansible.builtin.fail:
-        msg: "HUBCONFIG env variable needs to be set and pointing to the HUB kubeconfig file"
+        msg: "VP_HUBCONFIG env variable needs to be set and pointing to the HUB kubeconfig file"
       when:
-        HUBCONFIG is not defined or HUBCONFIG | length == 0
+        VP_HUBCONFIG is not defined or VP_HUBCONFIG | length == 0
 
-    - name: Check for correct SPOKECONFIG env variable
+    - name: Check for correct VP_SPOKECONFIG env variable
       ansible.builtin.fail:
-        msg: "SPOKECONFIG env variable needs to be set and pointing to the REGION kubeconfig file"
+        msg: "VP_SPOKECONFIG env variable needs to be set and pointing to the REGION kubeconfig file"
       when:
-        SPOKECONFIG is not defined or SPOKECONFIG | length == 0
+        VP_SPOKECONFIG is not defined or VP_SPOKECONFIG | length == 0
 
     - name: Print the hub and regional kubeconfigs
       ansible.builtin.debug:
-        msg: "HUBCONFIG: {{ HUBCONFIG }} - SPOKECONFIG: {{ SPOKECONFIG }}"
+        msg: "VP_HUBCONFIG: {{ VP_HUBCONFIG }} - VP_SPOKECONFIG: {{ VP_SPOKECONFIG }}"
 
   roles:
     - acm_import
