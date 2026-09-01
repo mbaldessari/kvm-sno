@@ -8,11 +8,11 @@
   vars:
     mcgtempfolder: "~/sno-mcg"
     #gitrepo: https://github.com/validatedpatterns/multicloud-gitops
-    #gitbranch: rhdp-deploy
-    gitrepo: https://github.com/darkdoc/multicloud-gitops
-    gitbranch: pipeline_test
-    hub: sno3
-    spoke: sno4
+    #gitbranch: main
+    gitrepo: https://github.com/mbaldessari/multicloud-gitops
+    gitbranch: main-nosingle
+    hub: sno1
+    spoke: sno2
   tasks:
     - name: Check that all kubeconfig files exist
       ansible.builtin.stat:
@@ -83,18 +83,13 @@
       register: managedcluster_api
       until: managedcluster_api is not failed
 
-    - name: Add {{ spoke }}
-      ansible.builtin.set_fact:
-        VP_HUBCONFIG: "{{ ('~/' ~  hub ~ '-kubeconfig') | expanduser }}"
-        VP_SPOKECONFIG: "{{ ('~/' ~ spoke ~ '-kubeconfig') | expanduser }}"
-
     - name: Import {{ spoke }}
-      ansible.builtin.import_role:
-        name: acm_import
-      retries: 10
-      delay: 30
-      register: acm1
-      until: acm1 is not failed
+      ansible.builtin.shell: |
+        export VP_HUBCONFIG="{{ ('~/' ~  hub ~ '-kubeconfig') | expanduser }}"
+        export VP_SPOKECONFIG="{{ ('~/' ~ spoke ~ '-kubeconfig') | expanduser }}"
+        ./pattern.sh make import-default-spoke
+      args:
+        chdir: "{{ mcgtempfolder }}/multicloud-gitops"
 
     - name: Wait for namespaced argo on spoke
       ansible.builtin.shell: |
