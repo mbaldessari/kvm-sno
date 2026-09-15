@@ -68,6 +68,7 @@
       vars:
         openshift_mirror: "{{ 'https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview' if '-ec' in item else 'https://mirror.openshift.com/pub/openshift-v4/clients/ocp' }}"
       with_items: "{{ ocp_versions }}"
+      failed_when: false
 
     - name: Uncompress oc
       ansible.builtin.unarchive:
@@ -96,6 +97,7 @@
         dest: "{{ mirrorfolder }}/{{ item }}"
         remote_src: true
       with_items: "{{ ocp_versions }}"
+      failed_when: false
 
     - name: Uncompress oc-mirror (rhel9)
       ansible.builtin.unarchive:
@@ -103,6 +105,7 @@
         dest: "{{ mirrorfolder }}/{{ item }}"
         remote_src: true
       with_items: "{{ ocp_versions }}"
+      failed_when: false
 
     - name: Make oc-mirror script executable
       ansible.builtin.file:
@@ -110,6 +113,7 @@
         mode: '0755'
         state: file
       with_items: "{{ ocp_versions }}"
+      failed_when: false
 
     - name: Register iso URL
       ansible.builtin.shell: |

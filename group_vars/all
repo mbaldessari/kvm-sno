@@ -6,6 +6,7 @@ ocp_versions:
   - "4.20.36"
   - "4.21.31"
   - "4.22.12"
+  - "5.0.0-rc.2"
 
 ocp_version: "4.22.12"
 gitops_from_testing_catalog: false

@@ -11,9 +11,11 @@
       - "4.20"
       - "4.21"
       - "4.22"
-    ocp_candidate_url: https://mirror.openshift.com/pub/openshift-v4/x86_64/clients/ocp-dev-preview/
+    # ocp-dev-preview
+    ocp_candidate_url: https://mirror.openshift.com/pub/openshift-v5/x86_64/clients/ocp/
     ocp_candidate_tmp_file: /tmp/ocp-candidate-versions.html
     major_candidate_versions:
+      - "5.0"
   tasks:
     - name: Fetch URL
       ansible.builtin.get_url:

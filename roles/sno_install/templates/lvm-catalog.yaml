@@ -1,0 +1,9 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: CatalogSource
+metadata:
+  name: test-lvm-operator
+  namespace: openshift-marketplace
+spec:
+  displayName: Test LVM Operator
+  sourceType: grpc
+  image: quay.io/redhat-user-workloads/logical-volume-manag-tenant/lvm-operator-catalog:v{{ ocp_maj_min_version }}
