@@ -92,7 +92,7 @@ spec:
     mirrors:
       - quay.io/redhat-user-workloads/rh-openshift-gitops-tenant/argocd-image-updater-rhel9
       - registry.stage.redhat.io/openshift-gitops-1/argocd-image-updater-rhel9
-{% else %}
+{% endif %}
 {% if ocp_maj_min_version == "5.0" %}
   - source: registry.redhat.io/lvms4
     mirrors:
@@ -110,4 +110,3 @@ spec:
   - mirrors:
     - fw.int.rhx:6003
     source: registry.connect.redhat.com
-{% endif %}
