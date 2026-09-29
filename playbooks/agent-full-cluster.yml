@@ -1,0 +1,787 @@
+---
+- name: Set firewall rules
+  hosts: fw
+  gather_facts: false
+  become: true
+  vars:
+    all_nodes:
+    # - nginx
+    - master-0
+    - master-1
+    - master-2
+    - worker-0
+    - worker-1
+    - worker-2
+    - worker-3
+    - worker-4
+    - worker-5
+
+  tasks:
+    - name: Set rules to REJECT for Full cluster
+      ansible.builtin.lineinfile:
+        path: /etc/shorewall/rules
+        regexp: '^.*lab:{{ full_cluster[item].ip }}.*web$'
+        line: "REJECT         lab:{{ full_cluster[item].ip }}              web"
+        owner: root
+        group: root
+        mode: "0600"
+      when: enable_disconnected
+      loop: "{{ all_nodes }}"
+
+    - name: Set rules to ALLOW for Full cluster
+      ansible.builtin.lineinfile:
+        path: /etc/shorewall/rules
+        regexp: '^.*lab:{{ full_cluster[item].ip }}.*web$'
+        line: "ACCEPT         lab:{{ full_cluster[item].ip }}              web"
+        owner: root
+        group: root
+        mode: "0600"
+      when: not enable_disconnected
+      loop: "{{ all_nodes }}"
+
+    - name: Restart shorewall
+      ansible.builtin.systemd:
+        name: shorewall
+        state: restarted
+
+- name: Setup nginx load balancer
+  hosts: nginx
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Setup nginx config file
+      tags:
+        - nginx-setup
+      ansible.builtin.template:
+        src: "../templates/nginx_conf.j2"
+        dest: /etc/nginx/nginx.conf
+        selevel: s0
+        serole: object_r
+        setype: httpd_config_t
+        seuser: system_u
+        mode: "0640"
+      vars:
+        bootstrap: false
+
+    - name: Start and enable nginx
+      tags:
+        - nginx-setup
+      ansible.builtin.systemd_service:
+        name: nginx
+        state: restarted
+        enabled: true
+
+- name: Install full cluster via agent-based installer
+  hosts: kvm
+  gather_facts: false
+  become: true
+  vars:
+    agent_nodes:
+    - master-0
+    - master-1
+    - master-2
+    - worker-0
+    - worker-1
+    - worker-2
+    # - worker-3
+    # - worker-4
+    # - worker-5
+    san_nodes:
+    - master-0
+    - master-1
+    - master-2
+    - worker-0
+    - worker-1
+    - worker-2
+    # - worker-3
+
+    nonsan_nodes:
+    # - worker-4
+    # - worker-5
+  tasks:
+    - name: Notify bandini - start job
+      ansible.builtin.uri:
+        url: http://raspyclock.int.rhx:8080/job
+        method: POST
+        body: "start"
+      failed_when: false
+
+    - name: Check that the mirror bits are correct
+      ansible.builtin.shell: |
+        set -ex
+        if ! grep -q "Found update {{ ocp_version }}" /var/log/oc-mirror.log ; then
+          echo "WRONG VERSION"
+          exit 1
+        fi
+
+    - name: Set up iscsi on the kvm node
+      ansible.builtin.shell: |
+        #!/bin/bash
+        set -ex
+        systemctl stop target.service
+        rm -rf /etc/target/saveconfig.json /var/lib/iscsi_disks/
+        rm -rf /var/lib/iscsi_disks /var/lib/libvirt/iscsi_disks
+        systemctl start target.service
+        targetcli clearconfig confirm=True
+        mkdir -p /var/lib/libvirt/iscsi_disks
+        targetcli backstores/fileio create iscsi_disk1 /var/lib/libvirt/iscsi_disks/disk1.img 150G
+        targetcli backstores/fileio create iscsi_disk2 /var/lib/libvirt/iscsi_disks/disk2.img 160G
+        targetcli iscsi/ create iqn.2024-02.com.example
+        targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk1
+        targetcli iscsi/iqn.2024-02.com.example/tpg1/luns/ create /backstores/fileio/iscsi_disk2
+        targetcli iscsi/iqn.2024-02.com.example/tpg1/ set attribute generate_node_acls=1  authentication=0 demo_mode_write_protect=0 cache_dynamic_acls=1
+
+    - name: Remove full cluster folder
+      ansible.builtin.file:
+        path: "{{ fullclusterfolder }}"
+        state: absent
+
+    - name: Create full cluster config folder
+      ansible.builtin.file:
+        path: "{{ fullclusterfolder }}"
+        state: directory
+        recurse: true
+
+    - name: Prepare install-config.yaml for debugging
+      ansible.builtin.template:
+        src: ../templates/agent-full-cluster-install-config.j2.yaml
+        dest: "{{ tempfolder }}/agent-full-cluster-install-config.yaml"
+        mode: "0640"
+      vars:
+        enable_caching: true
+        worker_replicas: "{{ agent_nodes | select('match', 'worker-.*') | list | length }}"
+
+    - name: Prepare install-config.yaml for agent-based install
+      ansible.builtin.template:
+        src: ../templates/agent-full-cluster-install-config.j2.yaml
+        dest: "{{ fullclusterfolder }}/install-config.yaml"
+        mode: "0640"
+      vars:
+        enable_caching: true
+        worker_replicas: "{{ agent_nodes | select('match', 'worker-.*') | list | length }}"
+
+    - name: Prepare agent-config.yaml
+      ansible.builtin.template:
+        src: ../templates/agent-config.j2.yaml
+        dest: "{{ fullclusterfolder }}/agent-config.yaml"
+        mode: "0640"
+
+    - name: Prepare agent-config.yaml for debugging
+      ansible.builtin.copy:
+        src: "{{ fullclusterfolder }}/agent-config.yaml"
+        dest: "{{ tempfolder }}/agent-config.yaml"
+        mode: "0640"
+        remote_src: true
+
+    - name: Set openshift-install command
+      ansible.builtin.set_fact:
+        oc_install: "{{ oc_dir }}/openshift-install"
+      when: not fips_enabled
+
+    - name: Set openshift-install command FIPS
+      ansible.builtin.set_fact:
+        oc_install: "{{ oc_dir }}/openshift-install-fips"
+      when: fips_enabled
+
+    - name: Generate agent ISO
+      ansible.builtin.shell: |
+        set -e
+        export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
+        "{{ oc_install }}" agent create image --dir=.
+      args:
+        chdir: "{{ fullclusterfolder }}"
+
+    - name: Make all files readable
+      ansible.builtin.file:
+        path: "{{ fullclusterfolder }}"
+        mode: u=rwX,g=rX,o=rX
+        recurse: true
+
+    - name: "Create masters and workers"
+      ansible.builtin.command: >-
+        virt-install
+        --name {{ item }}
+        --hvm
+        --virt-type kvm
+        --cpu host-passthrough
+        --arch {{ arch }}
+        --cdrom {{ fullclusterfolder }}/agent.{{ arch }}.iso
+        --console pty,target_type=serial
+        --os-variant rhel8.0
+        --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
+        --vcpus {{ full_cluster[item].cpus }},sockets=1,cores={{ full_cluster[item].cpus }},threads=1
+        --ram {{ full_cluster[item].ram }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }},serial={{ diskserial }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }},serial={{ diskserial2 }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk3 }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache3 }},wwn={{ full_cluster[item].wwn3 }},serial={{ diskserial3 }}
+        --check disk_size=off
+        --graphics spice,listen=127.0.0.1
+        --noautoconsole
+      with_items: "{{ san_nodes }}"
+      retries: 0
+      delay: 10
+      register: vm_creation
+      until: vm_creation is not failed
+
+    - name: Wait for bootstrap process to complete
+      ansible.builtin.shell: |
+        set -e
+        export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
+        "{{ oc_install }}" agent wait-for bootstrap-complete --dir=. --log-level=debug
+      args:
+        chdir: "{{ fullclusterfolder }}"
+
+    - name: Wait for installation completion
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
+        "{{ oc_install }}" agent wait-for install-complete --dir=. --log-level=debug
+      retries: 2
+      delay: 5
+      register: wait_for_install
+      until: wait_for_install is not failed
+      args:
+        chdir: "{{ fullclusterfolder }}"
+
+    - name: Fetch kubeconfig file
+      ansible.posix.synchronize:
+        mode: pull
+        src: "{{ fullclusterfolder }}/auth/kubeconfig"
+        dest: "~/fullcluster-kubeconfig"
+
+    - name: Fix permissions
+      ansible.builtin.shell: |
+        chmod 0600 "/home/michele/fullcluster-kubeconfig"
+      delegate_to: localhost
+
+    - name: Set kubeadmin password
+      tags:
+        - password
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        PASS=$(python3 -c 'import bcrypt; print(bcrypt.hashpw(b"{{ kubeadmin_pass }}", bcrypt.gensalt(rounds=10)).decode())' | base64 -w0)
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} patch secret -n kube-system kubeadmin --type json \
+          -p '[{"op": "replace", "path": "/data/kubeadmin", "value": "'$PASS'"}]'
+      when: kubeadmin_pass is defined
+      register: kubepass
+      until: kubepass is not failed
+      retries: 30
+      delay: 5
+
+    - name: Apply mirroring yaml files
+      tags:
+        - update
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f {{ local_mirror }}/yamls/cluster-resources/idms-oc-mirror.yaml
+        {{ oc_bin }} apply -f {{ local_mirror }}/yamls/cluster-resources/itms-oc-mirror.yaml
+        {{ oc_bin }} apply -f {{ local_mirror }}/yamls/cluster-resources/cs-community-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
+        {{ oc_bin }} apply -f {{ local_mirror }}/yamls/cluster-resources/cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
+        {{ oc_bin }} apply -f {{ local_mirror }}/yamls/cluster-resources/cs-certified-operator-index-v{{ ocp_maj_min_version_dashed }}.yaml
+      when: enable_disconnected
+      register: mirroring
+      until: mirroring is not failed
+      retries: 10
+      delay: 10
+
+    - name: Disable default catalog sources
+      tags:
+        - update
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} patch OperatorHub cluster --type json -p '[{"op": "add", "path": "/spec/disableAllDefaultSources", "value": true}]'
+      when: enable_disconnected
+      register: catalog_sources
+      until: catalog_sources is not failed
+      retries: 50
+      delay: 20
+
+    - name: Template out update operator
+      tags:
+        - update
+      ansible.builtin.template:
+        src: "../templates/update-operator.yaml"
+        dest: "{{ fullclusterfolder }}/update-operator.yaml"
+        mode: "0644"
+
+    - name: Reset ca folder
+      ansible.builtin.shell: |
+        mkdir -p "{{ ca_folder }}"
+        rm -f "{{ ca_folder }}/{{ item }}-ca-kube"
+      with_items:
+        - fullcluster
+
+    - name: Does the firefox profile exist
+      ansible.builtin.stat:
+        path: "{{ firefox_profile }}"
+      register: profile_path
+
+    - name: Init firefox profile path
+      ansible.builtin.shell: |
+        mkdir -p "{{ firefox_profile }}"
+      when: not profile_path.stat.exists
+
+    - name: Fetch all CAs for each cluster
+      ansible.builtin.shell: |
+        set -x -e -o pipefail
+        export KUBECONFIG=/home/michele/{{ item }}-kubeconfig
+        {{ oc_bin }} get -n default configmap/kube-root-ca.crt -o jsonpath="{.data.ca\.crt}" > "{{ ca_folder }}/{{ item }}-ca-kube"
+      with_items:
+        - fullcluster
+      retries: 5
+      delay: 10
+      register: pki_import
+      until: pki_import is not failed
+
+    - name: Delete exiting CAs from SNOs
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -f {{ ca_folder }}/{{ item }}-cert*pem
+        awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
+        for i in {{ item }}-cert*; do
+          certutil -D -n "{{ item }}-$i-kube" -d sql:"{{ firefox_profile }}" || true
+        done
+      args:
+        chdir: "{{ ca_folder }}"
+      with_items:
+        - fullcluster
+      retries: 5
+      delay: 10
+      register: pki_import
+      until: pki_import is not failed
+
+    - name: Import all CAs into my firefox profile
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        rm -f {{ ca_folder }}/cert*
+        awk 'BEGIN {c=0;} /BEGIN CERTIFICATE/ {c++} {print > "{{ item }}-cert" c ".pem"}' < {{ ca_folder }}/{{ item }}-ca-kube
+        for i in {{ item }}-cert*; do
+          certutil -A -n "{{ item }}-$i-kube" -t "TC,C,C"  -i "$i" -d sql:"{{ firefox_profile }}"
+        done
+      args:
+        chdir: "{{ ca_folder }}"
+      with_items:
+        - fullcluster
+      retries: 10
+      delay: 10
+      register: pki_import
+      until: pki_import is not failed
+
+    - name: Template out butane kdump for workers
+      tags:
+        - mcp
+      ansible.builtin.template:
+        src: "../templates/mcp-kdump.yaml"
+        dest: "{{ fullclusterfolder }}/mcp-kdump.yaml"
+        mode: "0644"
+
+    - name: Render butane kdump
+      tags:
+        - mcp
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        butane "{{ fullclusterfolder }}/mcp-kdump.yaml" -o "{{ fullclusterfolder }}/99-worker-mco-kdump.yaml"
+
+    - name: Install local iscsi MCP
+      tags:
+        - mcp
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/99-worker-mco-kdump.yaml"
+        {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 2}}'
+      register: mcg_iscsi
+      until: mcg_iscsi is not failed
+      retries: 5
+      delay: 10
+
+    - name: Wait for MCP to start
+      tags:
+        - iscsi
+      ansible.builtin.pause:
+        minutes: 1
+
+    - name: Approve pending CSRs after MCP
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+        sleep 10
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+      register: csr
+      until: csr is not failed
+      retries: 5
+      delay: 10
+
+    - name: Set minio-s3 secret for image registry
+      tags:
+        - s3
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} create secret generic image-registry-private-configuration-user \
+              --from-literal=REGISTRY_STORAGE_S3_ACCESSKEY="{{ minio.admin_access_key }}" \
+              --from-literal=REGISTRY_STORAGE_S3_SECRETKEY="{{ minio.admin_secret_key }}" --namespace openshift-image-registry
+      register: miniosetup
+      until: miniosetup is not failed
+      retries: 3
+      delay: 5
+
+    - name: Set minio-s3 backend for image registry
+      tags:
+        - s3
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} patch configs.imageregistry.operator.openshift.io cluster -n openshift-image-registry \
+              --type merge --patch '{"spec": { "storage": { "s3": { "region": "notneeded", "regionEndpoint": "https://{{ minio.fqdn }}:{{ minio.port }}", "bucket": "{{ minio.bucket }}"}}}}'
+        {{ oc_bin }} patch configs.imageregistry.operator.openshift.io cluster --type=json -p='[{"op": "add", "path": "/spec/managementState", "value": "Managed"}]'
+      register: miniosetup
+      until: miniosetup is not failed
+      retries: 3
+      delay: 5
+
+    - name: Wait for MCP to settle
+      tags:
+        - iscsi
+      ansible.builtin.shell: |
+        set -ex
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        if [ $({{ oc_bin }} get mcp/master -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/master -o jsonpath='{.status.machineCount}') ]; then
+          exit 1
+        fi
+        if [ $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.readyMachineCount}') != $({{ oc_bin }} get mcp/worker -o jsonpath='{.status.machineCount}') ]; then
+          exit 1
+        fi
+      retries: 30
+      delay: 90
+      register: mcp_ready
+      until: mcp_ready is not failed
+
+    - name: Wait for the clusters stability
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} adm wait-for-stable-cluster --minimum-stable-period=5s
+
+    - name: Approve pending CSRs (final)
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+        sleep 10
+        {{ oc_bin }} get csr -o {% raw %}go-template='{{range .items}}{{if not .status}}{{.metadata.name}}{{"\n"}}{{end}}{{end}}{% endraw %}' | xargs --no-run-if-empty {{ oc_bin }} adm certificate approve
+      register: csr
+      until: csr is not failed
+      retries: 5
+      delay: 10
+
+    - name: Label workers as storage nodes
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} label nodes -l node-role.kubernetes.io/worker "scale.spectrum.ibm.com/role=storage"
+        {{ oc_bin }} label nodes -l node-role.kubernetes.io/worker "scale.spectrum.ibm.com/daemon-selector="
+
+    - name: Patch MCP back to 1 maxunavail
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} patch mcp worker --type merge --patch '{"spec": {"maxUnavailable": 1}}'
+
+    - name: Get multipath IDs
+      tags:
+        - fusion
+      delegate_to: worker-0
+      ansible.builtin.shell: |
+        for i in $(multipathd show maps raw format %w); do ls -1 /dev/disk/by-id/dm-uuid-mpath-$i; done
+      register: disk_ids_raw
+
+    - name: Set multipath facts
+      tags:
+        - fusion
+      ansible.builtin.set_fact:
+        disk_ids: "{{ disk_ids_raw.stdout_lines }}"
+
+    - name: Template localstorage bits
+      ansible.builtin.template:
+        src: "../templates/{{ item }}"
+        dest: "{{ fullclusterfolder }}/{{ item }}"
+        mode: "0644"
+      loop:
+        - local-storage-base.yaml
+        - local-storage-cr.yaml
+
+    - name: Apply localstorage bits
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
+      register: localstorage_apply
+      until: localstorage_apply is not failed
+      retries: 30
+      delay: 10
+      loop:
+        - local-storage-base.yaml
+        - local-storage-cr.yaml
+
+    - name: Make localstorage storageclass the default
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} patch storageclass localfs-sc -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+      register: localstorage_apply
+      until: localstorage_apply is not failed
+      retries: 5
+      delay: 10
+
+    - name: Template fusion and virt bits
+      tags:
+        - fusion
+      ansible.builtin.template:
+        src: "../templates/{{ item }}"
+        dest: "{{ fullclusterfolder }}/{{ item }}"
+        mode: "0644"
+      loop:
+        - fusion-ns.yaml
+        - fusion-operatorgroup.yaml
+        - fusion-catalog.yaml
+        - fusion-subscription.yaml
+        - fusion-object.yaml
+        - fusion-cluster.yaml
+        - fusion-localdisk.yaml
+        - fusion-filesystem.yaml
+        - fusion-storageclass.yaml
+        - fusion-test.yaml
+        - virt-subscription.yaml
+        - virt-hyperconverged.yaml
+
+    - name: STOP HERE
+      ansible.builtin.fail:
+        msg: "STOP HERE FOR NOW"
+      when: stop_to_develop | default(true) | bool
+
+    - name: Apply fusion catalog if not GA
+      tags:
+        - fusion
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 30
+      delay: 10
+      loop:
+        - fusion-catalog.yaml
+      when: not fusion_ga
+
+    - name: Apply fusion bits
+      tags:
+        - fusion
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig";
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 30
+      delay: 10
+      loop:
+        - fusion-ns.yaml
+        - fusion-operatorgroup.yaml
+        - fusion-subscription.yaml
+        - fusion-object.yaml
+        - virt-subscription.yaml
+
+    - name: Create ibm secret
+      tags:
+        - fusion
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} create secret -n ibm-fusion-access generic fusion-pullsecret \
+          --from-literal=ibm-entitlement-key={{ ibmentitlementkeyfile }}
+
+    - name: Apply fusion cluster
+      tags:
+        - fusion2
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/fusion-cluster.yaml"
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 20
+      delay: 10
+
+    - name: Wait for fusion pods
+      tags:
+        - fusion2
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        COUNT=$({{ oc_bin }} get pods -n ibm-spectrum-scale | grep worker | grep Running | wc -l)
+        NODES=$(oc get nodes -l "node-role.kubernetes.io/worker" --no-headers | wc -l)
+        if [ ${COUNT} != ${NODES} ]; then
+          exit 1
+        fi
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 30
+      delay: 20
+
+    - name: Apply fusion filesystem objects and small test
+      tags:
+        - fusion3
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/{{ item }}"
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 20
+      delay: 10
+      loop:
+        - fusion-localdisk.yaml
+        - fusion-filesystem.yaml
+        - fusion-storageclass.yaml
+        - fusion-test.yaml
+
+    - name: Create Virt HCO
+      tags:
+        - virt1
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/virt-hyperconverged.yaml"
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 20
+      delay: 10
+
+    - name: Download virtctl
+      tags:
+        - virt2
+      ansible.builtin.shell: |
+        set -ex
+        rm -f /tmp/virtctl.tar.gz
+        curl -L -o /tmp/virtctl.tar.gz -k https://hyperconverged-cluster-cli-download-openshift-cnv.apps.cluster.{{ domain }}/amd64/linux/virtctl.tar.gz
+        pushd /tmp
+        tar xf virtctl.tar.gz
+        mv virtctl "{{ oc_dir }}"
+        popd
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 5
+      delay: 30
+
+    - name: Download and vm image
+      tags:
+        - virt3
+      ansible.builtin.shell: |
+        set -e
+        rm -f /tmp/vm.img
+        curl -L -o /tmp/vm.img -k "{{ vm_image }}"
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        oc project ibm-test-deployment
+        oc delete datavolume/vm-test-dv || /bin/true
+        oc delete datasource/vm-test-dv || /bin/true
+        {{ oc_dir }}/virtctl image-upload dv vm-test-dv --size=20Gi --image-path=/tmp/vm.img --insecure --datasource
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 2
+      delay: 10
+
+    - name: Template virt-machine
+      tags:
+        - virt4
+      ansible.builtin.template:
+        src: "../templates/{{ item }}"
+        dest: "{{ fullclusterfolder }}/{{ item }}"
+        mode: "0644"
+      loop:
+        - virt-machine.yaml
+
+    - name: Create small VM
+      tags:
+        - virt4
+      ansible.builtin.shell: |
+        set -e
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} apply -f "{{ fullclusterfolder }}/virt-machine.yaml"
+      register: fusion_apply
+      until: fusion_apply is not failed
+      retries: 2
+      delay: 10
+
+    - name: Test ssh access to VM
+      tags:
+        - virt5
+      ansible.builtin.shell: |
+        set -ex
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_dir }}/virtctl ssh --namespace ibm-test-deployment -t="-o StrictHostKeyChecking=no" -t="-o UserKnownHostsFile=/dev/null" -i /home/michele/.ssh/id_ansible kni@test-vm -c "sudo sh -c \"echo -e '[main]\nproxy=http://172.16.15.254:3128/' > /etc/dnf/dnf.conf\""
+        {{ oc_dir }}/virtctl ssh --namespace ibm-test-deployment -t="-o StrictHostKeyChecking=no" -t="-o UserKnownHostsFile=/dev/null" -i /home/michele/.ssh/id_ansible kni@test-vm -c "sudo dnf install -y mariadb-server"
+      register: vm_ssh
+      until: vm_ssh is not failed
+      retries: 5
+      delay: 30
+
+    - name: Get console pod name
+      tags:
+        - console
+      ansible.builtin.shell: |
+        set -e -o pipefail
+        export KUBECONFIG="{{ fullclusterfolder }}/auth/kubeconfig"
+        {{ oc_bin }} get -n ibm-fusion-access pods | grep console-plugin | awk '{ print $1 }'
+      register: console_pod
+
+    - name: Test console access
+      tags:
+        - console
+      kubernetes.core.k8s_info:
+        api_version: v1
+        kind: Pod
+        namespace: ibm-fusion-access
+        name: "{{ console_pod.stdout }}"
+        kubeconfig: "{{ fullclusterfolder }}/auth/kubeconfig"
+      register: pod_info
+
+    - name: Debug console pod
+      tags:
+        - console
+      ansible.builtin.debug:
+        msg: "{{ pod_info }}"
+
+    - name: Evaluate pod health
+      tags:
+        - console
+      ansible.builtin.set_fact:
+        pod_healthy: "{{ (pod_info.resources[0].status.phase == 'Running') and
+                         (pod_info.resources[0].status.containerStatuses | selectattr('ready', 'equalto', true) | list | length ==
+                          pod_info.resources[0].status.containerStatuses | length) }}"
+
+    - name: Notify bandini - cluster done
+      ansible.builtin.uri:
+        url: http://raspyclock.int.rhx:8080/receive
+        method: POST
+        body: "Cluster Done! "
+      failed_when: false
+
+    - name: Notify bandini - job finished
+      ansible.builtin.uri:
+        url: http://raspyclock.int.rhx:8080/job
+        method: POST
+        body: "finished"
+      failed_when: false
+
+    - name: Notify bandini - ntfy
+      ansible.builtin.uri:
+        url: "https://ntfy.sh/{{ ntfy_topic }}"
+        method: POST
+        body: "Cluster install successful"
+      failed_when: false

@@ -47,6 +47,18 @@ full-cluster-direct: ## Installs a full OCP cluster on multiple VMs not in disco
 full-cluster-destroy: ## Destroys the full cluster
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/full-cluster-destroy.yml
 
+.PHONY: agent-full-cluster
+agent-full-cluster: ## Installs a full OCP cluster using agent-based installer (disconnected)
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) --extra-vars='{enable_caching: False}' playbooks/agent-full-cluster.yml
+
+.PHONY: agent-full-cluster-direct
+agent-full-cluster-direct: ## Installs a full OCP cluster using agent-based installer (connected)
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) --extra-vars='{enable_disconnected: False}' playbooks/agent-full-cluster.yml
+
+.PHONY: agent-full-cluster-destroy
+agent-full-cluster-destroy: ## Destroys the agent-based full cluster
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/full-cluster-destroy.yml
+
 .PHONY: sno-disconnected
 sno-disconnected: ## Install an SNO vm on kuemper host in disconnected mode
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' --extra-vars='{enable_disconnected: True}' $(EXTRA_VARS) playbooks/sno-install.yml

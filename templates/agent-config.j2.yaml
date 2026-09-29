@@ -1,0 +1,15 @@
+apiVersion: v1beta1
+kind: AgentConfig
+metadata:
+  name: cluster
+rendezvousIP: {{ full_cluster['master-0'].ip }}
+hosts:
+{% for node in agent_nodes %}
+  - hostname: {{ node }}
+    role: {{ 'master' if 'master' in node else 'worker' }}
+    rootDeviceHints:
+      serialNumber: {{ diskserial }}
+    interfaces:
+      - name: enp1s0
+        macAddress: {{ mac_prefix }}:{{ full_cluster[node].mac_nr }}
+{% endfor %}
