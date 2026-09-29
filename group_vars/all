@@ -37,6 +37,7 @@ vm_image: "http://fw.int.rhx/Fedora-Cloud-Base-Generic-44_Beta-1.2.x86_64.qcow2"
 iscsi_mco_pool: "worker"
 iscsi_target_ip: 192.168.66.100
 iscsi_iqn: iqn.2024-02.com.example
+ntp_server: "192.168.66.254"
 bridge_interface: "br0"
 ca_folder: "/tmp/sno-ca"
 firefox_profile: "/home/michele/.mozilla/firefox/1u0ue9rm.OpenShift-1708184658172"
