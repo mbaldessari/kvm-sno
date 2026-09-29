@@ -332,7 +332,7 @@ full_cluster:
     ram: 64768
     mac_nr: a0
     ip: 192.168.66.150
-    disk: 60
+    disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7544"
     disk2: 50
@@ -346,7 +346,7 @@ full_cluster:
     ram: 64768
     mac_nr: a1
     ip: 192.168.66.151
-    disk: 60
+    disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7644"
     disk2: 50
@@ -360,7 +360,7 @@ full_cluster:
     ram: 64768
     mac_nr: a2
     ip: 192.168.66.152
-    disk: 60
+    disk: 100
     cache: unsafe
     wwn: "0x5000c50015ea7566"
     disk2: 50
