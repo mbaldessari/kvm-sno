@@ -332,7 +332,7 @@ full_cluster:
     ram: 64768
     mac_nr: a0
     ip: 192.168.66.150
-    disk: 100
+    disk: 60
     cache: unsafe
     wwn: "0x5000c50015ea7544"
     disk2: 50
@@ -346,7 +346,7 @@ full_cluster:
     ram: 64768
     mac_nr: a1
     ip: 192.168.66.151
-    disk: 100
+    disk: 60
     cache: unsafe
     wwn: "0x5000c50015ea7644"
     disk2: 50
@@ -360,7 +360,7 @@ full_cluster:
     ram: 64768
     mac_nr: a2
     ip: 192.168.66.152
-    disk: 100
+    disk: 60
     cache: unsafe
     wwn: "0x5000c50015ea7566"
     disk2: 50
@@ -464,7 +464,7 @@ ssh_pubkey: "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIO8CumOo7uGDhSG5gzRdMkej/dBZ3Yh
 rhn_org: "{{ lookup('file', '~/.rhn_org') }}"
 activation_key: "{{ lookup('file', '~/.rhn_activation_key') }}"
     
-rhel_version: "10.1"
+rhel_version: "9.6"
 minio:
   fqdn: "nginx.cluster.{{ domain }}"
   port: "9000"

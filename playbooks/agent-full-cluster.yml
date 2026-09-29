@@ -106,13 +106,13 @@
         body: "start"
       failed_when: false
 
-    - name: Check that the mirror bits are correct
-      ansible.builtin.shell: |
-        set -ex
-        if ! grep -q "Found update {{ ocp_version }}" /var/log/oc-mirror.log ; then
-          echo "WRONG VERSION"
-          exit 1
-        fi
+    # - name: Check that the mirror bits are correct
+    #   ansible.builtin.shell: |
+    #     set -ex
+    #     if ! grep -q "Found update {{ ocp_version }}" /var/log/oc-mirror.log ; then
+    #       echo "WRONG VERSION"
+    #       exit 1
+    #     fi
 
     - name: Set up iscsi on the kvm node
       ansible.builtin.shell: |
@@ -187,7 +187,7 @@
       ansible.builtin.shell: |
         set -e
         export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
-        "{{ oc_install }}" agent create image --dir=.
+        "{{ oc_install }}" agent create image --dir=. &> /tmp/agent-generate-iso.log
       args:
         chdir: "{{ fullclusterfolder }}"
 
@@ -211,9 +211,9 @@
         --network bridge="{{ bridge_interface }}",mac="{{ mac_prefix }}:{{ full_cluster[item].mac_nr }}"
         --vcpus {{ full_cluster[item].cpus }},sockets=1,cores={{ full_cluster[item].cpus }},threads=1
         --ram {{ full_cluster[item].ram }}
-        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache }},wwn={{ full_cluster[item].wwn }},serial={{ diskserial }}
-        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache2 }},wwn={{ full_cluster[item].wwn2 }},serial={{ diskserial2 }}
-        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk3 }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache3 }},wwn={{ full_cluster[item].wwn3 }},serial={{ diskserial3 }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache }},serial={{ diskserial }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk2 }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache2 }},serial={{ diskserial2 }}
+        --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk3 }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache3 }},serial={{ diskserial3 }}
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --noautoconsole

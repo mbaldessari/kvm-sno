@@ -8,7 +8,7 @@ hosts:
   - hostname: {{ node }}
     role: {{ 'master' if 'master' in node else 'worker' }}
     rootDeviceHints:
-      serialNumber: {{ diskserial }}
+      deviceName: /dev/vda
     interfaces:
       - name: enp1s0
         macAddress: {{ mac_prefix }}:{{ full_cluster[node].mac_nr }}
