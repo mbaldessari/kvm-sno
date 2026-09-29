@@ -9,11 +9,11 @@
     patterns_operator_ns: patterns-operator
     vp_operator_tempfolder: "~/sno-vp-operator"
     gitrepo_from: https://github.com/validatedpatterns/patterns-operator
-    upgrade_from: "0.0.79"
-    #gitrepo_to: https://github.com/validatedpatterns/patterns-operator
-    #upgrade_to: "main"
-    gitrepo_to: https://github.com/mbaldessari/patterns-operator
-    upgrade_to: "fix-variant-webhook"
+    upgrade_from: "0.0.80"
+    gitrepo_to: https://github.com/validatedpatterns/patterns-operator
+    upgrade_to: "main"
+    #gitrepo_to: https://github.com/mbaldessari/patterns-operator
+    #upgrade_to: "fix-variant-webhook"
     hub: sno3
     spoke: sno4
     from_version: 6.6.6
@@ -240,7 +240,7 @@
 
     - name: Import {{ spoke }}
       ansible.builtin.import_role:
-        name: acm_import
+        name: rhvp.cluster_utils.acm_import
       retries: 10
       delay: 30
       register: acm1

@@ -97,6 +97,7 @@ spec:
   - source: registry.redhat.io/lvms4
     mirrors:
     - registry.stage.redhat.io/lvms4
+    - quay.io/redhat-user-workloads/rh-openshift-lvm-tenant
 {% endif %}
   - mirrors:
     - fw.int.rhx:6000

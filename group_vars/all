@@ -1,14 +1,14 @@
 ---
 # ocp_versions is only used by the ocp-mirror target to mirror locally all the versions and uncompress them *once*
 ocp_versions:
-  - "4.18.44"
-  - "4.19.34"
-  - "4.20.36"
-  - "4.21.31"
-  - "4.22.12"
-  - "5.0.0-rc.2"
+  - "4.18.55"
+  - "4.19.47"
+  - "4.20.38"
+  - "4.21.35"
+  - "4.22.16"
+  - "5.0.0-rc.4"
 
-ocp_version: "4.22.12"
+ocp_version: "4.22.15"
 gitops_from_testing_catalog: false
 fusion_ga: true
 fips_enabled: false
