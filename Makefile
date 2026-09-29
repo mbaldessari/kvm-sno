@@ -59,6 +59,14 @@ agent-full-cluster-direct: ## Installs a full OCP cluster using agent-based inst
 agent-full-cluster-destroy: ## Destroys the agent-based full cluster
 	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/full-cluster-destroy.yml
 
+.PHONY: sushy-setup
+sushy-setup: ## Setup sushy BMC emulator on KVM host via podman
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/sushy-setup.yml
+
+.PHONY: sushy-destroy
+sushy-destroy: ## Destroy sushy BMC emulator
+	ansible-playbook -i hosts $(TAGS_STRING) $(EXTRA_VARS) playbooks/sushy-destroy.yml
+
 .PHONY: sno-disconnected
 sno-disconnected: ## Install an SNO vm on kuemper host in disconnected mode
 	ansible-playbook -i hosts $(TAGS_STRING) --extra-vars='{"snos":[$(SNOS)]}' --extra-vars='{enable_disconnected: True}' $(EXTRA_VARS) playbooks/sno-install.yml

@@ -1,0 +1,15 @@
+---
+- name: Destroy sushy BMC emulator
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Stop and remove sushy-emulator container
+      ansible.builtin.shell: |
+        podman rm -f sushy-emulator
+      failed_when: false
+
+    - name: Remove sushy config
+      ansible.builtin.file:
+        path: /etc/sushy/sushy-emulator.conf
+        state: absent

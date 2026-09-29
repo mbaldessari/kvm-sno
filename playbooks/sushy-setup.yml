@@ -1,0 +1,51 @@
+---
+- name: Setup sushy BMC emulator on KVM host
+  hosts: kvm
+  gather_facts: false
+  become: true
+  tasks:
+    - name: Create sushy config directory
+      ansible.builtin.file:
+        path: /etc/sushy
+        state: directory
+        mode: "0755"
+
+    - name: Template sushy-emulator config
+      ansible.builtin.template:
+        src: "../templates/sushy-emulator.conf.j2"
+        dest: /etc/sushy/sushy-emulator.conf
+        mode: "0644"
+
+    - name: Stop existing sushy-emulator container
+      ansible.builtin.shell: |
+        podman rm -f sushy-emulator
+      failed_when: false
+
+    - name: Pull sushy-tools container image
+      ansible.builtin.shell: |
+        podman pull quay.io/metal3-io/sushy-tools
+
+    - name: Run sushy-emulator via podman
+      ansible.builtin.shell: |
+        podman run -d --name sushy-emulator \
+          --privileged \
+          --net host \
+          -v /var/run/libvirt:/var/run/libvirt:z \
+          -v /usr/share/edk2:/usr/share/OVMF:ro \
+          -v /etc/sushy/sushy-emulator.conf:/etc/sushy/sushy-emulator.conf:z \
+          quay.io/metal3-io/sushy-tools \
+          sushy-emulator --config /etc/sushy/sushy-emulator.conf
+
+    - name: Wait for sushy-emulator to start
+      ansible.builtin.pause:
+        seconds: 5
+
+    - name: Verify sushy-emulator is running
+      ansible.builtin.uri:
+        url: "http://localhost:{{ sushy_port | default(8000) }}/redfish/v1/Systems"
+        method: GET
+        status_code: 200
+      register: sushy_check
+      retries: 3
+      delay: 5
+      until: sushy_check is not failed
