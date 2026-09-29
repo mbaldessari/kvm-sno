@@ -183,23 +183,7 @@
         oc_install: "{{ oc_dir }}/openshift-install-fips"
       when: fips_enabled
 
-    - name: Generate cluster manifests
-      ansible.builtin.shell: |
-        set -e
-        export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
-        "{{ oc_install }}" agent create cluster-manifests --dir=. &> /tmp/agent-generate-manifests.log
-      args:
-        chdir: "{{ fullclusterfolder }}"
-
-    - name: Remove rootDeviceHints from generated BareMetalHost manifests
-      ansible.builtin.replace:
-        path: "{{ item }}"
-        regexp: '^\s*rootDeviceHints:\n(\s+\w+:.*\n)+'
-        replace: ''
-      with_fileglob:
-        - "{{ fullclusterfolder }}/cluster-manifests/*.yaml"
-
-    - name: Generate agent ISO from manifests
+    - name: Generate agent ISO
       ansible.builtin.shell: |
         set -e
         export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true

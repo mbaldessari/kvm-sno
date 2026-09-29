@@ -3,6 +3,8 @@ kind: AgentConfig
 metadata:
   name: cluster
 rendezvousIP: {{ full_cluster['master-0'].ip }}
+additionalNTPSources:
+  - {{ ntp_server }}
 hosts:
 {% for node in agent_nodes %}
   - hostname: {{ node }}
