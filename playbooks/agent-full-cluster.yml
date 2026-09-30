@@ -216,6 +216,7 @@
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk3 }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache3 }},serial={{ diskserial3 }}
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
+        --events on_reboot=restart
         --noautoconsole
       with_items: "{{ san_nodes }}"
       retries: 0
