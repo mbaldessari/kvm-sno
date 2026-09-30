@@ -230,6 +230,11 @@
      #   register: restart
      #   until: restart is not failed        
 
+    - name: Set VMs to restart on poweroff
+      ansible.builtin.command: >-
+        virt-xml {{ item }} --edit --events on_poweroff=restart
+      with_items: "{{ san_nodes }}"
+
     - name: Wait for bootstrap process to complete
       ansible.builtin.shell: |
         set -e
