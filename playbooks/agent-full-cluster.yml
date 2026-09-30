@@ -202,8 +202,7 @@
         --disk pool={{ rhel_pool }},size={{ full_cluster[item].disk3 }},format=qcow2,bus=virtio,cache={{ full_cluster[item].cache3 }},serial={{ diskserial3 }}
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
-        --events on_reboot=restart
-        --events on_poweroff=restart
+        --events on_poweroff=restart,on_reboot=restart
         --noautoconsole
       with_items: "{{ agent_nodes }}"
       retries: 0
@@ -233,7 +232,7 @@
     - name: Set VMs to restart on poweroff
       ansible.builtin.command: >-
         virt-xml {{ item }} --edit --events on_poweroff=restart
-      with_items: "{{ san_nodes }}"
+      with_items: "{{ agent_nodes }}"
 
     - name: Wait for bootstrap process to complete
       ansible.builtin.shell: |
