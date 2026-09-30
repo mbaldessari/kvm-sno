@@ -83,21 +83,7 @@
     - worker-0
     - worker-1
     - worker-2
-    # - worker-3
-    # - worker-4
-    # - worker-5
-    san_nodes:
-    - master-0
-    - master-1
-    - master-2
-    - worker-0
-    - worker-1
-    - worker-2
-    # - worker-3
 
-    nonsan_nodes:
-    # - worker-4
-    # - worker-5
   tasks:
     - name: Notify bandini - start job
       ansible.builtin.uri:
@@ -217,18 +203,38 @@
         --check disk_size=off
         --graphics spice,listen=127.0.0.1
         --events on_reboot=restart
+        --events on_poweroff=restart
         --noautoconsole
-      with_items: "{{ san_nodes }}"
+      with_items: "{{ agent_nodes }}"
       retries: 0
       delay: 10
       register: vm_creation
       until: vm_creation is not failed
 
+     # - name: Wait for vm to be stopped
+     #   ansible.builtin.shell: |
+     #     set -e -o pipefail
+     #     virsh list --all | grep -w "{{ item }}" | grep -v running
+     #   register: running
+     #   retries: 100
+     #   delay: 20
+     #   until: running is not failed
+     #   with_items: "{{ agent_nodes }}"
+     #
+     # - name: Start "{{ item }}"
+     #   ansible.builtin.command: |
+     #     virsh start "{{ item }}"
+     #   with_items: "{{ agent_nodes }}"
+     #   retries: 3
+     #   delay: 10
+     #   register: restart
+     #   until: restart is not failed        
+
     - name: Wait for bootstrap process to complete
       ansible.builtin.shell: |
         set -e
         export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
-        "{{ oc_install }}" agent wait-for bootstrap-complete --dir=. --log-level=debug
+        "{{ oc_install }}" agent wait-for bootstrap-complete --dir=. --log-level=debug &> /tmp/agent-bootstrap.log
       args:
         chdir: "{{ fullclusterfolder }}"
 
@@ -236,7 +242,7 @@
       ansible.builtin.shell: |
         set -e -o pipefail
         export OPENSHIFT_INSTALL_SKIP_HOSTCRYPT_VALIDATION=true
-        "{{ oc_install }}" agent wait-for install-complete --dir=. --log-level=debug
+        "{{ oc_install }}" agent wait-for install-complete --dir=. --log-level=debug &> /tmp/agent-install-complete.log
       retries: 2
       delay: 5
       register: wait_for_install
