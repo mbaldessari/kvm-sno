@@ -5,8 +5,8 @@ ocp_versions:
   - "4.19.47"
   - "4.20.38"
   - "4.21.35"
-  - "4.22.17"
-  - "5.0.0-rc.5"
+  - "4.22.19"
+  - "5.0.0-rc.7"
 
 ocp_version: "4.22.15"
 gitops_from_testing_catalog: false
