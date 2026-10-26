@@ -6,4 +6,5 @@ metadata:
 spec:
   displayName: Test LVM Operator
   sourceType: grpc
-  image: quay.io/redhat-user-workloads/logical-volume-manag-tenant/lvm-operator-catalog:v{{ ocp_maj_min_version }}
+  #image: quay.io/redhat-user-workloads/logical-volume-manag-tenant/lvm-operator-catalog:v{{ ocp_maj_min_version }}
+  image: quay.io/redhat-user-workloads/logical-volume-manag-tenant/lvm-operator-catalog@sha256:4ac30bc3db61f6d772df78c60858fd129e834658a285b671a9f307c9e47ec5db
