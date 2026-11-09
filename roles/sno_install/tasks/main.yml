@@ -178,7 +178,7 @@
     dest: "{{ tempfolder }}/{{ item }}/lvm-catalog.yaml"
     mode: "0644"
   with_items: "{{ inventory_hostname_short }}"
-  when: ocp_maj_min_version == "5.0"
+  when: ocp_maj_min_version == "6.0"
 
 - name: Template out lvm bits
   tags:
@@ -371,7 +371,7 @@
   until: lvm is not failed
   retries: 50
   delay: 20
-  when: ocp_maj_min_version == "5.0"
+  when: ocp_maj_min_version == "6.0"
 
 - name: Install LVM operator
   tags:

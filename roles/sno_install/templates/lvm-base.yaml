@@ -28,7 +28,7 @@ spec:
   name: lvms-operator
 {% if enable_disconnected %}
   source: "cs-redhat-operator-index-v{{ ocp_maj_min_version_dashed }}"
-{% elif ocp_maj_min_version == "5.0" %}
+{% elif ocp_maj_min_version == "6.0" %}
   source: "test-lvm-operator"
 {% else %}
   source: "redhat-operators"
