@@ -5,10 +5,10 @@ ocp_versions:
   - "4.19.47"
   - "4.20.44"
   - "4.21.40"
-  - "4.22.22"
-  - "5.0.1"
+  - "4.22.23"
+  - "5.0.2"
 
-ocp_version: "4.22.15"
+ocp_version: "5.0.2"
 gitops_from_testing_catalog: false
 fusion_ga: true
 fips_enabled: false
